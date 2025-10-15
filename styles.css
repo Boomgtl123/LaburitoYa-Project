@@ -146,6 +146,37 @@ body:has(form#registerForm) {
   animation: fadeIn 0.6s ease-in;
 }
 
+/* ========== LOGIN (OVERRIDES) ========== */
+/* Hacer la tarjeta de inicio de sesión centrada, responsive y con color #0a66c2 */
+body:has(form#loginForm) .container {
+  background: var(--linkedin-blue);
+  color: var(--white);
+  border: none;
+}
+
+body:has(form#loginForm) h1 {
+  color: var(--white);
+}
+
+body:has(form#loginForm) p {
+  color: var(--white);
+}
+
+body:has(form#loginForm) a {
+  color: #ffffff;
+  text-decoration: underline;
+}
+
+body:has(form#loginForm) button[type="submit"] {
+  background-color: #ffffff;
+  color: var(--linkedin-blue);
+}
+
+body:has(form#loginForm) button[type="submit"]:hover {
+  background-color: #e8f0ff;
+  color: var(--linkedin-blue-hover);
+}
+
 /* Logo en páginas de auth */
 .container:not(.index)::before {
   content: '';
@@ -380,4 +411,5 @@ button:disabled {
   color: #1DA1F2 !important;
   font-weight: bold;
   margin-left: 4px;
+  font-size: 0.9em;
 }

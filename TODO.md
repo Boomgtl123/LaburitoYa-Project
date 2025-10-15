@@ -2,7 +2,7 @@
 
 Plan y seguimiento de tareas para mostrar la palomita azul consistente en toda la app.
 
-## Estado
+## Estado: ✅ COMPLETADO
 
 - [x] Utilidad global en auth.js:
   - [x] renderNombreConBadge(nombre, usuario)
@@ -12,20 +12,20 @@ Plan y seguimiento de tareas para mostrar la palomita azul consistente en toda l
   - [x] Post header: nombre con badge usando caché de usuarios y fallback a post.userVerificado
   - [x] Comentarios: nombre con badge usando caché
   - [x] Pre-carga de caché de usuarios (autores y comentaristas)
-- [ ] profile.js:
-  - [ ] profileName: usar auth.renderNombreConBadge
-  - [ ] Seguidores/Seguidos (crearItemUsuario): nombre con badge
-- [ ] public-profile.js:
-  - [ ] profileName: usar auth.renderNombreConBadge
-  - [ ] Seguidores/Seguidos (crearItemUsuario): nombre con badge
-- [ ] search.js:
-  - [ ] Personas (crearItemUsuario): nombre con badge
-  - [ ] Publicaciones (crearItemPost): nombre con badge (usando userId -> caché si existe, fallback a post.userVerificado)
-- [ ] messages.js:
-  - [ ] Lista de conversaciones (crearElementoConversacion): nombre con badge
-  - [ ] Header de chat (chatUserName): nombre con badge
-- [ ] styles.css:
-  - [ ] Agregar clase global .verified-badge (color #1DA1F2, font-weight: bold, margin-left: 4px)
+- [x] profile.js:
+  - [x] profileName: usar auth.renderNombreConBadge
+  - [x] Seguidores/Seguidos (crearItemUsuario): nombre con badge
+- [x] public-profile.js:
+  - [x] profileName: usar auth.renderNombreConBadge
+  - [x] Seguidores/Seguidos (crearItemUsuario): nombre con badge
+- [x] search.js:
+  - [x] Personas (crearItemUsuario): nombre con badge
+  - [x] Publicaciones (crearItemPost): nombre con badge (usando userId -> caché si existe, fallback a post.userVerificado)
+- [x] messages.js:
+  - [x] Lista de conversaciones (crearElementoConversacion): nombre con badge
+  - [x] Header de chat (chatUserName): nombre con badge
+- [x] styles.css:
+  - [x] Agregar clase global .verified-badge (color #1DA1F2, font-weight: bold, margin-left: 4px, font-size: 0.9em)
 
 ## Notas de implementación
 
