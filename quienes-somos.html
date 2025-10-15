@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Quiénes Somos - LaburitoYa</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      color: white;
+      margin-bottom: 50px;
+      padding: 40px 20px;
+    }
+
+    .header h1 {
+      font-size: 48px;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .header p {
+      font-size: 20px;
+      opacity: 0.9;
+    }
+
+    .team-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 40px;
+      margin-bottom: 50px;
+    }
+
+    .team-card {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .team-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 5px;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .team-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+    }
+
+    .team-photo {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      margin: 0 auto 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 60px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .team-name {
+      font-size: 28px;
+      font-weight: 700;
+      color: #2d3748;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .team-role {
+      font-size: 16px;
+      font-weight: 600;
+      color: #667eea;
+      text-align: center;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .team-description {
+      font-size: 16px;
+      line-height: 1.8;
+      color: #4a5568;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .team-skills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .skill-tag {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .about-section {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      margin-bottom: 30px;
+    }
+
+    .about-section h2 {
+      font-size: 32px;
+      color: #2d3748;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .about-section p {
+      font-size: 18px;
+      line-height: 1.8;
+      color: #4a5568;
+      text-align: center;
+      margin-bottom: 15px;
+    }
+
+    .location {
+      text-align: center;
+      font-size: 18px;
+      color: white;
+      margin-top: 30px;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      backdrop-filter: blur(10px);
+    }
+
+    .location strong {
+      font-size: 24px;
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    .back-button {
+      display: inline-block;
+      background: white;
+      color: #667eea;
+      padding: 15px 40px;
+      border-radius: 30px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 16px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+      margin: 20px auto;
+      display: block;
+      width: fit-content;
+    }
+
+    .back-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+      background: #667eea;
+      color: white;
+    }
+
+    .emoji {
+      font-size: 24px;
+      margin-right: 10px;
+    }
+
+    @media (max-width: 768px) {
+      .header h1 {
+        font-size: 36px;
+      }
+
+      .team-container {
+        grid-template-columns: 1fr;
+      }
+
+      .team-card {
+        padding: 30px 20px;
+      }
+
+      .about-section {
+        padding: 30px 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>👥 Quiénes Somos</h1>
+      <p>Conoce al equipo detrás de LaburitoYa</p>
+    </div>
+
+    <div class="about-section">
+      <h2>🚀 Nuestra Historia</h2>
+      <p>
+        LaburitoYa nació de la visión de dos jóvenes emprendedores de Casbas que identificaron 
+        la necesidad de conectar trabajadores con oportunidades laborales de manera rápida y eficiente.
+      </p>
+      <p>
+        Somos un equipo apasionado por la tecnología y el desarrollo social, comprometidos con 
+        facilitar el acceso al trabajo y mejorar la vida de las personas en nuestra comunidad.
+      </p>
+    </div>
+
+    <div class="team-container">
+      <!-- Benjamin Gonzalez -->
+      <div class="team-card">
+        <div class="team-photo">👨‍💼</div>
+        <h3 class="team-name">Benjamin Gonzalez</h3>
+        <p class="team-role">CEO & Development SEMI SR</p>
+        <p class="team-description">
+          Líder visionario y desarrollador experimentado, Benjamin es el cerebro detrás de la 
+          arquitectura técnica de LaburitoYa. Con una sólida experiencia en desarrollo de software 
+          y gestión de proyectos, guía al equipo hacia la innovación constante.
+        </p>
+        <div class="team-skills">
+          <span class="skill-tag">💻 Full Stack</span>
+          <span class="skill-tag">🎯 Liderazgo</span>
+          <span class="skill-tag">🚀 Innovación</span>
+          <span class="skill-tag">📊 Estrategia</span>
+        </div>
+      </div>
+
+      <!-- Santiago Montiel -->
+      <div class="team-card">
+        <div class="team-photo">👨‍💻</div>
+        <h3 class="team-name">Santiago Montiel</h3>
+        <p class="team-role">Developer JR</p>
+        <p class="team-description">
+          Desarrollador talentoso y entusiasta, Santiago aporta energía fresca y creatividad al equipo. 
+          Su pasión por aprender y su dedicación al código limpio hacen que cada funcionalidad 
+          de LaburitoYa sea mejor cada día.
+        </p>
+        <div class="team-skills">
+          <span class="skill-tag">⚡ JavaScript</span>
+          <span class="skill-tag">🎨 UI/UX</span>
+          <span class="skill-tag">📱 Responsive</span>
+          <span class="skill-tag">🔥 Firebase</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="location">
+      <strong>📍 Ubicación</strong>
+      Orgullosamente desde Casbas, trabajando para conectar a nuestra comunidad
+    </div>
+
+    <a href="home.html" class="back-button">
+      <span class="emoji">🏠</span> Volver al Inicio
+    </a>
+  </div>
+</body>
+</html>

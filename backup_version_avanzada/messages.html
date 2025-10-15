@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mensajes - LaburitoYa</title>
+  <link rel="stylesheet" href="home.css" />
+  <link rel="stylesheet" href="messages.css" />
+</head>
+<body>
+  <!-- Navbar estilo LinkedIn -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="nav-left">
+        <img src="logo.png" alt="LaburitoYa" class="nav-logo" />
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="searchInput" placeholder="Buscar empleos, personas..." />
+        </div>
+      </div>
+      <div class="nav-right">
+        <a href="home.html" class="nav-item">
+          <span class="nav-icon">🏠</span>
+          <span>Inicio</span>
+        </a>
+        <a href="#" class="nav-item">
+          <span class="nav-icon">👥</span>
+          <span>Mi Red</span>
+        </a>
+        <a href="#" class="nav-item">
+          <span class="nav-icon">💼</span>
+          <span>Empleos</span>
+        </a>
+        <a href="messages.html" class="nav-item active">
+          <span class="nav-icon">💬</span>
+          <span>Mensajes</span>
+        </a>
+        <div class="nav-item nav-dropdown" id="navPerfil">
+          <img src="https://via.placeholder.com/32" alt="Perfil" class="nav-avatar" id="navAvatar" />
+          <span>Yo</span>
+          <div class="dropdown-menu">
+            <a href="profile.html" class="dropdown-item">
+              <span>👤</span> Ver perfil
+            </a>
+            <a href="#" class="dropdown-item" id="btnCerrarSesion">
+              <span>🚪</span> Cerrar sesión
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Contenedor de mensajería -->
+  <div class="messages-container">
+    <!-- Lista de conversaciones -->
+    <aside class="conversations-sidebar">
+      <div class="conversations-header">
+        <h2>Mensajes</h2>
+        <button class="btn-new-message" id="btnNewMessage" title="Nuevo mensaje">✏️</button>
+      </div>
+      
+      <div class="search-conversations">
+        <input type="text" id="searchConversations" placeholder="Buscar conversaciones..." />
+      </div>
+
+      <div class="conversations-list" id="conversationsList">
+        <!-- Las conversaciones se cargarán aquí -->
+        <div class="loading-conversations">
+          <div class="spinner-small"></div>
+          <p>Cargando conversaciones...</p>
+        </div>
+      </div>
+
+      <div class="no-conversations" id="noConversations" style="display: none;">
+        <p>📭 No tienes conversaciones aún</p>
+        <p class="small-text">Envía un mensaje desde una publicación para comenzar</p>
+      </div>
+    </aside>
+
+    <!-- Área de chat -->
+    <main class="chat-area">
+      <!-- Estado inicial: sin conversación seleccionada -->
+      <div class="chat-empty" id="chatEmpty">
+        <div class="empty-state">
+          <span class="empty-icon">💬</span>
+          <h3>Tus mensajes</h3>
+          <p>Selecciona una conversación para comenzar a chatear</p>
+        </div>
+      </div>
+
+      <!-- Chat activo -->
+      <div class="chat-active" id="chatActive" style="display: none;">
+        <!-- Header del chat -->
+        <div class="chat-header">
+          <div class="chat-user-info">
+            <img src="https://via.placeholder.com/40" alt="Usuario" class="chat-avatar" id="chatAvatar" />
+            <div class="chat-user-details">
+              <h3 id="chatUserName">Usuario</h3>
+              <p id="chatUserStatus">En línea</p>
+            </div>
+          </div>
+          <div class="chat-actions">
+            <button class="btn-chat-action" id="btnViewProfile" title="Ver perfil">👤</button>
+            <button class="btn-chat-action" id="btnCloseChat" title="Cerrar chat">✕</button>
+          </div>
+        </div>
+
+        <!-- Mensajes -->
+        <div class="chat-messages" id="chatMessages">
+          <!-- Los mensajes se cargarán aquí -->
+        </div>
+
+        <!-- Input de mensaje -->
+        <div class="chat-input-container">
+          <form id="messageForm" class="message-form">
+            <input 
+              type="text" 
+              id="messageInput" 
+              placeholder="Escribe un mensaje..." 
+              autocomplete="off"
+              required
+            />
+            <button type="submit" class="btn-send-message">
+              <span>📤</span>
+            </button>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal para nuevo mensaje -->
+  <div class="modal" id="newMessageModal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Nuevo mensaje</h3>
+        <button class="btn-close-modal" id="btnCloseModal">✕</button>
+      </div>
+      <div class="modal-body">
+        <p>Para enviar un mensaje, ve a una publicación y haz clic en "Contactar"</p>
+        <p class="small-text">También puedes responder a mensajes existentes desde esta página</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-modal-action" id="btnGoToHome">Ir al inicio</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="auth.js"></script>
+  <script src="notifications.js"></script>
+  <script src="messages.js"></script>
+</body>
+</html>

@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Perfil - LaburitoYa</title>
+  <link rel="stylesheet" href="home.css" />
+  <link rel="stylesheet" href="profile.css" />
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="nav-left">
+        <!-- Botón hamburguesa (solo visible en móvil) -->
+        <button class="nav-hamburger" id="navHamburger">⋮</button>
+        
+        <div class="nav-btn nav-dropdown" id="navNotificaciones">
+          <span class="nav-icon">🔔</span>
+          <span class="notification-badge" id="notificationsBadgeIcon" style="display: none;">0</span>
+          <div class="dropdown-menu dropdown-notifications">
+            <div class="notifications-header">
+              <h3>Notificaciones</h3>
+              <button class="btn-mark-read" id="btnMarkAllRead">Marcar todas como leídas</button>
+            </div>
+            <div class="notifications-tabs">
+              <button class="notif-tab active" data-tab="destacadas">⭐ Destacadas</button>
+              <button class="notif-tab" data-tab="tendencias">📈 Tendencias</button>
+              <button class="notif-tab" data-tab="recientes">🕐 Recientes</button>
+            </div>
+            <div class="notifications-content" id="notificationsContent">
+              <div class="loading-notifications">Cargando notificaciones...</div>
+            </div>
+          </div>
+        </div>
+        <a href="home.html" class="nav-btn">
+          <span>INICIO</span>
+        </a>
+        <a href="empleos.html" class="nav-btn" id="navEmpleos">
+          <span>EMPLEOS</span>
+        </a>
+      </div>
+
+      <div class="nav-center">
+        <img src="logo.png" alt="LaburitoYa" class="nav-logo" />
+      </div>
+
+      <div class="nav-right">
+        <a href="messages.html" class="nav-btn" id="navMensajes">
+          <span>MENSAJES</span>
+          <span class="notification-badge" id="notificationsBadge" style="display: none;">0</span>
+        </a>
+        <div class="nav-btn nav-dropdown" id="navInfo">
+          <span>+ INFO</span>
+          <div class="dropdown-menu dropdown-info">
+            <div class="search-box-dropdown">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="searchInput" placeholder="Buscar empleos, personas..." />
+            </div>
+            <div class="search-results-dropdown" id="searchResultsDropdown" style="display: none;">
+              <!-- Resultados de búsqueda aparecerán aquí -->
+            </div>
+            <div class="dropdown-divider"></div>
+            <a href="quienes-somos.html" class="dropdown-item" id="btnQuienesSomos">
+              <span>👥</span> Quiénes somos
+            </a>
+            <a href="politicas.html" class="dropdown-item" id="btnPoliticas">
+              <span>📋</span> Políticas
+            </a>
+            <a href="#" class="dropdown-item" id="btnCerrarSesion">
+              <span>🚪</span> Cerrar sesión
+            </a>
+          </div>
+        </div>
+        <div class="nav-btn nav-avatar-btn" id="navPerfil">
+          <img src="https://via.placeholder.com/40" alt="Perfil" class="nav-avatar" id="navAvatar" onclick="window.location.href='profile.html'" style="cursor: pointer;" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Menú móvil desplegable -->
+    <div class="mobile-menu" id="mobileMenu">
+      <a href="home.html" class="mobile-menu-item">INICIO</a>
+      <a href="empleos.html" class="mobile-menu-item">EMPLEOS</a>
+      <a href="messages.html" class="mobile-menu-item">MENSAJES</a>
+      <a href="quienes-somos.html" class="mobile-menu-item">Quiénes somos</a>
+      <a href="politicas.html" class="mobile-menu-item">Políticas</a>
+      <a href="#" class="mobile-menu-item" id="mobileLogout">Cerrar sesión</a>
+    </div>
+  </nav>
+
+  <!-- Contenido del perfil público -->
+  <div class="profile-container">
+    <div class="profile-content">
+      <!-- Header del perfil -->
+      <div class="profile-header-card">
+        <div class="profile-cover"></div>
+        <div class="profile-main-info">
+          <div class="profile-photo-container">
+            <img src="https://via.placeholder.com/150" alt="Foto de perfil" id="profilePhoto" class="profile-photo" />
+          </div>
+          <div class="profile-info-section">
+            <div class="profile-basic-info">
+              <h1 id="profileName">Cargando...</h1>
+              <p class="profile-type" id="profileType">Cargando...</p>
+              <div class="profile-contact-info">
+                <span class="contact-item" id="profileLocation">📍 Cargando...</span>
+                <span class="contact-item" id="profileContact">📞 Cargando...</span>
+              </div>
+            </div>
+            
+            <!-- Estadísticas integradas en el header -->
+            <div class="profile-stats-inline">
+              <div class="stat-item-inline">
+                <span class="stat-number-inline" id="statPosts">0</span>
+                <span class="stat-label-inline">Publicaciones</span>
+              </div>
+              <div class="stat-divider"></div>
+              <div class="stat-item-inline">
+                <span class="stat-number-inline" id="statLikes">0</span>
+                <span class="stat-label-inline">Recomendaciones</span>
+              </div>
+              <div class="stat-divider"></div>
+              <div class="stat-item-inline stat-clickable" id="statSeguidoresBox">
+                <span class="stat-number-inline" id="statSeguidores">0</span>
+                <span class="stat-label-inline">Seguidores</span>
+              </div>
+              <div class="stat-divider"></div>
+              <div class="stat-item-inline stat-clickable" id="statSeguidosBox">
+                <span class="stat-number-inline" id="statSeguidos">0</span>
+                <span class="stat-label-inline">Siguiendo</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botones de acción -->
+      <div class="profile-actions-card">
+        <button class="btn-action-primary" id="btnSeguir">
+          <span id="btnSeguirIcon">➕</span>
+          <span id="btnSeguirText">Seguir</span>
+        </button>
+        <button class="btn-action-secondary" id="btnMensaje">
+          <span>💬</span>
+          <span>Mensaje</span>
+        </button>
+      </div>
+
+      <!-- Información del perfil -->
+      <div class="profile-edit-card">
+        <div class="card-header">
+          <h2>Información</h2>
+        </div>
+        
+        <div class="profile-view">
+          <div class="view-item" id="viewBiografiaContainer" style="display: none;">
+            <strong>Biografía:</strong>
+            <span id="viewBiografia">-</span>
+          </div>
+          <div class="view-item">
+            <strong>Tipo de perfil:</strong>
+            <span id="viewPerfil">-</span>
+          </div>
+          <div class="view-item">
+            <strong>Zona:</strong>
+            <span id="viewZona">-</span>
+          </div>
+
+          <div id="redesSocialesContainer" style="display: none;">
+            <h3 style="margin-top: 24px; margin-bottom: 12px; font-size: 16px; color: #000000e6;">Redes Sociales</h3>
+            
+            <div class="view-item" id="viewInstagramContainer" style="display: none;">
+              <strong>📷 Instagram:</strong>
+              <a href="#" id="viewInstagram" target="_blank" style="color: #0a66c2; text-decoration: none;">-</a>
+            </div>
+            <div class="view-item" id="viewTwitterContainer" style="display: none;">
+              <strong>🐦 X (Twitter):</strong>
+              <a href="#" id="viewTwitter" target="_blank" style="color: #0a66c2; text-decoration: none;">-</a>
+            </div>
+            <div class="view-item" id="viewThreadsContainer" style="display: none;">
+              <strong>🧵 Threads:</strong>
+              <a href="#" id="viewThreads" target="_blank" style="color: #0a66c2; text-decoration: none;">-</a>
+            </div>
+            <div class="view-item" id="viewFacebookContainer" style="display: none;">
+              <strong>👥 Facebook:</strong>
+              <a href="#" id="viewFacebook" target="_blank" style="color: #0a66c2; text-decoration: none;">-</a>
+            </div>
+            <div class="view-item" id="viewTiktokContainer" style="display: none;">
+              <strong>🎵 TikTok:</strong>
+              <a href="#" id="viewTiktok" target="_blank" style="color: #0a66c2; text-decoration: none;">-</a>
+            </div>
+          </div>
+
+          <div class="view-item">
+            <strong>Miembro desde:</strong>
+            <span id="viewFecha">-</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sección de Seguidores/Seguidos -->
+      <div class="followers-card" id="followersCard" style="display: none;">
+        <div class="card-header">
+          <h3 id="followersTitle">Seguidores</h3>
+          <button class="btn-close-followers" id="btnCloseFollowers">✕</button>
+        </div>
+        
+        <div class="followers-tabs">
+          <button class="tab-btn active" id="tabSeguidores">Seguidores</button>
+          <button class="tab-btn" id="tabSeguidos">Siguiendo</button>
+        </div>
+        
+        <div class="followers-list" id="followersList">
+          <div class="loading-followers">Cargando...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="auth.js"></script>
+  <script src="followers.js"></script>
+  <script src="public-profile.js"></script>
+  <!-- Scripts opcionales -->
+  <script>
+    // Cargar módulos opcionales de forma segura
+    const optionalScripts = ['search.js', 'notifications-feed.js'];
+    optionalScripts.forEach(script => {
+      const scriptElement = document.createElement('script');
+      scriptElement.src = script;
+      scriptElement.onerror = () => console.warn(`⚠️ ${script} no disponible, continuando sin él`);
+      document.body.appendChild(scriptElement);
+    });
+    
+    // Inicializar dropdown de +INFO
+    document.addEventListener('DOMContentLoaded', function() {
+      const navInfo = document.getElementById('navInfo');
+      if (navInfo) {
+        navInfo.addEventListener('click', function(e) {
+          if (!e.target.closest('.dropdown-menu')) {
+            this.classList.toggle('active');
+          }
+        });
+      }
+      
+      // Cerrar dropdown al hacer click fuera
+      document.addEventListener('click', function(e) {
+        const navInfo = document.getElementById('navInfo');
+        if (navInfo && !navInfo.contains(e.target)) {
+          navInfo.classList.remove('active');
+        }
+      });
+
+      // Funcionalidad del menú hamburguesa
+      const hamburger = document.getElementById('navHamburger');
+      const mobileMenu = document.getElementById('mobileMenu');
+      const mobileLogout = document.getElementById('mobileLogout');
+
+      if (hamburger && mobileMenu) {
+        hamburger.addEventListener('click', function(e) {
+          e.stopPropagation();
+          mobileMenu.classList.toggle('active');
+        });
+
+        // Cerrar menú al hacer clic fuera
+        document.addEventListener('click', function(e) {
+          if (!mobileMenu.contains(e.target) && !hamburger.contains(e.target)) {
+            mobileMenu.classList.remove('active');
+          }
+        });
+
+        // Cerrar menú al hacer clic en un enlace
+        const menuItems = mobileMenu.querySelectorAll('.mobile-menu-item');
+        menuItems.forEach(item => {
+          item.addEventListener('click', function() {
+            mobileMenu.classList.remove('active');
+          });
+        });
+      }
+
+      // Funcionalidad de cerrar sesión en menú móvil
+      if (mobileLogout) {
+        mobileLogout.addEventListener('click', function(e) {
+          e.preventDefault();
+          if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'login.html';
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>

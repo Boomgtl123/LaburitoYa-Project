@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Inicio - LaburitoYa</title>
+  <link rel="stylesheet" href="home.css" />
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="nav-left">
+        <!-- Botón hamburguesa (solo visible en móvil) -->
+        <button class="nav-hamburger" id="navHamburger">⋮</button>
+        
+        <div class="nav-btn nav-dropdown" id="navNotificaciones">
+          <span class="nav-icon">🔔</span>
+          <span class="notification-badge" id="notificationsBadgeIcon" style="display: none;">0</span>
+          <div class="dropdown-menu dropdown-notifications">
+            <div class="notifications-header">
+              <h3>Notificaciones</h3>
+              <button class="btn-mark-read" id="btnMarkAllRead">Marcar todas como leídas</button>
+            </div>
+            <div class="notifications-tabs">
+              <button class="notif-tab active" data-tab="destacadas">⭐ Destacadas</button>
+              <button class="notif-tab" data-tab="tendencias">📈 Tendencias</button>
+              <button class="notif-tab" data-tab="recientes">🕐 Recientes</button>
+            </div>
+            <div class="notifications-content" id="notificationsContent">
+              <div class="loading-notifications">Cargando notificaciones...</div>
+            </div>
+          </div>
+        </div>
+        <a href="home.html" class="nav-btn active">
+          <span>INICIO</span>
+        </a>
+        <a href="empleos.html" class="nav-btn" id="navEmpleos">
+          <span>EMPLEOS</span>
+        </a>
+      </div>
+
+      <div class="nav-center">
+        <img src="logo.png" alt="LaburitoYa" class="nav-logo" />
+      </div>
+
+      <div class="nav-right">
+        <a href="messages.html" class="nav-btn" id="navMensajes">
+          <span>MENSAJES</span>
+          <span class="notification-badge" id="notificationsBadge" style="display: none;">0</span>
+        </a>
+        <div class="nav-btn nav-dropdown" id="navInfo">
+          <span>+ INFO</span>
+          <div class="dropdown-menu dropdown-info">
+            <div class="search-box-dropdown">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="searchInput" placeholder="Buscar empleos, personas..." />
+            </div>
+            <div class="search-results-dropdown" id="searchResultsDropdown" style="display: none;">
+              <!-- Resultados de búsqueda aparecerán aquí -->
+            </div>
+            <div class="dropdown-divider"></div>
+            <a href="quienes-somos.html" class="dropdown-item" id="btnQuienesSomos">
+              <span>👥</span> Quiénes somos
+            </a>
+            <a href="politicas.html" class="dropdown-item" id="btnPoliticas">
+              <span>📋</span> Políticas
+            </a>
+            <a href="#" class="dropdown-item" id="btnCerrarSesion">
+              <span>🚪</span> Cerrar sesión
+            </a>
+          </div>
+        </div>
+        <div class="nav-btn nav-avatar-btn" id="navPerfil">
+          <img src="https://via.placeholder.com/40" alt="Perfil" class="nav-avatar" id="navAvatar" onclick="window.location.href='profile.html'" style="cursor: pointer;" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Menú móvil desplegable -->
+    <div class="mobile-menu" id="mobileMenu">
+      <a href="home.html" class="mobile-menu-item active">INICIO</a>
+      <a href="empleos.html" class="mobile-menu-item">EMPLEOS</a>
+      <a href="messages.html" class="mobile-menu-item">MENSAJES</a>
+      <a href="quienes-somos.html" class="mobile-menu-item">Quiénes somos</a>
+      <a href="politicas.html" class="mobile-menu-item">Políticas</a>
+      <a href="#" class="mobile-menu-item" id="mobileLogout">Cerrar sesión</a>
+    </div>
+  </nav>
+
+  <!-- Layout de 3 columnas -->
+  <div class="main-layout">
+    <!-- Columna Izquierda - Perfil -->
+    <aside class="left-sidebar">
+      <div class="profile-card">
+        <div class="profile-header">
+          <img src="https://via.placeholder.com/70" alt="Usuario" class="profile-avatar" id="sidebarAvatar" loading="lazy" />
+        </div>
+        <h3 class="profile-name" id="sidebarNombre">Cargando...</h3>
+        <p class="profile-title" id="sidebarPerfil">Cargando...</p>
+        <p class="profile-bio" id="sidebarBio"></p>
+        <a href="profile.html" class="btn-edit-profile">Ver perfil completo</a>
+        <div class="profile-stats">
+          <div class="stat-item">
+            <span class="stat-label">Publicaciones</span>
+            <span class="stat-value" id="statPublicaciones">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Vistas del perfil</span>
+            <span class="stat-value" id="statVistas">0</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Columna Central - Feed -->
+    <main class="feed">
+      <!-- Crear publicación -->
+      <div class="create-post-card">
+        <form id="postForm">
+          <div class="create-post-input">
+            <img src="https://via.placeholder.com/48" alt="Usuario" class="user-avatar" id="postFormAvatar" loading="lazy" />
+            <textarea id="contenido" placeholder="¿En qué estás trabajando? Usa # para etiquetar el rubro (ej: #Plomero #Electricista)" required></textarea>
+          </div>
+          <div class="hashtag-suggestions" id="hashtagSuggestions"></div>
+          <div class="create-post-actions">
+            <label for="inputFotos" class="action-btn" style="cursor: pointer;">
+              📷 Foto (máx. 3)
+              <input type="file" id="inputFotos" accept="image/*" multiple style="display: none;" />
+            </label>
+            <div id="previewFotos" style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;"></div>
+            <button type="submit" class="publish-btn">Publicar</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Filtro de hashtags activo -->
+      <div class="hashtag-filter" id="hashtagFilter" style="display: none;">
+        <span>Mostrando publicaciones con: <strong id="hashtagActivo"></strong></span>
+        <button class="btn-clear-filter" id="btnClearFilter">✕ Mostrar todas</button>
+      </div>
+
+      <!-- Lista de publicaciones -->
+      <div id="postList">
+        <!-- Las publicaciones se cargarán dinámicamente -->
+      </div>
+
+      <!-- Botón Ver más -->
+      <div class="load-more-container" id="loadMoreContainer" style="display: none;">
+        <button class="btn-load-more" id="btnLoadMore">Ver más publicaciones</button>
+      </div>
+
+      <!-- Loading spinner -->
+      <div class="loading-spinner" id="loadingSpinner" style="display: flex;">
+        <div class="spinner"></div>
+        <p>Cargando publicaciones...</p>
+      </div>
+
+      <!-- Mensaje cuando no hay publicaciones -->
+      <div class="no-posts-message" id="noPostsMessage" style="display: none;">
+        <p>📝 No hay publicaciones aún. ¡Sé el primero en publicar!</p>
+      </div>
+    </main>
+
+    <!-- Columna Derecha - Tendencias -->
+    <aside class="right-sidebar">
+      <div class="trends-card">
+        <h3 class="card-title">Tendencias para ti</h3>
+        <p class="trends-subtitle">Hashtags más usados</p>
+        <div id="trendsList">
+          <!-- Las tendencias se cargarán dinámicamente -->
+          <div class="loading-trends">Cargando tendencias...</div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Scripts en orden correcto -->
+  <script src="auth.js"></script>
+  <script src="followers.js"></script>
+  <script src="hashtags.js"></script>
+  <script src="home.js"></script>
+  <!-- Scripts opcionales que se cargarán si existen -->
+  <script>
+    // Cargar módulos opcionales de forma segura
+    const optionalScripts = ['notifications.js', 'search.js', 'fileUpload.js', 'notifications-feed.js'];
+    optionalScripts.forEach(script => {
+      const scriptElement = document.createElement('script');
+      scriptElement.src = script;
+      scriptElement.onerror = () => console.warn(`⚠️ ${script} no disponible, continuando sin él`);
+      document.body.appendChild(scriptElement);
+    });
+
+    // Funcionalidad del menú hamburguesa
+    document.addEventListener('DOMContentLoaded', function() {
+      const hamburger = document.getElementById('navHamburger');
+      const mobileMenu = document.getElementById('mobileMenu');
+      const mobileLogout = document.getElementById('mobileLogout');
+
+      if (hamburger && mobileMenu) {
+        hamburger.addEventListener('click', function(e) {
+          e.stopPropagation();
+          mobileMenu.classList.toggle('active');
+        });
+
+        // Cerrar menú al hacer clic fuera
+        document.addEventListener('click', function(e) {
+          if (!mobileMenu.contains(e.target) && !hamburger.contains(e.target)) {
+            mobileMenu.classList.remove('active');
+          }
+        });
+
+        // Cerrar menú al hacer clic en un enlace
+        const menuItems = mobileMenu.querySelectorAll('.mobile-menu-item');
+        menuItems.forEach(item => {
+          item.addEventListener('click', function() {
+            mobileMenu.classList.remove('active');
+          });
+        });
+      }
+
+      // Funcionalidad de cerrar sesión en menú móvil
+      if (mobileLogout) {
+        mobileLogout.addEventListener('click', function(e) {
+          e.preventDefault();
+          if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'login.html';
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>

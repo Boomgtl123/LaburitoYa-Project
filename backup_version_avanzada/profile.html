@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mi Perfil - LaburitoYa</title>
+  <link rel="stylesheet" href="home.css" />
+  <link rel="stylesheet" href="profile.css" />
+</head>
+<body>
+  <!-- Navbar estilo LinkedIn -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="nav-left">
+        <img src="logo.png" alt="LaburitoYa" class="nav-logo" />
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" placeholder="Buscar empleos, personas..." />
+        </div>
+      </div>
+      <div class="nav-right">
+        <a href="home.html" class="nav-item">
+          <span class="nav-icon">🏠</span>
+          <span>Inicio</span>
+        </a>
+        <a href="#" class="nav-item">
+          <span class="nav-icon">👥</span>
+          <span>Mi Red</span>
+        </a>
+        <a href="#" class="nav-item">
+          <span class="nav-icon">💼</span>
+          <span>Empleos</span>
+        </a>
+        <a href="messages.html" class="nav-item">
+          <span class="nav-icon">💬</span>
+          <span>Mensajes</span>
+        </a>
+        <div class="nav-item nav-dropdown active" id="navPerfil">
+          <img src="https://via.placeholder.com/32" alt="Perfil" class="nav-avatar" id="navAvatar" />
+          <span>Yo</span>
+          <div class="dropdown-menu">
+            <a href="profile.html" class="dropdown-item">
+              <span>👤</span> Ver perfil
+            </a>
+            <a href="#" class="dropdown-item" id="btnCerrarSesion">
+              <span>🚪</span> Cerrar sesión
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Contenido del perfil -->
+  <div class="profile-container">
+    <div class="profile-content">
+      <!-- Header del perfil -->
+      <div class="profile-header-card">
+        <div class="profile-cover"></div>
+        <div class="profile-main-info">
+          <div class="profile-photo-container">
+            <img src="https://via.placeholder.com/150" alt="Foto de perfil" id="profilePhoto" class="profile-photo" />
+            <button class="btn-change-photo" id="btnChangePhoto">
+              📷 Cambiar foto
+            </button>
+            <input type="file" id="photoInput" accept="image/*" style="display: none;" />
+          </div>
+          <div class="profile-info">
+            <h1 id="profileName">Cargando...</h1>
+            <p class="profile-type" id="profileType">Cargando...</p>
+            <p class="profile-location" id="profileLocation">📍 Cargando...</p>
+            <p class="profile-contact" id="profileContact">📞 Cargando...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Formulario de edición -->
+      <div class="profile-edit-card">
+        <div class="card-header">
+          <h2>Editar perfil</h2>
+          <button class="btn-toggle-edit" id="btnToggleEdit">✏️ Editar</button>
+        </div>
+        
+        <form id="profileForm" class="profile-form" style="display: none;">
+          <div class="form-group">
+            <label for="editNombre">Nombre completo *</label>
+            <input type="text" id="editNombre" required />
+          </div>
+
+          <div class="form-group">
+            <label for="editPerfil">Tipo de perfil *</label>
+            <select id="editPerfil" required>
+              <option value="Trabajador">Busco trabajo</option>
+              <option value="Empleador">Busco contratar</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="editTelefono">Teléfono *</label>
+            <input type="tel" id="editTelefono" required />
+          </div>
+
+          <div class="form-group">
+            <label for="editZona">Zona o ciudad *</label>
+            <input type="text" id="editZona" required />
+          </div>
+
+          <div class="form-group">
+            <label for="editBiografia">Biografía</label>
+            <textarea id="editBiografia" rows="4" placeholder="Cuéntanos sobre ti, tu experiencia, habilidades..."></textarea>
+          </div>
+
+          <h3 style="margin-top: 24px; margin-bottom: 16px; font-size: 18px; color: #000000e6;">Redes Sociales</h3>
+
+          <div class="form-group">
+            <label for="editInstagram">📷 Instagram</label>
+            <input type="url" id="editInstagram" placeholder="https://instagram.com/tu_usuario" />
+          </div>
+
+          <div class="form-group">
+            <label for="editTwitter">🐦 X (Twitter)</label>
+            <input type="url" id="editTwitter" placeholder="https://x.com/tu_usuario" />
+          </div>
+
+          <div class="form-group">
+            <label for="editThreads">🧵 Threads</label>
+            <input type="url" id="editThreads" placeholder="https://threads.net/@tu_usuario" />
+          </div>
+
+          <div class="form-group">
+            <label for="editFacebook">👥 Facebook</label>
+            <input type="url" id="editFacebook" placeholder="https://facebook.com/tu_usuario" />
+          </div>
+
+          <div class="form-group">
+            <label for="editTiktok">🎵 TikTok</label>
+            <input type="url" id="editTiktok" placeholder="https://tiktok.com/@tu_usuario" />
+          </div>
+
+          <div class="form-group">
+            <label for="editCorreo">Correo electrónico</label>
+            <input type="email" id="editCorreo" disabled />
+            <small>El correo no se puede modificar</small>
+          </div>
+
+          <div class="form-group">
+            <label for="editUsername">Username</label>
+            <input type="text" id="editUsername" disabled />
+            <small>El username no se puede modificar</small>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn-cancel" id="btnCancel">Cancelar</button>
+            <button type="submit" class="btn-save">Guardar cambios</button>
+          </div>
+
+          <p id="mensajePerfil" class="mensaje-perfil"></p>
+        </form>
+
+        <!-- Vista de solo lectura -->
+        <div id="profileView" class="profile-view">
+          <div class="view-item">
+            <strong>Nombre:</strong>
+            <span id="viewNombre">-</span>
+          </div>
+          <div class="view-item">
+            <strong>Username:</strong>
+            <span id="viewUsername">-</span>
+          </div>
+          <div class="view-item">
+            <strong>Tipo de perfil:</strong>
+            <span id="viewPerfil">-</span>
+          </div>
+          <div class="view-item">
+            <strong>Teléfono:</strong>
+            <span id="viewTelefono">-</span>
+          </div>
+          <div class="view-item">
+            <strong>Zona:</strong>
+            <span id="viewZona">-</span>
+          </div>
+          <div class="view-item">
+            <strong>Biografía:</strong>
+            <span id="viewBiografia">-</span>
+          </div>
+
+          <h3 style="margin-top: 24px; margin-bottom: 12px; font-size: 16px; color: #000000e6;">Redes Sociales</h3>
+          
+          <div class="view-item" id="viewInstagramContainer" style="display: none;">
+            <strong>📷 Instagram:</strong>
+            <a href="#" id="viewInstagram" target="_blank" style="color: #0a66c2; text-decoration: none;">-</a>
+          </div>
+          <div class="view-item" id="viewTwitterContainer" style="display: none;">
+            <strong>🐦 X (Twitter):</strong>
+            <a href="#" id="viewTwitter" target="_blank" style="color: #0a66c2; text-decoration: none;">-</a>
+          </div>
+          <div class="view-item" id="viewThreadsContainer" style="display: none;">
+            <strong>🧵 Threads:</strong>
+            <a href="#" id="viewThreads" target="_blank" style="color: #0a66c2; text-decoration: none;">-</a>
+          </div>
+          <div class="view-item" id="viewFacebookContainer" style="display: none;">
+            <strong>👥 Facebook:</strong>
+            <a href="#" id="viewFacebook" target="_blank" style="color: #0a66c2; text-decoration: none;">-</a>
+          </div>
+          <div class="view-item" id="viewTiktokContainer" style="display: none;">
+            <strong>🎵 TikTok:</strong>
+            <a href="#" id="viewTiktok" target="_blank" style="color: #0a66c2; text-decoration: none;">-</a>
+          </div>
+
+          <div class="view-item">
+            <strong>Correo:</strong>
+            <span id="viewCorreo">-</span>
+          </div>
+          <div class="view-item">
+            <strong>Miembro desde:</strong>
+            <span id="viewFecha">-</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Estadísticas -->
+      <div class="profile-stats-card">
+        <h3>Estadísticas</h3>
+        <div class="stats-grid">
+          <div class="stat-box">
+            <span class="stat-number" id="statPosts">0</span>
+            <span class="stat-label">Publicaciones</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-number" id="statViews">0</span>
+            <span class="stat-label">Vistas del perfil</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-number" id="statLikes">0</span>
+            <span class="stat-label">Recomendaciones</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="auth.js"></script>
+  <script src="profile.js"></script>
+</body>
+</html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Test Menú Móvil - LaburitoYa</title>
+  <link rel="stylesheet" href="home.css" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+    .test-info {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      font-size: 14px;
+      z-index: 10000;
+    }
+    .test-info strong {
+      color: #0a66c2;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="nav-left">
+        <!-- Botón hamburguesa (solo visible en móvil) -->
+        <button class="nav-hamburger" id="navHamburger">⋮</button>
+        
+        <div class="nav-btn nav-dropdown" id="navNotificaciones">
+          <span class="nav-icon">🔔</span>
+        </div>
+        <a href="home.html" class="nav-btn">
+          <span>INICIO</span>
+        </a>
+        <a href="empleos.html" class="nav-btn">
+          <span>EMPLEOS</span>
+        </a>
+      </div>
+
+      <div class="nav-center">
+        <img src="logo.png" alt="LaburitoYa" class="nav-logo" />
+      </div>
+
+      <div class="nav-right">
+        <a href="messages.html" class="nav-btn">
+          <span>MENSAJES</span>
+        </a>
+        <div class="nav-btn nav-dropdown">
+          <span>+ INFO</span>
+        </div>
+        <div class="nav-btn nav-avatar-btn">
+          <img src="https://via.placeholder.com/40" alt="Perfil" class="nav-avatar" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Menú móvil desplegable -->
+    <div class="mobile-menu" id="mobileMenu">
+      <a href="home.html" class="mobile-menu-item">INICIO</a>
+      <a href="empleos.html" class="mobile-menu-item">EMPLEOS</a>
+      <a href="messages.html" class="mobile-menu-item">MENSAJES</a>
+      <a href="quienes-somos.html" class="mobile-menu-item">Quiénes somos</a>
+      <a href="politicas.html" class="mobile-menu-item">Políticas</a>
+      <a href="#" class="mobile-menu-item" id="mobileLogout">Cerrar sesión</a>
+    </div>
+  </nav>
+
+  <div style="padding: 100px 20px; text-align: center;">
+    <h1>Test del Menú Móvil</h1>
+    <p>Redimensiona la ventana del navegador para ver el menú móvil en acción.</p>
+    <p><strong>El botón hamburguesa (⋮) debe aparecer cuando el ancho de la ventana sea menor a 1024px.</strong></p>
+  </div>
+
+  <div class="test-info">
+    <strong>Ancho actual:</strong> <span id="windowWidth">-</span>px<br>
+    <strong>Menú móvil:</strong> <span id="mobileStatus">-</span>
+  </div>
+
+  <script>
+    // Funcionalidad del menú hamburguesa
+    const hamburger = document.getElementById('navHamburger');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const mobileLogout = document.getElementById('mobileLogout');
+
+    if (hamburger && mobileMenu) {
+      hamburger.addEventListener('click', function(e) {
+        e.stopPropagation();
+        mobileMenu.classList.toggle('active');
+      });
+
+      // Cerrar menú al hacer clic fuera
+      document.addEventListener('click', function(e) {
+        if (!mobileMenu.contains(e.target) && !hamburger.contains(e.target)) {
+          mobileMenu.classList.remove('active');
+        }
+      });
+
+      // Cerrar menú al hacer clic en un enlace
+      const menuItems = mobileMenu.querySelectorAll('.mobile-menu-item');
+      menuItems.forEach(item => {
+        item.addEventListener('click', function(e) {
+          e.preventDefault();
+          mobileMenu.classList.remove('active');
+          alert('Navegando a: ' + this.textContent);
+        });
+      });
+    }
+
+    // Funcionalidad de cerrar sesión en menú móvil
+    if (mobileLogout) {
+      mobileLogout.addEventListener('click', function(e) {
+        e.preventDefault();
+        alert('Cerrar sesión clickeado');
+      });
+    }
+
+    // Mostrar información de ancho de ventana
+    function updateWindowInfo() {
+      const width = window.innerWidth;
+      document.getElementById('windowWidth').textContent = width;
+      document.getElementById('mobileStatus').textContent = width <= 1024 ? 'ACTIVO ✅' : 'INACTIVO ❌';
+    }
+
+    updateWindowInfo();
+    window.addEventListener('resize', updateWindowInfo);
+  </script>
+</body>
+</html>

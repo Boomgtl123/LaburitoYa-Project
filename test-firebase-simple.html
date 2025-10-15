@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Firebase - LaburitoYa</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background-color: #f3f2ef;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #0a66c2;
+      margin-bottom: 20px;
+    }
+    .test-section {
+      margin: 20px 0;
+      padding: 15px;
+      border: 1px solid #e0e0e0;
+      border-radius: 4px;
+    }
+    .status {
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+    .success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    .loading {
+      background-color: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeaa7;
+    }
+    button {
+      background-color: #0a66c2;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+      font-size: 14px;
+    }
+    button:hover {
+      background-color: #004182;
+    }
+    pre {
+      background-color: #f5f5f5;
+      padding: 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 12px;
+    }
+    .data-display {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔥 Test de Conexión Firebase</h1>
+    <p>Esta página verifica la conexión con Firebase Realtime Database</p>
+
+    <!-- Test 1: Conexión -->
+    <div class="test-section">
+      <h3>Test 1: Verificar Conexión</h3>
+      <button onclick="testConnection()">Probar Conexión</button>
+      <div id="connectionStatus"></div>
+    </div>
+
+    <!-- Test 2: Leer Usuarios -->
+    <div class="test-section">
+      <h3>Test 2: Leer Usuarios</h3>
+      <button onclick="testReadUsers()">Leer Usuarios</button>
+      <div id="usersStatus"></div>
+      <div id="usersData" class="data-display"></div>
+    </div>
+
+    <!-- Test 3: Leer Posts -->
+    <div class="test-section">
+      <h3>Test 3: Leer Publicaciones</h3>
+      <button onclick="testReadPosts()">Leer Posts</button>
+      <div id="postsStatus"></div>
+      <div id="postsData" class="data-display"></div>
+    </div>
+
+    <!-- Test 4: Crear Usuario de Prueba -->
+    <div class="test-section">
+      <h3>Test 4: Crear Usuario de Prueba</h3>
+      <button onclick="createTestUser()">Crear Usuario Test</button>
+      <div id="createUserStatus"></div>
+    </div>
+
+    <!-- Test 5: Crear Post de Prueba -->
+    <div class="test-section">
+      <h3>Test 5: Crear Post de Prueba</h3>
+      <button onclick="createTestPost()">Crear Post Test</button>
+      <div id="createPostStatus"></div>
+    </div>
+
+    <!-- Información -->
+    <div class="test-section">
+      <h3>ℹ️ Información</h3>
+      <p><strong>URL Firebase:</strong> https://laburitoya-6e55d-default-rtdb.firebaseio.com</p>
+      <p><strong>Proyecto:</strong> laburitoya-6e55d</p>
+      <p><strong>Región:</strong> us-central1</p>
+    </div>
+  </div>
+
+  <script>
+    const DB_URL = 'https://laburitoya-6e55d-default-rtdb.firebaseio.com';
+
+    // Test 1: Verificar Conexión
+    async function testConnection() {
+      const statusDiv = document.getElementById('connectionStatus');
+      statusDiv.innerHTML = '<div class="status loading">⏳ Probando conexión...</div>';
+
+      try {
+        const response = await fetch(`${DB_URL}/.json`);
+        
+        if (response.ok) {
+          statusDiv.innerHTML = '<div class="status success">✅ Conexión exitosa con Firebase!</div>';
+        } else {
+          statusDiv.innerHTML = `<div class="status error">❌ Error: ${response.status} - ${response.statusText}</div>`;
+        }
+      } catch (error) {
+        statusDiv.innerHTML = `<div class="status error">❌ Error de red: ${error.message}</div>`;
+      }
+    }
+
+    // Test 2: Leer Usuarios
+    async function testReadUsers() {
+      const statusDiv = document.getElementById('usersStatus');
+      const dataDiv = document.getElementById('usersData');
+      
+      statusDiv.innerHTML = '<div class="status loading">⏳ Leyendo usuarios...</div>';
+      dataDiv.innerHTML = '';
+
+      try {
+        const response = await fetch(`${DB_URL}/usuarios.json`);
+        const data = await response.json();
+
+        if (data) {
+          const count = Object.keys(data).length;
+          statusDiv.innerHTML = `<div class="status success">✅ Se encontraron ${count} usuario(s)</div>`;
+          dataDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+        } else {
+          statusDiv.innerHTML = '<div class="status error">⚠️ No hay usuarios en la base de datos</div>';
+          dataDiv.innerHTML = '<p>La base de datos está vacía. Usa el Test 4 para crear un usuario de prueba.</p>';
+        }
+      } catch (error) {
+        statusDiv.innerHTML = `<div class="status error">❌ Error: ${error.message}</div>`;
+      }
+    }
+
+    // Test 3: Leer Posts
+    async function testReadPosts() {
+      const statusDiv = document.getElementById('postsStatus');
+      const dataDiv = document.getElementById('postsData');
+      
+      statusDiv.innerHTML = '<div class="status loading">⏳ Leyendo publicaciones...</div>';
+      dataDiv.innerHTML = '';
+
+      try {
+        const response = await fetch(`${DB_URL}/posts.json`);
+        const data = await response.json();
+
+        if (data) {
+          const count = Object.keys(data).length;
+          statusDiv.innerHTML = `<div class="status success">✅ Se encontraron ${count} publicación(es)</div>`;
+          dataDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+        } else {
+          statusDiv.innerHTML = '<div class="status error">⚠️ No hay publicaciones en la base de datos</div>';
+          dataDiv.innerHTML = '<p>No hay posts. Usa el Test 5 para crear una publicación de prueba.</p>';
+        }
+      } catch (error) {
+        statusDiv.innerHTML = `<div class="status error">❌ Error: ${error.message}</div>`;
+      }
+    }
+
+    // Test 4: Crear Usuario de Prueba
+    async function createTestUser() {
+      const statusDiv = document.getElementById('createUserStatus');
+      statusDiv.innerHTML = '<div class="status loading">⏳ Creando usuario de prueba...</div>';
+
+      const testUser = {
+        nombre: "Usuario Test",
+        username: "usuariotest",
+        correo: "test@test.com",
+        contrasena: "test123",
+        telefono: "123456789",
+        perfil: "Trabajador",
+        pais: "Argentina",
+        distrito: "Guaminí",
+        localidad: "Guaminí",
+        zona: "Guaminí, Guaminí, Argentina",
+        fecha: new Date().toISOString(),
+        foto: "https://via.placeholder.com/150",
+        biografia: "Usuario de prueba creado automáticamente",
+        redesSociales: {
+          facebook: "",
+          instagram: "",
+          linkedin: "",
+          twitter: ""
+        }
+      };
+
+      try {
+        const response = await fetch(`${DB_URL}/usuarios/test123.json`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(testUser)
+        });
+
+        if (response.ok) {
+          statusDiv.innerHTML = `
+            <div class="status success">
+              ✅ Usuario creado exitosamente!<br>
+              <strong>Correo:</strong> test@test.com<br>
+              <strong>Contraseña:</strong> test123
+            </div>
+          `;
+        } else {
+          statusDiv.innerHTML = `<div class="status error">❌ Error al crear usuario: ${response.statusText}</div>`;
+        }
+      } catch (error) {
+        statusDiv.innerHTML = `<div class="status error">❌ Error: ${error.message}</div>`;
+      }
+    }
+
+    // Test 5: Crear Post de Prueba
+    async function createTestPost() {
+      const statusDiv = document.getElementById('createPostStatus');
+      statusDiv.innerHTML = '<div class="status loading">⏳ Creando publicación de prueba...</div>';
+
+      const testPost = {
+        contenido: "¡Hola! Esta es una publicación de prueba. Busco trabajo como desarrollador #Trabajo #Desarrollo",
+        fecha: new Date().toISOString(),
+        userId: "test123",
+        userName: "Usuario Test",
+        userFoto: "https://via.placeholder.com/48",
+        userPerfil: "Trabajador",
+        hashtags: ["#trabajo", "#desarrollo"],
+        likes: [],
+        comentarios: []
+      };
+
+      try {
+        const postId = 'post_' + Date.now();
+        const response = await fetch(`${DB_URL}/posts/${postId}.json`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(testPost)
+        });
+
+        if (response.ok) {
+          statusDiv.innerHTML = '<div class="status success">✅ Publicación creada exitosamente!</div>';
+        } else {
+          statusDiv.innerHTML = `<div class="status error">❌ Error al crear publicación: ${response.statusText}</div>`;
+        }
+      } catch (error) {
+        statusDiv.innerHTML = `<div class="status error">❌ Error: ${error.message}</div>`;
+      }
+    }
+
+    // Auto-test al cargar
+    window.addEventListener('load', () => {
+      console.log('🔥 Test Firebase cargado');
+      console.log('URL:', DB_URL);
+    });
+  </script>
+</body>
+</html>

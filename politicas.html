@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Políticas - LaburitoYa</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #4a5fd9 0%, #5b6fe0 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      color: white;
+      margin-bottom: 40px;
+      padding: 40px 20px;
+    }
+
+    .header h1 {
+      font-size: 48px;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .header p {
+      font-size: 18px;
+      opacity: 0.9;
+    }
+
+    .policy-card {
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      margin-bottom: 20px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+      transition: transform 0.3s ease;
+    }
+
+    .policy-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .policy-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: #2d3748;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .policy-icon {
+      font-size: 32px;
+    }
+
+    .policy-content {
+      font-size: 16px;
+      line-height: 1.8;
+      color: #4a5568;
+    }
+
+    .policy-content p {
+      margin-bottom: 15px;
+    }
+
+    .policy-content ul {
+      margin-left: 20px;
+      margin-bottom: 15px;
+    }
+
+    .policy-content li {
+      margin-bottom: 10px;
+    }
+
+    .policy-content strong {
+      color: #2d3748;
+    }
+
+    .highlight-box {
+      background: #e8f5fd;
+      border-left: 4px solid #0a66c2;
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 5px;
+    }
+
+    .back-button {
+      display: inline-block;
+      background: white;
+      color: #4a5fd9;
+      padding: 15px 40px;
+      border-radius: 30px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 16px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+      margin: 20px auto;
+      display: block;
+      width: fit-content;
+    }
+
+    .back-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+      background: #4a5fd9;
+      color: white;
+    }
+
+    .last-updated {
+      text-align: center;
+      color: white;
+      font-size: 14px;
+      margin-top: 30px;
+      opacity: 0.8;
+    }
+
+    @media (max-width: 768px) {
+      .header h1 {
+        font-size: 36px;
+      }
+
+      .policy-card {
+        padding: 20px;
+      }
+
+      .policy-title {
+        font-size: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📋 Políticas de LaburitoYa</h1>
+      <p>Conoce nuestras normas y compromisos</p>
+    </div>
+
+    <!-- Política de Privacidad -->
+    <div class="policy-card">
+      <h2 class="policy-title">
+        <span class="policy-icon">🔒</span>
+        Política de Privacidad
+      </h2>
+      <div class="policy-content">
+        <p>
+          En LaburitoYa, tu privacidad es nuestra prioridad. Nos comprometemos a proteger 
+          tu información personal y a ser transparentes sobre cómo la utilizamos.
+        </p>
+        <div class="highlight-box">
+          <strong>Información que recopilamos:</strong>
+          <ul>
+            <li>Nombre completo y datos de contacto</li>
+            <li>Información de perfil profesional</li>
+            <li>Ubicación geográfica (zona de trabajo)</li>
+            <li>Publicaciones y contenido compartido</li>
+          </ul>
+        </div>
+        <p>
+          <strong>Uso de la información:</strong> Utilizamos tus datos únicamente para 
+          conectarte con oportunidades laborales, mejorar nuestros servicios y mantener 
+          la seguridad de la plataforma.
+        </p>
+        <p>
+          <strong>Protección de datos:</strong> Implementamos medidas de seguridad para 
+          proteger tu información contra accesos no autorizados, alteración o destrucción.
+        </p>
+      </div>
+    </div>
+
+    <!-- Términos de Uso -->
+    <div class="policy-card">
+      <h2 class="policy-title">
+        <span class="policy-icon">📜</span>
+        Términos de Uso
+      </h2>
+      <div class="policy-content">
+        <p>
+          Al utilizar LaburitoYa, aceptas cumplir con los siguientes términos y condiciones:
+        </p>
+        <ul>
+          <li><strong>Uso responsable:</strong> Debes usar la plataforma de manera ética y legal</li>
+          <li><strong>Información veraz:</strong> La información de tu perfil debe ser precisa y actualizada</li>
+          <li><strong>Respeto mutuo:</strong> Mantén un trato respetuoso con todos los usuarios</li>
+          <li><strong>Contenido apropiado:</strong> No publiques contenido ofensivo, discriminatorio o ilegal</li>
+          <li><strong>Propiedad intelectual:</strong> Respeta los derechos de autor y propiedad intelectual</li>
+        </ul>
+        <div class="highlight-box">
+          <strong>⚠️ Prohibiciones:</strong> Está prohibido el spam, el acoso, la suplantación 
+          de identidad y cualquier actividad que viole las leyes aplicables.
+        </div>
+      </div>
+    </div>
+
+    <!-- Política de Contenido -->
+    <div class="policy-card">
+      <h2 class="policy-title">
+        <span class="policy-icon">✍️</span>
+        Política de Contenido
+      </h2>
+      <div class="policy-content">
+        <p>
+          LaburitoYa es una plataforma profesional para conectar trabajadores con oportunidades. 
+          Todo el contenido debe ser relevante y apropiado.
+        </p>
+        <p><strong>Contenido permitido:</strong></p>
+        <ul>
+          <li>Ofertas de trabajo y servicios profesionales</li>
+          <li>Experiencias laborales y recomendaciones</li>
+          <li>Información sobre habilidades y capacitación</li>
+          <li>Consultas profesionales relacionadas con el trabajo</li>
+        </ul>
+        <p><strong>Contenido no permitido:</strong></p>
+        <ul>
+          <li>Spam o publicidad no relacionada con trabajo</li>
+          <li>Contenido ofensivo, discriminatorio o de odio</li>
+          <li>Información falsa o engañosa</li>
+          <li>Contenido sexual explícito o violento</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Política de Seguridad -->
+    <div class="policy-card">
+      <h2 class="policy-title">
+        <span class="policy-icon">🛡️</span>
+        Política de Seguridad
+      </h2>
+      <div class="policy-content">
+        <p>
+          Tu seguridad es fundamental para nosotros. Implementamos las siguientes medidas:
+        </p>
+        <ul>
+          <li><strong>Verificación de usuarios:</strong> Proceso de registro con validación de datos</li>
+          <li><strong>Reportes:</strong> Sistema para reportar contenido o usuarios inapropiados</li>
+          <li><strong>Moderación:</strong> Revisión de contenido reportado y acciones correctivas</li>
+          <li><strong>Encriptación:</strong> Protección de datos sensibles mediante encriptación</li>
+        </ul>
+        <div class="highlight-box">
+          <strong>💡 Recomendaciones de seguridad:</strong>
+          <ul>
+            <li>No compartas información bancaria o contraseñas</li>
+            <li>Verifica la identidad de empleadores antes de aceptar trabajos</li>
+            <li>Reporta cualquier actividad sospechosa</li>
+            <li>Mantén tus datos de contacto actualizados</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Política de Contacto -->
+    <div class="policy-card">
+      <h2 class="policy-title">
+        <span class="policy-icon">📞</span>
+        Contacto y Soporte
+      </h2>
+      <div class="policy-content">
+        <p>
+          Si tienes preguntas, inquietudes o necesitas reportar un problema, estamos aquí para ayudarte.
+        </p>
+        <div class="highlight-box">
+          <p><strong>Formas de contacto:</strong></p>
+          <ul>
+            <li>📧 Email: soporte@laburitoya.com</li>
+            <li>📱 Teléfono: Disponible en tu perfil</li>
+            <li>💬 Mensajes: A través de la plataforma</li>
+          </ul>
+        </div>
+        <p>
+          Nos comprometemos a responder todas las consultas en un plazo máximo de 48 horas hábiles.
+        </p>
+      </div>
+    </div>
+
+    <!-- Modificaciones -->
+    <div class="policy-card">
+      <h2 class="policy-title">
+        <span class="policy-icon">🔄</span>
+        Modificaciones a las Políticas
+      </h2>
+      <div class="policy-content">
+        <p>
+          LaburitoYa se reserva el derecho de modificar estas políticas en cualquier momento. 
+          Los cambios significativos serán notificados a los usuarios a través de la plataforma.
+        </p>
+        <p>
+          El uso continuado de LaburitoYa después de la publicación de cambios constituye 
+          tu aceptación de las políticas modificadas.
+        </p>
+      </div>
+    </div>
+
+    <a href="home.html" class="back-button">
+      🏠 Volver al Inicio
+    </a>
+
+    <p class="last-updated">
+      Última actualización: Enero 2025
+    </p>
+  </div>
+</body>
+</html>

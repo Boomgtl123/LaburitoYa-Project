@@ -1,0 +1,376 @@
+/* ========== VARIABLES CSS ========== */
+:root {
+  --linkedin-blue: #0a66c2;
+  --linkedin-blue-hover: #004182;
+  --linkedin-blue-light: #378fe9;
+  --background-gray: #f3f2ef;
+  --white: #ffffff;
+  --text-primary: #000000e6;
+  --text-secondary: #666666;
+  --border-color: #e0e0e0;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* ========== RESET Y BASE ========== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background-color: var(--background-gray);
+  color: var(--text-primary);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* ========== PÁGINA INDEX (LANDING) ========== */
+body:has(.container.index) {
+  background: linear-gradient(135deg, #0a66c2 0%, #378fe9 100%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.container.index {
+  text-align: center;
+  max-width: 500px;
+  width: 100%;
+  animation: fadeIn 0.6s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.logo {
+  width: 100%;
+  max-width: 350px;
+  margin-bottom: 40px;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2));
+  animation: slideDown 0.8s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.subtitle {
+  font-size: 24px;
+  font-weight: 400;
+  color: var(--white);
+  margin-bottom: 40px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.btn {
+  text-decoration: none;
+  padding: 14px 24px;
+  border-radius: 24px;
+  font-weight: 600;
+  font-size: 16px;
+  text-align: center;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  cursor: pointer;
+  display: inline-block;
+}
+
+.btn.primary {
+  background: var(--white);
+  color: var(--linkedin-blue);
+  box-shadow: var(--shadow-md);
+}
+
+.btn.primary:hover {
+  background: var(--background-gray);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.btn.outline {
+  border: 2px solid var(--white);
+  color: var(--white);
+  background: transparent;
+}
+
+.btn.outline:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+/* ========== PÁGINAS DE AUTENTICACIÓN (LOGIN/REGISTER) ========== */
+body:has(form#loginForm),
+body:has(form#registerForm) {
+  background-color: var(--background-gray);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.container:not(.index) {
+  background: var(--white);
+  border-radius: 8px;
+  box-shadow: var(--shadow-md);
+  padding: 40px;
+  max-width: 400px;
+  width: 100%;
+  animation: fadeIn 0.6s ease-in;
+}
+
+/* Logo en páginas de auth */
+.container:not(.index)::before {
+  content: '';
+  display: block;
+  width: 120px;
+  height: 40px;
+  margin: 0 auto 30px;
+  background-image: url('logo.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+h1 {
+  font-size: 28px;
+  font-weight: 400;
+  color: var(--text-primary);
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+/* ========== FORMULARIOS ========== */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+input,
+select {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 16px;
+  font-family: inherit;
+  color: var(--text-primary);
+  background-color: var(--white);
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+input:focus,
+select:focus {
+  border-color: var(--linkedin-blue);
+  box-shadow: 0 0 0 3px rgba(10, 102, 194, 0.1);
+}
+
+input::placeholder {
+  color: var(--text-secondary);
+}
+
+select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+}
+
+button[type="submit"] {
+  width: 100%;
+  padding: 14px 24px;
+  background-color: var(--linkedin-blue);
+  color: var(--white);
+  border: none;
+  border-radius: 24px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 8px;
+  box-shadow: var(--shadow-sm);
+}
+
+button[type="submit"]:hover {
+  background-color: var(--linkedin-blue-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+button[type="submit"]:active {
+  transform: translateY(0);
+}
+
+/* ========== MENSAJES ========== */
+#mensajeLogin,
+#mensajeRegistro {
+  text-align: center;
+  padding: 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-top: 8px;
+  display: none;
+}
+
+#mensajeLogin.error,
+#mensajeRegistro.error {
+  background-color: #fff3f3;
+  color: #d32f2f;
+  border: 1px solid #ffcdd2;
+  display: block;
+}
+
+#mensajeLogin.success,
+#mensajeRegistro.success {
+  background-color: #f1f8f4;
+  color: #2e7d32;
+  border: 1px solid #c8e6c9;
+  display: block;
+}
+
+/* ========== LINKS ADICIONALES ========== */
+.auth-links {
+  text-align: center;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-color);
+}
+
+.auth-links a {
+  color: var(--linkedin-blue);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+
+.auth-links a:hover {
+  color: var(--linkedin-blue-hover);
+  text-decoration: underline;
+}
+
+.auth-links p {
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 768px) {
+  .container.index {
+    padding: 20px;
+  }
+
+  .logo {
+    max-width: 280px;
+    margin-bottom: 30px;
+  }
+
+  .subtitle {
+    font-size: 20px;
+    margin-bottom: 30px;
+  }
+
+  .container:not(.index) {
+    padding: 30px 24px;
+  }
+
+  h1 {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .logo {
+    max-width: 220px;
+  }
+
+  .subtitle {
+    font-size: 18px;
+  }
+
+  .container:not(.index) {
+    padding: 24px 20px;
+  }
+
+  .btn {
+    padding: 12px 20px;
+    font-size: 15px;
+  }
+
+  input,
+  select,
+  button[type="submit"] {
+    font-size: 16px; /* Evita zoom en iOS */
+  }
+}
+
+/* ========== ANIMACIONES ADICIONALES ========== */
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.btn:active {
+  animation: pulse 0.3s ease;
+}
+
+/* ========== ACCESIBILIDAD ========== */
+*:focus-visible {
+  outline: 2px solid var(--linkedin-blue);
+  outline-offset: 2px;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ========== UTILIDADES ========== */
+.text-center {
+  text-align: center;
+}
+
+.mt-1 { margin-top: 8px; }
+.mt-2 { margin-top: 16px; }
+.mt-3 { margin-top: 24px; }
+
+.mb-1 { margin-bottom: 8px; }
+.mb-2 { margin-bottom: 16px; }
+.mb-3 { margin-bottom: 24px; }

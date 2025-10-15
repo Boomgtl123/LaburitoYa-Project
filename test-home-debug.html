@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Debug Home - LaburitoYa</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: #f3f2ef;
+    }
+    .debug-section {
+      background: white;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+    }
+    .success { color: #2e7d32; }
+    .error { color: #d32f2f; }
+    .warning { color: #f57c00; }
+    pre {
+      background: #f5f5f5;
+      padding: 15px;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 12px;
+    }
+    button {
+      background-color: #0a66c2;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover {
+      background-color: #004182;
+    }
+    .post-preview {
+      border: 1px solid #e0e0e0;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 8px;
+      background: #fafafa;
+    }
+    .post-preview img {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 10px;
+    }
+    .post-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔍 Debug de Home.html</h1>
+  
+  <div class="debug-section">
+    <h2>1. Verificar Sesión</h2>
+    <div id="sessionInfo"></div>
+  </div>
+
+  <div class="debug-section">
+    <h2>2. Verificar Conexión a Firebase</h2>
+    <div id="firebaseInfo"></div>
+  </div>
+
+  <div class="debug-section">
+    <h2>3. Cargar Publicaciones</h2>
+    <button onclick="loadPosts()">Cargar Publicaciones</button>
+    <button onclick="testImageLoad()">Probar Carga de Imágenes</button>
+    <div id="postsInfo"></div>
+  </div>
+
+  <div class="debug-section">
+    <h2>4. Preview de Publicaciones</h2>
+    <div id="postsPreview"></div>
+  </div>
+
+  <div class="debug-section">
+    <h2>5. Consola de Errores</h2>
+    <div id="consoleErrors"></div>
+  </div>
+
+  <script>
+    const DB_URL = 'https://laburitoya-6e55d-default-rtdb.firebaseio.com';
+    let usuarioActual = null;
+    let allPosts = [];
+
+    // Capturar errores de consola
+    const originalConsoleError = console.error;
+    const errors = [];
+    console.error = function(...args) {
+      errors.push(args.join(' '));
+      updateErrorsDisplay();
+      originalConsoleError.apply(console, args);
+    };
+
+    function updateErrorsDisplay() {
+      const div = document.getElementById('consoleErrors');
+      if (errors.length === 0) {
+        div.innerHTML = '<p class="success">✅ No hay errores en consola</p>';
+      } else {
+        div.innerHTML = '<p class="error">❌ Errores detectados:</p><pre>' + 
+          errors.join('\n') + '</pre>';
+      }
+    }
+
+    // 1. Verificar sesión
+    function checkSession() {
+      const sessionDiv = document.getElementById('sessionInfo');
+      const userData = localStorage.getItem('usuarioActual');
+      
+      if (!userData) {
+        sessionDiv.innerHTML = `
+          <p class="error">❌ No hay sesión activa</p>
+          <p>Necesitas iniciar sesión primero.</p>
+          <button onclick="window.location.href='login.html'">Ir a Login</button>
+        `;
+        return false;
+      }
+
+      try {
+        usuarioActual = JSON.parse(userData);
+        sessionDiv.innerHTML = `
+          <p class="success">✅ Sesión activa</p>
+          <pre>${JSON.stringify(usuarioActual, null, 2)}</pre>
+        `;
+        return true;
+      } catch (e) {
+        sessionDiv.innerHTML = `
+          <p class="error">❌ Error al parsear sesión: ${e.message}</p>
+        `;
+        return false;
+      }
+    }
+
+    // 2. Verificar Firebase
+    async function checkFirebase() {
+      const firebaseDiv = document.getElementById('firebaseInfo');
+      firebaseDiv.innerHTML = '<p>⏳ Verificando conexión...</p>';
+
+      try {
+        const response = await fetch(`${DB_URL}/.json`);
+        if (response.ok) {
+          firebaseDiv.innerHTML = `
+            <p class="success">✅ Conexión a Firebase exitosa</p>
+            <p>Status: ${response.status}</p>
+          `;
+          return true;
+        } else {
+          firebaseDiv.innerHTML = `
+            <p class="error">❌ Error de conexión</p>
+            <p>Status: ${response.status}</p>
+          `;
+          return false;
+        }
+      } catch (error) {
+        firebaseDiv.innerHTML = `
+          <p class="error">❌ Error de red: ${error.message}</p>
+        `;
+        return false;
+      }
+    }
+
+    // 3. Cargar publicaciones
+    async function loadPosts() {
+      const postsDiv = document.getElementById('postsInfo');
+      const previewDiv = document.getElementById('postsPreview');
+      
+      postsDiv.innerHTML = '<p>⏳ Cargando publicaciones...</p>';
+      previewDiv.innerHTML = '';
+
+      try {
+        const response = await fetch(`${DB_URL}/posts.json`);
+        const data = await response.json();
+
+        if (!data || Object.keys(data).length === 0) {
+          postsDiv.innerHTML = `
+            <p class="warning">⚠️ No hay publicaciones en Firebase</p>
+            <button onclick="createTestPost()">Crear Publicación de Prueba</button>
+          `;
+          return;
+        }
+
+        allPosts = Object.entries(data).map(([id, post]) => ({
+          id,
+          ...post
+        })).sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+        postsDiv.innerHTML = `
+          <p class="success">✅ ${allPosts.length} publicación(es) encontrada(s)</p>
+          <button onclick="showPostsData()">Ver Datos JSON</button>
+        `;
+
+        // Mostrar preview
+        allPosts.forEach(post => {
+          const postDiv = document.createElement('div');
+          postDiv.className = 'post-preview';
+          postDiv.innerHTML = `
+            <div class="post-header">
+              <img src="${post.userFoto || 'https://via.placeholder.com/48'}" 
+                   alt="${post.userName}"
+                   onerror="this.src='https://via.placeholder.com/48'; console.error('Error cargando imagen: ${post.userFoto}')">
+              <div>
+                <strong>${post.userName}</strong><br>
+                <small>${post.userPerfil || 'Usuario'}</small>
+              </div>
+            </div>
+            <p>${post.contenido}</p>
+            <small>📍 ${post.userZona || 'N/A'} | 📞 ${post.userTelefono || 'N/A'}</small>
+            <hr>
+            <small>Foto URL: ${post.userFoto || 'No especificada'}</small>
+          `;
+          previewDiv.appendChild(postDiv);
+        });
+
+      } catch (error) {
+        postsDiv.innerHTML = `
+          <p class="error">❌ Error al cargar publicaciones: ${error.message}</p>
+          <pre>${error.stack}</pre>
+        `;
+      }
+    }
+
+    function showPostsData() {
+      const newWindow = window.open('', '_blank');
+      newWindow.document.write(`
+        <html>
+          <head>
+            <title>Datos de Publicaciones</title>
+            <style>
+              body { font-family: monospace; padding: 20px; }
+              pre { background: #f5f5f5; padding: 15px; border-radius: 4px; }
+            </style>
+          </head>
+          <body>
+            <h1>Publicaciones (JSON)</h1>
+            <pre>${JSON.stringify(allPosts, null, 2)}</pre>
+          </body>
+        </html>
+      `);
+    }
+
+    // 4. Probar carga de imágenes
+    function testImageLoad() {
+      const previewDiv = document.getElementById('postsPreview');
+      
+      if (allPosts.length === 0) {
+        alert('Primero carga las publicaciones');
+        return;
+      }
+
+      previewDiv.innerHTML = '<h3>Probando carga de imágenes...</h3>';
+
+      allPosts.forEach((post, index) => {
+        const testDiv = document.createElement('div');
+        testDiv.style.cssText = 'margin: 10px 0; padding: 10px; border: 1px solid #ccc;';
+        
+        const img = new Image();
+        const startTime = Date.now();
+        
+        img.onload = function() {
+          const loadTime = Date.now() - startTime;
+          testDiv.innerHTML = `
+            <p class="success">✅ Post ${index + 1}: Imagen cargada (${loadTime}ms)</p>
+            <p>URL: ${post.userFoto}</p>
+            <img src="${post.userFoto}" style="width: 48px; height: 48px; border-radius: 50%;">
+          `;
+        };
+        
+        img.onerror = function() {
+          testDiv.innerHTML = `
+            <p class="error">❌ Post ${index + 1}: Error al cargar imagen</p>
+            <p>URL: ${post.userFoto || 'No especificada'}</p>
+            <p>Usando placeholder...</p>
+            <img src="https://via.placeholder.com/48" style="width: 48px; height: 48px; border-radius: 50%;">
+          `;
+        };
+        
+        img.src = post.userFoto || 'https://via.placeholder.com/48';
+        previewDiv.appendChild(testDiv);
+      });
+    }
+
+    // 5. Crear publicación de prueba
+    async function createTestPost() {
+      if (!usuarioActual) {
+        alert('Necesitas iniciar sesión primero');
+        return;
+      }
+
+      const testPost = {
+        contenido: "🧪 Publicación de prueba - " + new Date().toLocaleString(),
+        fecha: new Date().toISOString(),
+        userId: usuarioActual.id,
+        userName: usuarioActual.nombre,
+        userFoto: usuarioActual.foto || "https://via.placeholder.com/48",
+        userPerfil: usuarioActual.perfil,
+        userTelefono: usuarioActual.telefono,
+        userZona: usuarioActual.zona,
+        hashtags: ["#test"],
+        likes: [],
+        comentarios: []
+      };
+
+      try {
+        const response = await fetch(`${DB_URL}/posts.json`, {
+          method: 'POST',
+          body: JSON.stringify(testPost)
+        });
+
+        if (response.ok) {
+          alert('✅ Publicación de prueba creada!');
+          loadPosts();
+        } else {
+          alert('❌ Error al crear publicación');
+        }
+      } catch (error) {
+        alert('❌ Error: ' + error.message);
+      }
+    }
+
+    // Ejecutar al cargar
+    window.addEventListener('load', async function() {
+      const hasSession = checkSession();
+      if (hasSession) {
+        await checkFirebase();
+        await loadPosts();
+      }
+      updateErrorsDisplay();
+    });
+  </script>
+</body>
+</html>

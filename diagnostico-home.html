@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diagnóstico Home - LaburitoYa</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background-color: #f3f2ef;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #0a66c2;
+      margin-bottom: 20px;
+    }
+    .test-item {
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 4px;
+      border-left: 4px solid #ccc;
+    }
+    .test-item.success {
+      background-color: #d4edda;
+      border-left-color: #28a745;
+    }
+    .test-item.error {
+      background-color: #f8d7da;
+      border-left-color: #dc3545;
+    }
+    .test-item.warning {
+      background-color: #fff3cd;
+      border-left-color: #ffc107;
+    }
+    button {
+      background-color: #0a66c2;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 10px 5px;
+    }
+    button:hover {
+      background-color: #004182;
+    }
+    pre {
+      background-color: #f5f5f5;
+      padding: 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 12px;
+    }
+    .actions {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 2px solid #e0e0e0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔍 Diagnóstico de Home</h1>
+    <p>Esta herramienta verifica por qué no se ven las publicaciones en home.html</p>
+
+    <div id="results"></div>
+
+    <div class="actions">
+      <h3>Acciones Rápidas:</h3>
+      <button onclick="irALogin()">🔐 Ir a Login</button>
+      <button onclick="irARegistro()">📝 Ir a Registro</button>
+      <button onclick="crearUsuarioTest()">👤 Crear Usuario Test</button>
+      <button onclick="location.reload()">🔄 Recargar Diagnóstico</button>
+    </div>
+  </div>
+
+  <script>
+    const DB_URL = 'https://laburitoya-6e55d-default-rtdb.firebaseio.com';
+    const resultsDiv = document.getElementById('results');
+
+    async function runDiagnostics() {
+      resultsDiv.innerHTML = '<p>Ejecutando diagnóstico...</p>';
+      let html = '';
+
+      // Test 1: Verificar sesión
+      html += '<h3>1. Verificar Sesión de Usuario</h3>';
+      const usuarioActual = localStorage.getItem('usuarioActual');
+      
+      if (usuarioActual) {
+        try {
+          const usuario = JSON.parse(usuarioActual);
+          html += `
+            <div class="test-item success">
+              ✅ <strong>Sesión activa encontrada</strong><br>
+              Usuario: ${usuario.nombre}<br>
+              ID: ${usuario.id}<br>
+              Correo: ${usuario.correo}
+            </div>
+          `;
+        } catch (e) {
+          html += `
+            <div class="test-item error">
+              ❌ <strong>Sesión corrupta</strong><br>
+              Error: ${e.message}<br>
+              <button onclick="limpiarSesion()">Limpiar sesión</button>
+            </div>
+          `;
+        }
+      } else {
+        html += `
+          <div class="test-item error">
+            ❌ <strong>No hay sesión activa</strong><br>
+            Necesitas iniciar sesión para ver las publicaciones.<br>
+            <button onclick="irALogin()">Ir a Login</button>
+          </div>
+        `;
+      }
+
+      // Test 2: Verificar conexión a Firebase
+      html += '<h3>2. Verificar Conexión a Firebase</h3>';
+      try {
+        const response = await fetch(`${DB_URL}/.json`);
+        if (response.ok) {
+          html += `
+            <div class="test-item success">
+              ✅ <strong>Conexión a Firebase exitosa</strong>
+            </div>
+          `;
+        } else {
+          html += `
+            <div class="test-item error">
+              ❌ <strong>Error de conexión</strong><br>
+              Status: ${response.status}
+            </div>
+          `;
+        }
+      } catch (error) {
+        html += `
+          <div class="test-item error">
+            ❌ <strong>Error de red</strong><br>
+            ${error.message}
+          </div>
+        `;
+      }
+
+      // Test 3: Verificar publicaciones en Firebase
+      html += '<h3>3. Verificar Publicaciones en Firebase</h3>';
+      try {
+        const response = await fetch(`${DB_URL}/posts.json`);
+        const posts = await response.json();
+        
+        if (posts && Object.keys(posts).length > 0) {
+          const count = Object.keys(posts).length;
+          html += `
+            <div class="test-item success">
+              ✅ <strong>${count} publicación(es) encontrada(s)</strong><br>
+              <button onclick="verPublicaciones()">Ver detalles</button>
+            </div>
+          `;
+        } else {
+          html += `
+            <div class="test-item warning">
+              ⚠️ <strong>No hay publicaciones en Firebase</strong><br>
+              La base de datos está vacía.<br>
+              <button onclick="crearPostTest()">Crear publicación de prueba</button>
+            </div>
+          `;
+        }
+      } catch (error) {
+        html += `
+          <div class="test-item error">
+            ❌ <strong>Error al leer publicaciones</strong><br>
+            ${error.message}
+          </div>
+        `;
+      }
+
+      // Test 4: Verificar usuarios en Firebase
+      html += '<h3>4. Verificar Usuarios en Firebase</h3>';
+      try {
+        const response = await fetch(`${DB_URL}/usuarios.json`);
+        const usuarios = await response.json();
+        
+        if (usuarios && Object.keys(usuarios).length > 0) {
+          const count = Object.keys(usuarios).length;
+          html += `
+            <div class="test-item success">
+              ✅ <strong>${count} usuario(s) encontrado(s)</strong>
+            </div>
+          `;
+        } else {
+          html += `
+            <div class="test-item warning">
+              ⚠️ <strong>No hay usuarios en Firebase</strong><br>
+              <button onclick="crearUsuarioTest()">Crear usuario de prueba</button>
+            </div>
+          `;
+        }
+      } catch (error) {
+        html += `
+          <div class="test-item error">
+            ❌ <strong>Error al leer usuarios</strong><br>
+            ${error.message}
+          </div>
+        `;
+      }
+
+      // Test 5: Verificar archivos JavaScript
+      html += '<h3>5. Verificar Archivos JavaScript</h3>';
+      const scripts = ['auth.js', 'home.js', 'notifications.js', 'search.js', 'hashtags.js', 'fileUpload.js'];
+      
+      for (const script of scripts) {
+        try {
+          const response = await fetch(script);
+          if (response.ok) {
+            html += `
+              <div class="test-item success">
+                ✅ ${script} cargado
+              </div>
+            `;
+          } else {
+            html += `
+              <div class="test-item error">
+                ❌ ${script} no encontrado
+              </div>
+            `;
+          }
+        } catch (error) {
+          html += `
+            <div class="test-item error">
+              ❌ Error al cargar ${script}
+            </div>
+          `;
+        }
+      }
+
+      // Resumen y recomendaciones
+      html += '<h3>📋 Resumen y Recomendaciones</h3>';
+      
+      if (!usuarioActual) {
+        html += `
+          <div class="test-item warning">
+            <strong>⚠️ PROBLEMA PRINCIPAL: No has iniciado sesión</strong><br><br>
+            <strong>Solución:</strong><br>
+            1. Haz clic en "Ir a Login" abajo<br>
+            2. Ingresa con tus credenciales<br>
+            3. Si no tienes cuenta, haz clic en "Ir a Registro"<br><br>
+            <strong>Credenciales de prueba:</strong><br>
+            Correo: test@test.com<br>
+            Contraseña: test123
+          </div>
+        `;
+      } else {
+        html += `
+          <div class="test-item success">
+            <strong>✅ Todo parece estar bien</strong><br><br>
+            Si aún no ves las publicaciones:<br>
+            1. Abre home.html<br>
+            2. Presiona F12 para abrir la consola<br>
+            3. Busca errores en rojo<br>
+            4. Comparte los errores para ayudarte mejor
+          </div>
+        `;
+      }
+
+      resultsDiv.innerHTML = html;
+    }
+
+    function irALogin() {
+      window.location.href = 'login.html';
+    }
+
+    function irARegistro() {
+      window.location.href = 'register.html';
+    }
+
+    function limpiarSesion() {
+      localStorage.removeItem('usuarioActual');
+      alert('Sesión limpiada. Ahora puedes iniciar sesión nuevamente.');
+      location.reload();
+    }
+
+    async function crearUsuarioTest() {
+      const testUser = {
+        nombre: "Usuario Test",
+        username: "usuariotest",
+        correo: "test@test.com",
+        contrasena: "test123",
+        telefono: "123456789",
+        perfil: "Trabajador",
+        pais: "Argentina",
+        distrito: "Guaminí",
+        localidad: "Guaminí",
+        zona: "Guaminí, Guaminí, Argentina",
+        fecha: new Date().toISOString(),
+        foto: "https://via.placeholder.com/150",
+        biografia: "Usuario de prueba"
+      };
+
+      try {
+        const response = await fetch(`${DB_URL}/usuarios/test123.json`, {
+          method: 'PUT',
+          body: JSON.stringify(testUser)
+        });
+
+        if (response.ok) {
+          alert('✅ Usuario de prueba creado!\n\nCredenciales:\nCorreo: test@test.com\nContraseña: test123');
+          location.reload();
+        }
+      } catch (error) {
+        alert('❌ Error al crear usuario: ' + error.message);
+      }
+    }
+
+    async function crearPostTest() {
+      const usuarioActual = localStorage.getItem('usuarioActual');
+      if (!usuarioActual) {
+        alert('Necesitas iniciar sesión primero');
+        return;
+      }
+
+      const usuario = JSON.parse(usuarioActual);
+      
+      const testPost = {
+        contenido: "¡Hola! Esta es una publicación de prueba. Busco trabajo como desarrollador #Trabajo #Desarrollo",
+        fecha: new Date().toISOString(),
+        userId: usuario.id,
+        userName: usuario.nombre,
+        userFoto: usuario.foto || "https://via.placeholder.com/48",
+        userPerfil: usuario.perfil,
+        userTelefono: usuario.telefono,
+        userZona: usuario.zona,
+        hashtags: ["#trabajo", "#desarrollo"],
+        likes: [],
+        comentarios: []
+      };
+
+      try {
+        const response = await fetch(`${DB_URL}/posts.json`, {
+          method: 'POST',
+          body: JSON.stringify(testPost)
+        });
+
+        if (response.ok) {
+          alert('✅ Publicación de prueba creada!');
+          location.reload();
+        }
+      } catch (error) {
+        alert('❌ Error al crear publicación: ' + error.message);
+      }
+    }
+
+    async function verPublicaciones() {
+      try {
+        const response = await fetch(`${DB_URL}/posts.json`);
+        const posts = await response.json();
+        
+        let html = '<h3>Publicaciones en Firebase:</h3><pre>';
+        html += JSON.stringify(posts, null, 2);
+        html += '</pre>';
+        
+        const newWindow = window.open('', '_blank');
+        newWindow.document.write(`
+          <html>
+            <head>
+              <title>Publicaciones</title>
+              <style>
+                body { font-family: monospace; padding: 20px; }
+                pre { background: #f5f5f5; padding: 15px; border-radius: 4px; }
+              </style>
+            </head>
+            <body>${html}</body>
+          </html>
+        `);
+      } catch (error) {
+        alert('Error: ' + error.message);
+      }
+    }
+
+    // Ejecutar diagnóstico al cargar
+    window.addEventListener('load', runDiagnostics);
+  </script>
+</body>
+</html>

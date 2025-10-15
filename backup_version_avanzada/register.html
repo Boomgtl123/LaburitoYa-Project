@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Únete a LaburitoYa</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Crea tu cuenta profesional</h1>
+    <form id="registerForm">
+      <select id="perfil" required>
+        <option value="" disabled selected>Selecciona tu perfil</option>
+        <option value="Trabajador">Busco trabajo</option>
+        <option value="Empleador">Busco contratar</option>
+      </select>
+      
+      <input type="text" id="nombre" placeholder="Nombre completo" required />
+      
+      <input type="text" id="username" placeholder="Nombre de usuario (único)" required />
+      <small id="usernameHelp" style="font-size: 12px; color: #666; margin-top: -8px; display: block;">
+        Solo letras, números y guiones. Ej: juan_perez123
+      </small>
+      <small id="usernameAvailable" style="font-size: 12px; margin-top: -8px; display: none;"></small>
+      
+      <input type="email" id="correo" placeholder="Correo electrónico" required />
+      <input type="tel" id="telefono" placeholder="Teléfono" required />
+      
+      <!-- País -->
+      <select id="pais" required>
+        <option value="" disabled selected>Selecciona tu país</option>
+        <option value="Argentina">🇦🇷 Argentina</option>
+        <option value="Peru">🇵🇪 Perú</option>
+      </select>
+      
+      <!-- Distrito (se muestra según el país) -->
+      <select id="distrito" required style="display: none;">
+        <option value="" disabled selected>Selecciona tu distrito</option>
+      </select>
+      
+      <!-- Localidad (se muestra según el distrito) -->
+      <select id="localidad" required style="display: none;">
+        <option value="" disabled selected>Selecciona tu localidad</option>
+      </select>
+      
+      <input type="password" id="contrasena" placeholder="Contraseña (mínimo 6 caracteres)" required minlength="6" />
+      
+      <button type="submit">Crear cuenta</button>
+      <p id="mensajeRegistro"></p>
+    </form>
+    <div class="auth-links">
+      <p>¿Ya tienes una cuenta?</p>
+      <a href="login.html">Inicia sesión aquí</a>
+    </div>
+  </div>
+  <script src="auth.js"></script>
+  <script src="locations.js"></script>
+  <script src="register.js"></script>
+</body>
+</html>
