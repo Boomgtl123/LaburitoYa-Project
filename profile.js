@@ -21,15 +21,20 @@ window.addEventListener('DOMContentLoaded', function() {
 function inicializarPagina() {
   // Cargar datos del usuario
   cargarDatosUsuario();
-  
+
   // Cargar estadísticas
   cargarEstadisticas();
-  
+
   // Cargar contadores de seguidores
   if (window.followers) {
     cargarContadoresSeguidores();
   }
-  
+
+  // Mostrar panel de administración si es CEO
+  if (auth.esCEO(usuarioActual)) {
+    mostrarPanelAdministracion();
+  }
+
   // Event listeners
   configurarEventListeners();
 }
@@ -133,20 +138,25 @@ function cargarDatosUsuario() {
   if (navAvatar) {
     navAvatar.src = usuarioActual.foto || 'https://via.placeholder.com/32';
   }
-  
+
   // Foto de perfil grande
   const profilePhoto = document.getElementById('profilePhoto');
   if (profilePhoto) {
     profilePhoto.src = usuarioActual.foto || 'https://via.placeholder.com/150';
   }
-  
+
   // Información del header
   const profileName = document.getElementById('profileName');
   const profileType = document.getElementById('profileType');
   const profileLocation = document.getElementById('profileLocation');
   const profileContact = document.getElementById('profileContact');
-  
-  if (profileName) profileName.textContent = usuarioActual.nombre;
+
+  // Mostrar badge de verificación si el usuario está verificado
+  const esVerificado = auth.estaVerificado(usuarioActual);
+  if (profileName) {
+    profileName.innerHTML = `${usuarioActual.nombre}${esVerificado ? ' <span style="color: #1DA1F2;">✓</span>' : ''}`;
+  }
+
   if (profileType) {
     const tipoTexto = usuarioActual.perfil === 'Trabajador' ? 'Buscando oportunidades laborales' : 'Buscando contratar personal';
     profileType.textContent = tipoTexto;
@@ -559,5 +569,239 @@ function cerrarSeguidores() {
   const followersCard = document.getElementById('followersCard');
   if (followersCard) {
     followersCard.style.display = 'none';
+  }
+}
+
+// ========== PANEL DE ADMINISTRACIÓN (SOLO CEO) ==========
+async function mostrarPanelAdministracion() {
+  // Crear el panel de administración
+  const adminPanel = document.createElement('div');
+  adminPanel.id = 'adminPanel';
+  adminPanel.style.cssText = `
+    margin-top: 30px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+  `;
+
+  adminPanel.innerHTML = `
+    <h3 style="color: #dc3545; margin-bottom: 20px;">🎯 Panel de Administración CEO</h3>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 20px;">
+      <button id="btnVerUsuarios" style="padding: 12px; background: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+        👥 Ver Todos los Usuarios
+      </button>
+      <button id="btnVerificarUsuario" style="padding: 12px; background: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+        ✅ Verificar Usuario
+      </button>
+      <button id="btnBloquearUsuario" style="padding: 12px; background: #dc3545; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+        🚫 Bloquear Usuario
+      </button>
+    </div>
+
+    <div id="adminContent" style="display: none; margin-top: 20px; padding: 15px; background: white; border-radius: 6px; border: 1px solid #dee2e6;">
+      <!-- Contenido dinámico aquí -->
+    </div>
+  `;
+
+  // Insertar el panel después del contenedor principal
+  const mainContainer = document.querySelector('.profile-container') || document.body;
+  mainContainer.appendChild(adminPanel);
+
+  // Event listeners para los botones
+  document.getElementById('btnVerUsuarios').addEventListener('click', mostrarListaUsuarios);
+  document.getElementById('btnVerificarUsuario').addEventListener('click', mostrarFormularioVerificar);
+  document.getElementById('btnBloquearUsuario').addEventListener('click', mostrarFormularioBloquear);
+}
+
+// ========== MOSTRAR LISTA DE USUARIOS ==========
+async function mostrarListaUsuarios() {
+  const adminContent = document.getElementById('adminContent');
+  if (!adminContent) return;
+
+  adminContent.style.display = 'block';
+  adminContent.innerHTML = '<div style="text-align: center;">Cargando usuarios...</div>';
+
+  try {
+    const usuarios = await auth.obtenerTodosLosUsuarios();
+
+    if (usuarios.length === 0) {
+      adminContent.innerHTML = '<p>No hay usuarios registrados.</p>';
+      return;
+    }
+
+    let html = '<h4 style="margin-bottom: 15px;">Lista de Todos los Usuarios</h4>';
+    html += '<div style="max-height: 400px; overflow-y: auto;">';
+
+    usuarios.forEach(usuario => {
+      const esVerificado = auth.estaVerificado(usuario);
+      const estaBloqueado = auth.estaBloqueado(usuario.id);
+
+      html += `
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <img src="${usuario.foto || 'https://via.placeholder.com/32'}" style="width: 32px; height: 32px; border-radius: 50%;" />
+            <div>
+              <strong>${usuario.nombre}</strong>${esVerificado ? ' <span style="color: #1DA1F2;">✓</span>' : ''}
+              <br><small style="color: #666;">${usuario.correo}</small>
+            </div>
+          </div>
+          <div style="display: flex; gap: 5px;">
+            ${estaBloqueado ? '<span style="color: #dc3545; font-weight: bold;">BLOQUEADO</span>' : ''}
+            ${esVerificado ? '<span style="color: #28a745;">Verificado</span>' : '<button onclick="verificarUsuarioDesdeLista(\'' + usuario.id + '\')" style="padding: 4px 8px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">Verificar</button>'}
+            ${estaBloqueado ?
+              '<button onclick="desbloquearUsuarioDesdeLista(\'' + usuario.id + '\')" style="padding: 4px 8px; background: #ffc107; color: black; border: none; border-radius: 4px; cursor: pointer;">Desbloquear</button>' :
+              '<button onclick="bloquearUsuarioDesdeLista(\'' + usuario.id + '\')" style="padding: 4px 8px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">Bloquear</button>'
+            }
+          </div>
+        </div>
+      `;
+    });
+
+    html += '</div>';
+    adminContent.innerHTML = html;
+
+  } catch (error) {
+    console.error('Error al cargar usuarios:', error);
+    adminContent.innerHTML = '<p>Error al cargar la lista de usuarios.</p>';
+  }
+}
+
+// ========== MOSTRAR FORMULARIO PARA VERIFICAR USUARIO ==========
+function mostrarFormularioVerificar() {
+  const adminContent = document.getElementById('adminContent');
+  if (!adminContent) return;
+
+  adminContent.style.display = 'block';
+  adminContent.innerHTML = `
+    <h4>Verificar Usuario</h4>
+    <p>Ingresa el correo electrónico del usuario que deseas verificar:</p>
+    <input type="email" id="correoVerificar" placeholder="usuario@email.com" style="width: 100%; padding: 8px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px;" />
+    <button onclick="verificarUsuarioPorCorreo()" style="padding: 8px 16px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">Verificar Usuario</button>
+  `;
+}
+
+// ========== MOSTRAR FORMULARIO PARA BLOQUEAR USUARIO ==========
+function mostrarFormularioBloquear() {
+  const adminContent = document.getElementById('adminContent');
+  if (!adminContent) return;
+
+  adminContent.style.display = 'block';
+  adminContent.innerHTML = `
+    <h4>Bloquear/Desbloquear Usuario</h4>
+    <p>Ingresa el correo electrónico del usuario:</p>
+    <input type="email" id="correoBloquear" placeholder="usuario@email.com" style="width: 100%; padding: 8px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px;" />
+    <div style="display: flex; gap: 10px;">
+      <button onclick="bloquearUsuarioPorCorreo()" style="padding: 8px 16px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">Bloquear</button>
+      <button onclick="desbloquearUsuarioPorCorreo()" style="padding: 8px 16px; background: #ffc107; color: black; border: none; border-radius: 4px; cursor: pointer;">Desbloquear</button>
+    </div>
+  `;
+}
+
+// ========== FUNCIONES PARA ACCIONES DESDE LA LISTA ==========
+async function verificarUsuarioDesdeLista(userId) {
+  if (await auth.verificarUsuario(userId)) {
+    mostrarNotificacion('✅ Usuario verificado exitosamente', 'success');
+    mostrarListaUsuarios(); // Recargar lista
+  } else {
+    mostrarNotificacion('❌ Error al verificar usuario', 'error');
+  }
+}
+
+async function bloquearUsuarioDesdeLista(userId) {
+  if (auth.bloquearUsuario(userId)) {
+    mostrarNotificacion('✅ Usuario bloqueado', 'success');
+    mostrarListaUsuarios(); // Recargar lista
+  } else {
+    mostrarNotificacion('❌ Error al bloquear usuario', 'error');
+  }
+}
+
+async function desbloquearUsuarioDesdeLista(userId) {
+  if (auth.desbloquearUsuario(userId)) {
+    mostrarNotificacion('✅ Usuario desbloqueado', 'success');
+    mostrarListaUsuarios(); // Recargar lista
+  } else {
+    mostrarNotificacion('❌ Error al desbloquear usuario', 'error');
+  }
+}
+
+// ========== FUNCIONES PARA ACCIONES POR CORREO ==========
+async function verificarUsuarioPorCorreo() {
+  const correo = document.getElementById('correoVerificar').value.trim();
+  if (!correo) {
+    mostrarNotificacion('❌ Ingresa un correo electrónico', 'error');
+    return;
+  }
+
+  try {
+    const usuario = await auth.obtenerUsuarioPorCorreo(correo);
+    if (!usuario) {
+      mostrarNotificacion('❌ Usuario no encontrado', 'error');
+      return;
+    }
+
+    if (await auth.verificarUsuario(usuario.id)) {
+      mostrarNotificacion('✅ Usuario verificado exitosamente', 'success');
+      document.getElementById('correoVerificar').value = '';
+    } else {
+      mostrarNotificacion('❌ Error al verificar usuario', 'error');
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    mostrarNotificacion('❌ Error al procesar la solicitud', 'error');
+  }
+}
+
+async function bloquearUsuarioPorCorreo() {
+  const correo = document.getElementById('correoBloquear').value.trim();
+  if (!correo) {
+    mostrarNotificacion('❌ Ingresa un correo electrónico', 'error');
+    return;
+  }
+
+  try {
+    const usuario = await auth.obtenerUsuarioPorCorreo(correo);
+    if (!usuario) {
+      mostrarNotificacion('❌ Usuario no encontrado', 'error');
+      return;
+    }
+
+    if (auth.bloquearUsuario(usuario.id)) {
+      mostrarNotificacion('✅ Usuario bloqueado', 'success');
+      document.getElementById('correoBloquear').value = '';
+    } else {
+      mostrarNotificacion('❌ Error al bloquear usuario', 'error');
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    mostrarNotificacion('❌ Error al procesar la solicitud', 'error');
+  }
+}
+
+async function desbloquearUsuarioPorCorreo() {
+  const correo = document.getElementById('correoBloquear').value.trim();
+  if (!correo) {
+    mostrarNotificacion('❌ Ingresa un correo electrónico', 'error');
+    return;
+  }
+
+  try {
+    const usuario = await auth.obtenerUsuarioPorCorreo(correo);
+    if (!usuario) {
+      mostrarNotificacion('❌ Usuario no encontrado', 'error');
+      return;
+    }
+
+    if (auth.desbloquearUsuario(usuario.id)) {
+      mostrarNotificacion('✅ Usuario desbloqueado', 'success');
+      document.getElementById('correoBloquear').value = '';
+    } else {
+      mostrarNotificacion('❌ Error al desbloquear usuario', 'error');
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    mostrarNotificacion('❌ Error al procesar la solicitud', 'error');
   }
 }

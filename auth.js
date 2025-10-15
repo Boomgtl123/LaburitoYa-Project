@@ -1,5 +1,83 @@
 // ========== GESTIÓN DE SESIÓN Y AUTENTICACIÓN ==========
 
+// ========== GESTIÓN DE ROLES Y PERMISOS ==========
+
+// Verificar si el usuario es CEO
+function esCEO(usuario) {
+  return usuario && usuario.correo === 'laburitoya@gmail.com';
+}
+
+// Verificar si el usuario está verificado
+function estaVerificado(usuario) {
+  return usuario && usuario.verificado === true;
+}
+
+// Verificar si un usuario está bloqueado por el CEO
+function estaBloqueado(userId) {
+  // Obtener lista de usuarios bloqueados del CEO
+  const bloqueados = JSON.parse(localStorage.getItem('usuariosBloqueados') || '[]');
+  return bloqueados.includes(userId);
+}
+
+// Bloquear usuario (solo CEO)
+function bloquearUsuario(userId) {
+  const usuarioActual = obtenerUsuarioActual();
+  if (!esCEO(usuarioActual)) return false;
+
+  const bloqueados = JSON.parse(localStorage.getItem('usuariosBloqueados') || '[]');
+  if (!bloqueados.includes(userId)) {
+    bloqueados.push(userId);
+    localStorage.setItem('usuariosBloqueados', JSON.stringify(bloqueados));
+  }
+  return true;
+}
+
+// Desbloquear usuario (solo CEO)
+function desbloquearUsuario(userId) {
+  const usuarioActual = obtenerUsuarioActual();
+  if (!esCEO(usuarioActual)) return false;
+
+  const bloqueados = JSON.parse(localStorage.getItem('usuariosBloqueados') || '[]');
+  const index = bloqueados.indexOf(userId);
+  if (index > -1) {
+    bloqueados.splice(index, 1);
+    localStorage.setItem('usuariosBloqueados', JSON.stringify(bloqueados));
+  }
+  return true;
+}
+
+// Verificar usuario (solo CEO)
+async function verificarUsuario(userId) {
+  const usuarioActual = obtenerUsuarioActual();
+  if (!esCEO(usuarioActual)) return false;
+
+  try {
+    const response = await fetch(`https://laburitoya-6e55d-default-rtdb.firebaseio.com/usuarios/${userId}.json`, {
+      method: 'PATCH',
+      body: JSON.stringify({ verificado: true })
+    });
+    return response.ok;
+  } catch (error) {
+    console.error('Error al verificar usuario:', error);
+    return false;
+  }
+}
+
+// Obtener todos los usuarios (solo CEO)
+async function obtenerTodosLosUsuarios() {
+  const usuarioActual = obtenerUsuarioActual();
+  if (!esCEO(usuarioActual)) return [];
+
+  try {
+    const response = await fetch('https://laburitoya-6e55d-default-rtdb.firebaseio.com/usuarios.json');
+    const data = await response.json();
+    return Object.entries(data).map(([id, user]) => ({ id, ...user }));
+  } catch (error) {
+    console.error('Error al obtener usuarios:', error);
+    return [];
+  }
+}
+
 // Guardar usuario en sesión
 function guardarSesion(usuario) {
   localStorage.setItem('usuarioActual', JSON.stringify(usuario));
@@ -139,5 +217,12 @@ window.auth = {
   obtenerUsuarioPorId,
   obtenerUsuarioPorCorreo,
   actualizarUsuarioEnFirebase,
-  inicializarNavbar
+  inicializarNavbar,
+  esCEO,
+  estaVerificado,
+  estaBloqueado,
+  bloquearUsuario,
+  desbloquearUsuario,
+  verificarUsuario,
+  obtenerTodosLosUsuarios
 };

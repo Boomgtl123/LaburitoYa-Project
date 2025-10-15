@@ -317,38 +317,43 @@ async function cargarPosts() {
   const loadingSpinner = document.getElementById('loadingSpinner');
   const noPostsMessage = document.getElementById('noPostsMessage');
   const loadMoreContainer = document.getElementById('loadMoreContainer');
-  
+
   if (!postList) return;
-  
+
   if (loadingSpinner) loadingSpinner.style.display = 'flex';
   if (noPostsMessage) noPostsMessage.style.display = 'none';
   if (loadMoreContainer) loadMoreContainer.style.display = 'none';
-  
+
   try {
     // Agregar timeout de 10 segundos
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000);
-    
+
     const response = await fetch("https://laburitoya-6e55d-default-rtdb.firebaseio.com/posts.json", {
       signal: controller.signal
     });
     clearTimeout(timeoutId);
-    
+
     const data = await response.json();
-    
+
     if (loadingSpinner) loadingSpinner.style.display = 'none';
-    
+
     if (!data || Object.keys(data).length === 0) {
       if (noPostsMessage) noPostsMessage.style.display = 'block';
       postList.innerHTML = '';
       return;
     }
-    
+
     let posts = Object.entries(data).map(([id, post]) => ({
       id,
       ...post
     })).sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-    
+
+    // Filtrar posts de usuarios bloqueados (excepto para CEO)
+    if (!auth.esCEO(usuarioActual)) {
+      posts = posts.filter(post => !auth.estaBloqueado(post.userId));
+    }
+
     if (window.hashtagFiltroActivo) {
       posts = posts.filter(post => {
         if (post.hashtags && Array.isArray(post.hashtags)) {
@@ -357,7 +362,7 @@ async function cargarPosts() {
         return false;
       });
     }
-    
+
     todosLosPosts = posts;
     
     if (posts.length === 0) {
@@ -482,26 +487,32 @@ function crearElementoPost(post) {
   const div = document.createElement('div');
   div.className = 'post';
   div.setAttribute('data-post-id', post.id);
-  
+
   const tiempoTranscurrido = calcularTiempoTranscurrido(post.fecha);
-  
+
   let contenidoConHashtags = post.contenido;
   if (window.hashtags) {
     contenidoConHashtags = window.hashtags.convertirHashtagsEnLinks(post.contenido);
   }
-  
+
   const usuarioLike = post.likes && post.likes.includes(usuarioActual.id);
   const likeClass = usuarioLike ? 'liked' : '';
   const likeIcon = usuarioLike ? '❤️' : '🤍';
   const likeCount = post.likes ? post.likes.length : 0;
   const commentCount = post.comentarios ? post.comentarios.length : 0;
-  
+
+  // Obtener datos del usuario del post para verificar si está verificado
+  const esVerificado = auth.estaVerificado({ verificado: post.userVerificado });
+
   div.innerHTML = `
     <div class="post-header">
       <img src="${post.userFoto || DEFAULT_AVATAR}" alt="${post.userName}" class="post-avatar" loading="lazy" onerror="this.src='${DEFAULT_AVATAR}'" style="cursor: pointer;" onclick="verPerfil('${post.userId}')" />
       <div class="post-info">
         <div style="display: flex; align-items: center; gap: 8px;">
-          <h4 class="post-username" style="cursor: pointer; color: #000000e6; transition: color 0.2s;" onclick="verPerfil('${post.userId}')" onmouseover="this.style.color='#0a66c2'" onmouseout="this.style.color='#000000e6'">${post.userName}</h4>
+          <h4 class="post-username" style="cursor: pointer; color: #000000e6; transition: color 0.2s;" onclick="verPerfil('${post.userId}')" onmouseover="this.style.color='#0a66c2'" onmouseout="this.style.color='#000000e6'">
+            ${post.userName}
+            ${esVerificado ? '<span class="verified-badge" style="color: #1DA1F2; margin-left: 4px;">✓</span>' : ''}
+          </h4>
           ${post.userId !== usuarioActual.id ? `
             <button class="btn-follow" data-user-id="${post.userId}" style="padding: 4px 12px; font-size: 13px; border: 1px solid #0a66c2; background: white; color: #0a66c2; border-radius: 16px; cursor: pointer; font-weight: 600; transition: all 0.2s;">
               Seguir
@@ -510,7 +521,7 @@ function crearElementoPost(post) {
         </div>
         <p class="post-subtitle">${post.userPerfil || 'Usuario'} • ${tiempoTranscurrido}</p>
       </div>
-      ${post.userId === usuarioActual.id ? `
+      ${post.userId === usuarioActual.id || auth.esCEO(usuarioActual) ? `
         <button class="post-delete-btn" onclick="eliminarPost('${post.id}')" title="Eliminar publicación">
           🗑️
         </button>
@@ -744,22 +755,36 @@ async function agregarComentario(postId, postUserId) {
 
 // ========== ELIMINAR POST ==========
 async function eliminarPost(postId) {
-  if (!confirm('¿Estás seguro que deseas eliminar esta publicación?')) {
+  // Verificar permisos: solo el autor o CEO pueden eliminar
+  const post = todosLosPosts.find(p => p.id === postId);
+  if (!post) return;
+
+  const puedeEliminar = post.userId === usuarioActual.id || auth.esCEO(usuarioActual);
+  if (!puedeEliminar) {
+    mostrarNotificacion('❌ No tienes permisos para eliminar esta publicación', 'error');
     return;
   }
-  
+
+  const mensajeConfirmacion = auth.esCEO(usuarioActual) && post.userId !== usuarioActual.id
+    ? '¿Estás seguro que deseas eliminar esta publicación como CEO?'
+    : '¿Estás seguro que deseas eliminar esta publicación?';
+
+  if (!confirm(mensajeConfirmacion)) {
+    return;
+  }
+
   try {
     const response = await fetch(`https://laburitoya-6e55d-default-rtdb.firebaseio.com/posts/${postId}.json`, {
       method: 'DELETE'
     });
-    
+
     if (response.ok) {
       await cargarPosts();
-      
+
       if (window.hashtags) {
         window.hashtags.actualizarTendencias();
       }
-      
+
       actualizarEstadisticas();
       mostrarNotificacion('✅ Publicación eliminada', 'success');
     }
