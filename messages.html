@@ -236,6 +236,11 @@
     
     // Funcionalidad del menú hamburguesa y avatar
     document.addEventListener('DOMContentLoaded', function() {
+      // Inicializar notificaciones
+      if (window.notifications) {
+        window.notifications.inicializarNotificaciones();
+      }
+      
       const hamburger = document.getElementById('navHamburger');
       const mobileMenu = document.getElementById('mobileMenu');
       const mobileLogout = document.getElementById('mobileLogout');
