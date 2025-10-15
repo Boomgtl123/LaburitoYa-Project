@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Mensajes - Debug</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .debug-panel {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .debug-panel h2 {
+      margin-top: 0;
+      color: #1976d2;
+    }
+    .status {
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+    .status.success {
+      background: #e8f5e9;
+      color: #2e7d32;
+      border-left: 4px solid #4caf50;
+    }
+    .status.error {
+      background: #ffebee;
+      color: #c62828;
+      border-left: 4px solid #f44336;
+    }
+    .status.info {
+      background: #e3f2fd;
+      color: #1565c0;
+      border-left: 4px solid #2196f3;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 5px;
+      background: #1976d2;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    button:hover {
+      background: #1565c0;
+    }
+    .console-output {
+      background: #263238;
+      color: #aed581;
+      padding: 15px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      max-height: 400px;
+      overflow-y: auto;
+      margin-top: 10px;
+    }
+    .console-line {
+      margin: 5px 0;
+      padding: 2px 0;
+    }
+    iframe {
+      width: 100%;
+      height: 600px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      background: white;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔍 Panel de Diagnóstico - Mensajes</h1>
+  
+  <div class="debug-panel">
+    <h2>Estado del Sistema</h2>
+    <div id="systemStatus"></div>
+    <button onclick="checkSystem()">🔄 Verificar Sistema</button>
+    <button onclick="checkFirebase()">🌐 Verificar Firebase</button>
+    <button onclick="checkAuth()">🔐 Verificar Autenticación</button>
+    <button onclick="clearStorage()">🗑️ Limpiar LocalStorage</button>
+  </div>
+
+  <div class="debug-panel">
+    <h2>Consola de Logs</h2>
+    <div class="console-output" id="consoleOutput">
+      <div class="console-line">Esperando logs...</div>
+    </div>
+    <button onclick="clearConsole()">🧹 Limpiar Consola</button>
+  </div>
+
+  <div class="debug-panel">
+    <h2>Vista de Mensajes</h2>
+    <button onclick="loadMessages()">📱 Cargar Página de Mensajes</button>
+    <button onclick="reloadMessages()">🔄 Recargar</button>
+    <div id="messagesFrame"></div>
+  </div>
+
+  <script>
+    // Capturar logs de consola
+    const originalLog = console.log;
+    const originalError = console.error;
+    const originalWarn = console.warn;
+    
+    function addToConsole(message, type = 'log') {
+      const consoleOutput = document.getElementById('consoleOutput');
+      const line = document.createElement('div');
+      line.className = 'console-line';
+      line.style.color = type === 'error' ? '#ff5252' : type === 'warn' ? '#ffd740' : '#aed581';
+      line.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      consoleOutput.appendChild(line);
+      consoleOutput.scrollTop = consoleOutput.scrollHeight;
+    }
+    
+    console.log = function(...args) {
+      originalLog.apply(console, args);
+      addToConsole(args.join(' '), 'log');
+    };
+    
+    console.error = function(...args) {
+      originalError.apply(console, args);
+      addToConsole(args.join(' '), 'error');
+    };
+    
+    console.warn = function(...args) {
+      originalWarn.apply(console, args);
+      addToConsole(args.join(' '), 'warn');
+    };
+
+    function clearConsole() {
+      document.getElementById('consoleOutput').innerHTML = '<div class="console-line">Consola limpiada...</div>';
+    }
+
+    async function checkSystem() {
+      const statusDiv = document.getElementById('systemStatus');
+      statusDiv.innerHTML = '<div class="status info">🔄 Verificando sistema...</div>';
+      
+      let html = '';
+      
+      // Verificar archivos
+      const files = ['auth.js', 'messages.js', 'messages.html', 'messages.css'];
+      for (const file of files) {
+        try {
+          const response = await fetch(file, { method: 'HEAD' });
+          if (response.ok) {
+            html += `<div class="status success">✅ ${file} - OK</div>`;
+          } else {
+            html += `<div class="status error">❌ ${file} - No encontrado</div>`;
+          }
+        } catch (error) {
+          html += `<div class="status error">❌ ${file} - Error: ${error.message}</div>`;
+        }
+      }
+      
+      // Verificar localStorage
+      const currentUser = localStorage.getItem('usuarioActual');
+      if (currentUser) {
+        try {
+          const user = JSON.parse(currentUser);
+          html += `<div class="status success">✅ Usuario en sesión: ${user.nombre || 'Sin nombre'}</div>`;
+        } catch (e) {
+          html += `<div class="status error">❌ Usuario en localStorage corrupto</div>`;
+        }
+      } else {
+        html += `<div class="status error">❌ No hay usuario en sesión</div>`;
+      }
+      
+      statusDiv.innerHTML = html;
+    }
+
+    async function checkFirebase() {
+      const statusDiv = document.getElementById('systemStatus');
+      statusDiv.innerHTML = '<div class="status info">🔄 Verificando Firebase...</div>';
+      
+      let html = '';
+      
+      try {
+        // Verificar conexión a Firebase
+        const response = await fetch('https://laburitoya-6e55d-default-rtdb.firebaseio.com/.json');
+        if (response.ok) {
+          html += '<div class="status success">✅ Conexión a Firebase - OK</div>';
+          
+          // Verificar mensajes
+          const mensajesResponse = await fetch('https://laburitoya-6e55d-default-rtdb.firebaseio.com/mensajes.json');
+          const mensajes = await mensajesResponse.json();
+          
+          if (mensajes) {
+            const count = Object.keys(mensajes).length;
+            html += `<div class="status success">✅ Mensajes en Firebase: ${count}</div>`;
+          } else {
+            html += '<div class="status info">ℹ️ No hay mensajes en Firebase</div>';
+          }
+          
+          // Verificar usuarios
+          const usuariosResponse = await fetch('https://laburitoya-6e55d-default-rtdb.firebaseio.com/usuarios.json');
+          const usuarios = await usuariosResponse.json();
+          
+          if (usuarios) {
+            const count = Object.keys(usuarios).length;
+            html += `<div class="status success">✅ Usuarios en Firebase: ${count}</div>`;
+          } else {
+            html += '<div class="status error">❌ No hay usuarios en Firebase</div>';
+          }
+        } else {
+          html += '<div class="status error">❌ Error de conexión a Firebase</div>';
+        }
+      } catch (error) {
+        html += `<div class="status error">❌ Error: ${error.message}</div>`;
+      }
+      
+      statusDiv.innerHTML = html;
+    }
+
+    async function checkAuth() {
+      const statusDiv = document.getElementById('systemStatus');
+      statusDiv.innerHTML = '<div class="status info">🔄 Verificando autenticación...</div>';
+      
+      let html = '';
+      
+      const currentUser = localStorage.getItem('usuarioActual');
+      
+      if (!currentUser) {
+        html += '<div class="status error">❌ No hay usuario autenticado</div>';
+        html += '<div class="status info">💡 Sugerencia: Inicia sesión en login.html primero</div>';
+      } else {
+        try {
+          const user = JSON.parse(currentUser);
+          html += '<div class="status success">✅ Usuario autenticado</div>';
+          html += `<div class="status info">👤 ID: ${user.id || 'N/A'}</div>`;
+          html += `<div class="status info">📧 Correo: ${user.correo || 'N/A'}</div>`;
+          html += `<div class="status info">👤 Nombre: ${user.nombre || 'N/A'}</div>`;
+          
+          // Verificar si el usuario existe en Firebase
+          if (user.id) {
+            try {
+              const response = await fetch(`https://laburitoya-6e55d-default-rtdb.firebaseio.com/usuarios/${user.id}.json`);
+              const userData = await response.json();
+              
+              if (userData) {
+                html += '<div class="status success">✅ Usuario existe en Firebase</div>';
+              } else {
+                html += '<div class="status error">❌ Usuario NO existe en Firebase</div>';
+              }
+            } catch (e) {
+              html += `<div class="status error">❌ Error al verificar usuario: ${e.message}</div>`;
+            }
+          }
+        } catch (e) {
+          html += '<div class="status error">❌ Error al parsear usuario de localStorage</div>';
+        }
+      }
+      
+      statusDiv.innerHTML = html;
+    }
+
+    function clearStorage() {
+      if (confirm('¿Estás seguro de que quieres limpiar el localStorage? Esto cerrará tu sesión.')) {
+        localStorage.clear();
+        alert('✅ LocalStorage limpiado. Recarga la página e inicia sesión nuevamente.');
+        location.reload();
+      }
+    }
+
+    function loadMessages() {
+      const frame = document.getElementById('messagesFrame');
+      frame.innerHTML = '<iframe src="messages.html"></iframe>';
+    }
+
+    function reloadMessages() {
+      const iframe = document.querySelector('#messagesFrame iframe');
+      if (iframe) {
+        iframe.src = iframe.src;
+      } else {
+        alert('Primero carga la página de mensajes');
+      }
+    }
+
+    // Verificar sistema al cargar
+    window.addEventListener('DOMContentLoaded', () => {
+      console.log('🚀 Panel de diagnóstico cargado');
+      checkSystem();
+    });
+  </script>
+</body>
+</html>

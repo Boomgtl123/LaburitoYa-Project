@@ -12,8 +12,19 @@ window.cargarConversaciones = null;
 
 // ========== PROTEGER PÁGINA Y CARGAR USUARIO ==========
 window.addEventListener('DOMContentLoaded', function() {
+  console.log('🔄 [MESSAGES] Iniciando carga de página de mensajes...');
+  
+  // Verificar que auth esté disponible
+  if (!window.auth) {
+    console.error('❌ [MESSAGES] Error: auth.js no está cargado');
+    mostrarError('Error de inicialización. Por favor recarga la página.');
+    return;
+  }
+  
   // Verificar sesión
+  console.log('🔐 [MESSAGES] Verificando sesión...');
   if (!auth.protegerPagina()) {
+    console.log('❌ [MESSAGES] No hay sesión activa, redirigiendo...');
     return;
   }
   
@@ -21,8 +32,14 @@ window.addEventListener('DOMContentLoaded', function() {
   usuarioActual = auth.obtenerUsuarioActual();
   window.usuarioActual = usuarioActual;
   
+  console.log('✅ [MESSAGES] Usuario autenticado:', usuarioActual ? usuarioActual.nombre : 'null');
+  
   if (usuarioActual) {
+    console.log('🚀 [MESSAGES] Inicializando página...');
     inicializarPagina();
+  } else {
+    console.error('❌ [MESSAGES] Error: No se pudo obtener el usuario actual');
+    mostrarError('Error al cargar usuario. Por favor inicia sesión nuevamente.');
   }
 });
 
@@ -166,17 +183,44 @@ function configurarEventListeners() {
 
 // ========== CARGAR CONVERSACIONES ==========
 async function cargarConversaciones() {
+  console.log('📥 [MESSAGES] Iniciando carga de conversaciones...');
   const conversationsList = document.getElementById('conversationsList');
   const noConversations = document.getElementById('noConversations');
   
-  if (!conversationsList) return;
+  if (!conversationsList) {
+    console.error('❌ [MESSAGES] Error: No se encontró el elemento conversationsList');
+    return;
+  }
+  
+  // Mostrar indicador de carga
+  conversationsList.innerHTML = `
+    <div class="loading-conversations">
+      <div class="spinner-small"></div>
+      <p>Cargando conversaciones...</p>
+    </div>
+  `;
   
   try {
-    // Obtener todos los mensajes
-    const response = await fetch("https://laburitoya-6e55d-default-rtdb.firebaseio.com/mensajes.json");
+    console.log('🌐 [MESSAGES] Consultando Firebase...');
+    
+    // Agregar timeout para detectar problemas de conexión
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 segundos timeout
+    
+    const response = await fetch("https://laburitoya-6e55d-default-rtdb.firebaseio.com/mensajes.json", {
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+    
+    if (!response.ok) {
+      throw new Error(`Error HTTP: ${response.status}`);
+    }
+    
     const data = await response.json();
+    console.log('📊 [MESSAGES] Datos recibidos de Firebase:', data ? 'Sí' : 'No');
     
     if (!data) {
+      console.log('ℹ️ [MESSAGES] No hay mensajes en la base de datos');
       conversationsList.innerHTML = '';
       if (noConversations) noConversations.style.display = 'block';
       return;
@@ -212,6 +256,7 @@ async function cargarConversaciones() {
     }
     
     if (Object.keys(conversaciones).length === 0) {
+      console.log('ℹ️ [MESSAGES] No hay conversaciones para este usuario');
       conversationsList.innerHTML = '';
       if (noConversations) noConversations.style.display = 'block';
       // Actualizar contador a 0
@@ -219,6 +264,7 @@ async function cargarConversaciones() {
       return;
     }
     
+    console.log(`✅ [MESSAGES] Se encontraron ${Object.keys(conversaciones).length} conversaciones`);
     if (noConversations) noConversations.style.display = 'none';
     
     // Ordenar conversaciones por fecha del último mensaje
@@ -227,26 +273,49 @@ async function cargarConversaciones() {
     });
     
     // Renderizar conversaciones
+    console.log('🎨 [MESSAGES] Renderizando conversaciones...');
     conversationsList.innerHTML = '';
     
     // Obtener todos los usuarios en paralelo para mejorar rendimiento
+    console.log('👥 [MESSAGES] Obteniendo datos de usuarios...');
     const usuariosPromises = conversacionesOrdenadas.map(([userId]) => obtenerUsuario(userId));
     const usuarios = await Promise.all(usuariosPromises);
     
+    let conversacionesRenderizadas = 0;
     conversacionesOrdenadas.forEach(([userId, conv], index) => {
       const usuario = usuarios[index];
       if (usuario) {
         const conversationElement = crearElementoConversacion(userId, usuario, conv);
         conversationsList.appendChild(conversationElement);
+        conversacionesRenderizadas++;
+      } else {
+        console.warn(`⚠️ [MESSAGES] No se pudo obtener datos del usuario ${userId}`);
       }
     });
+    
+    console.log(`✅ [MESSAGES] ${conversacionesRenderizadas} conversaciones renderizadas exitosamente`);
     
     // Actualizar contador de notificaciones después de renderizar
     actualizarContadorNotificaciones();
     
   } catch (error) {
-    console.error('Error al cargar conversaciones:', error);
-    conversationsList.innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">Error al cargar conversaciones</p>';
+    console.error('❌ [MESSAGES] Error al cargar conversaciones:', error);
+    
+    let mensajeError = 'Error al cargar conversaciones';
+    if (error.name === 'AbortError') {
+      mensajeError = 'Tiempo de espera agotado. Verifica tu conexión a internet.';
+    } else if (error.message.includes('HTTP')) {
+      mensajeError = 'Error de conexión con el servidor. Por favor intenta de nuevo.';
+    }
+    
+    conversationsList.innerHTML = `
+      <div style="padding: 20px; text-align: center;">
+        <p style="color: #d32f2f; margin-bottom: 10px;">❌ ${mensajeError}</p>
+        <button onclick="window.cargarConversaciones()" style="padding: 8px 16px; background: #1976d2; color: white; border: none; border-radius: 4px; cursor: pointer;">
+          🔄 Reintentar
+        </button>
+      </div>
+    `;
   }
 }
 
@@ -590,11 +659,14 @@ async function obtenerUsuario(userId) {
     const response = await fetch(`https://laburitoya-6e55d-default-rtdb.firebaseio.com/usuarios/${userId}.json`);
     if (response.ok) {
       const data = await response.json();
-      return data;
+      if (data) {
+        return { id: userId, ...data };
+      }
     }
+    console.warn(`⚠️ [MESSAGES] No se encontró usuario con ID: ${userId}`);
     return null;
   } catch (error) {
-    console.error('Error al obtener usuario:', error);
+    console.error(`❌ [MESSAGES] Error al obtener usuario ${userId}:`, error);
     return null;
   }
 }
@@ -700,9 +772,40 @@ async function actualizarContadorNotificaciones() {
   }
 }
 
+// ========== FUNCIÓN DE DIAGNÓSTICO ==========
+function diagnosticarProblemas() {
+  console.log('🔍 [DIAGNÓSTICO] Iniciando diagnóstico...');
+  console.log('1. Usuario actual:', usuarioActual);
+  console.log('2. Auth disponible:', !!window.auth);
+  console.log('3. Conversación activa:', conversacionActiva);
+  console.log('4. Elemento conversationsList:', !!document.getElementById('conversationsList'));
+  console.log('5. Elemento chatMessages:', !!document.getElementById('chatMessages'));
+  console.log('6. LocalStorage currentUser:', localStorage.getItem('usuarioActual'));
+}
+
+// Exponer función de diagnóstico globalmente
+window.diagnosticarMensajes = diagnosticarProblemas;
+
+// ========== FUNCIÓN PARA MOSTRAR ERRORES ==========
+function mostrarError(mensaje) {
+  const conversationsList = document.getElementById('conversationsList');
+  if (conversationsList) {
+    conversationsList.innerHTML = `
+      <div style="padding: 20px; text-align: center;">
+        <p style="color: #d32f2f; margin-bottom: 10px;">❌ ${mensaje}</p>
+        <button onclick="location.reload()" style="padding: 8px 16px; background: #1976d2; color: white; border: none; border-radius: 4px; cursor: pointer;">
+          🔄 Recargar página
+        </button>
+      </div>
+    `;
+  }
+}
+
 // Limpiar intervalo al salir de la página
 window.addEventListener('beforeunload', function() {
   if (intervalActualizacion) {
     clearInterval(intervalActualizacion);
   }
 });
+
+console.log('✅ [MESSAGES] Script de mensajes cargado correctamente');
