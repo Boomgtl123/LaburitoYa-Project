@@ -166,6 +166,7 @@
       <div class="chat-active" id="chatActive" style="display: none;">
         <!-- Header del chat -->
         <div class="chat-header">
+          <button class="btn-back-mobile" id="btnBackMobile" style="display: none;">←</button>
           <div class="chat-user-info">
             <img src="https://via.placeholder.com/40" alt="Usuario" class="chat-avatar" id="chatAvatar" />
             <div class="chat-user-details">
@@ -370,6 +371,35 @@
           navPerfil.classList.remove('active');
         }
       });
+      
+      // Botón volver en móvil para mensajes
+      const btnBackMobile = document.getElementById('btnBackMobile');
+      if (btnBackMobile) {
+        // Mostrar botón solo en móvil
+        function updateBackButtonVisibility() {
+          if (window.innerWidth <= 768) {
+            btnBackMobile.style.display = 'flex';
+          } else {
+            btnBackMobile.style.display = 'none';
+          }
+        }
+        
+        updateBackButtonVisibility();
+        window.addEventListener('resize', updateBackButtonVisibility);
+        
+        btnBackMobile.addEventListener('click', function() {
+          const chatArea = document.querySelector('.chat-area');
+          const conversationsSidebar = document.querySelector('.conversations-sidebar');
+          const chatEmpty = document.getElementById('chatEmpty');
+          const chatActive = document.getElementById('chatActive');
+          
+          if (chatEmpty) chatEmpty.style.display = 'flex';
+          if (chatActive) chatActive.style.display = 'none';
+          
+          if (chatArea) chatArea.classList.remove('mobile-show');
+          if (conversationsSidebar) conversationsSidebar.classList.remove('mobile-hide');
+        });
+      }
     });
   </script>
 </body>

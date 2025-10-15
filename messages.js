@@ -2,6 +2,7 @@
 let usuarioActual = null;
 let conversacionActiva = null;
 let intervalActualizacion = null;
+let mensajesNoLeidos = {};
 
 // ========== PROTEGER PÁGINA Y CARGAR USUARIO ==========
 window.addEventListener('DOMContentLoaded', function() {
@@ -242,7 +243,18 @@ function crearElementoConversacion(userId, usuario, conversacion) {
   const esEnviado = ultimoMensaje.de === usuarioActual.id;
   const textoMensaje = esEnviado ? `Tú: ${ultimoMensaje.mensaje}` : ultimoMensaje.mensaje;
   
+  // Contar mensajes no leídos
+  const noLeidos = conversacion.mensajes.filter(m => 
+    m.para === usuarioActual.id && !m.leido
+  ).length;
+  
+  if (noLeidos > 0) {
+    div.classList.add('unread');
+    mensajesNoLeidos[userId] = noLeidos;
+  }
+  
   const tiempo = calcularTiempoTranscurrido(ultimoMensaje.fecha);
+  const badgeNoLeidos = noLeidos > 0 ? `<span class="unread-badge">${noLeidos}</span>` : '';
   
   div.innerHTML = `
     <img src="${usuario.foto || 'https://via.placeholder.com/48'}" alt="${usuario.nombre}" class="conversation-avatar" />
@@ -251,6 +263,7 @@ function crearElementoConversacion(userId, usuario, conversacion) {
       <p class="conversation-last-message">${textoMensaje}</p>
     </div>
     <span class="conversation-time">${tiempo}</span>
+    ${badgeNoLeidos}
   `;
   
   div.addEventListener('click', function() {
@@ -264,12 +277,23 @@ function crearElementoConversacion(userId, usuario, conversacion) {
 async function abrirConversacion(userId, usuario) {
   conversacionActiva = userId;
   
+  // Marcar mensajes como leídos
+  await marcarMensajesComoLeidos(userId);
+  
   // Actualizar UI
   const chatEmpty = document.getElementById('chatEmpty');
   const chatActive = document.getElementById('chatActive');
+  const chatArea = document.querySelector('.chat-area');
+  const conversationsSidebar = document.querySelector('.conversations-sidebar');
   
   if (chatEmpty) chatEmpty.style.display = 'none';
   if (chatActive) chatActive.style.display = 'flex';
+  
+  // En móvil, mostrar chat y ocultar sidebar
+  if (window.innerWidth <= 768) {
+    if (chatArea) chatArea.classList.add('mobile-show');
+    if (conversationsSidebar) conversationsSidebar.classList.add('mobile-hide');
+  }
   
   // Actualizar header del chat
   const chatAvatar = document.getElementById('chatAvatar');
@@ -287,7 +311,7 @@ async function abrirConversacion(userId, usuario) {
   
   const conversationItems = document.querySelectorAll('.conversation-item');
   conversationItems.forEach(item => {
-    if (item.querySelector('.conversation-name').textContent === usuario.nombre) {
+    if (item.querySelector('.conversation-name').textContent.includes(usuario.nombre)) {
       item.classList.add('active');
     }
   });
@@ -300,6 +324,9 @@ async function abrirConversacion(userId, usuario) {
   if (messageInput) {
     messageInput.focus();
   }
+  
+  // Actualizar contador de notificaciones
+  await actualizarContadorNotificaciones();
 }
 
 // ========== INICIAR CONVERSACIÓN (desde publicación) ==========
@@ -382,11 +409,16 @@ function crearElementoMensaje(mensaje) {
   const avatar = esEnviado ? usuarioActual.foto : 'https://via.placeholder.com/32';
   const tiempo = new Date(mensaje.fecha).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
   
+  // Indicador de visto (solo para mensajes enviados)
+  const vistoIndicador = esEnviado ? 
+    `<span class="message-read-indicator ${mensaje.leido ? '' : 'unread'}">${mensaje.leido ? '✓✓' : '✓'}</span>` : 
+    '';
+  
   div.innerHTML = `
     <img src="${avatar || 'https://via.placeholder.com/32'}" alt="Avatar" class="message-avatar" />
     <div class="message-content">
       <div class="message-bubble">${mensaje.mensaje}</div>
-      <span class="message-time">${tiempo}</span>
+      <span class="message-time">${tiempo} ${vistoIndicador}</span>
     </div>
   `;
   
@@ -408,7 +440,8 @@ async function enviarMensaje(e) {
     de: usuarioActual.id,
     para: conversacionActiva,
     mensaje: mensaje,
-    fecha: new Date().toISOString()
+    fecha: new Date().toISOString(),
+    leido: false
   };
   
   try {
@@ -445,9 +478,17 @@ function cerrarChat() {
   
   const chatEmpty = document.getElementById('chatEmpty');
   const chatActive = document.getElementById('chatActive');
+  const chatArea = document.querySelector('.chat-area');
+  const conversationsSidebar = document.querySelector('.conversations-sidebar');
   
   if (chatEmpty) chatEmpty.style.display = 'flex';
   if (chatActive) chatActive.style.display = 'none';
+  
+  // En móvil, ocultar chat y mostrar sidebar
+  if (window.innerWidth <= 768) {
+    if (chatArea) chatArea.classList.remove('mobile-show');
+    if (conversationsSidebar) conversationsSidebar.classList.remove('mobile-hide');
+  }
   
   // Quitar active de conversaciones
   document.querySelectorAll('.conversation-item').forEach(item => {
@@ -515,6 +556,50 @@ function formatearFecha(fecha) {
     return 'Ayer';
   } else {
     return fechaMensaje.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+  }
+}
+
+// ========== MARCAR MENSAJES COMO LEÍDOS ==========
+async function marcarMensajesComoLeidos(userId) {
+  try {
+    const response = await fetch("https://laburitoya-6e55d-default-rtdb.firebaseio.com/mensajes.json");
+    const data = await response.json();
+    
+    if (!data) return;
+    
+    const updates = {};
+    
+    for (const id in data) {
+      const mensaje = data[id];
+      // Marcar como leído si es para el usuario actual y viene del otro usuario
+      if (mensaje.para === usuarioActual.id && mensaje.de === userId && !mensaje.leido) {
+        updates[`/mensajes/${id}/leido`] = true;
+      }
+    }
+    
+    if (Object.keys(updates).length > 0) {
+      await fetch("https://laburitoya-6e55d-default-rtdb.firebaseio.com/.json", {
+        method: "PATCH",
+        body: JSON.stringify(updates)
+      });
+    }
+  } catch (error) {
+    console.error('Error al marcar mensajes como leídos:', error);
+  }
+}
+
+// ========== ACTUALIZAR CONTADOR DE NOTIFICACIONES ==========
+async function actualizarContadorNotificaciones() {
+  const totalNoLeidos = Object.values(mensajesNoLeidos).reduce((sum, count) => sum + count, 0);
+  
+  const notificationsBadge = document.getElementById('notificationsBadge');
+  if (notificationsBadge) {
+    if (totalNoLeidos > 0) {
+      notificationsBadge.textContent = totalNoLeidos;
+      notificationsBadge.style.display = 'flex';
+    } else {
+      notificationsBadge.style.display = 'none';
+    }
   }
 }
 

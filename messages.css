@@ -375,14 +375,30 @@
   font-size: 11px;
   color: #666666;
   padding: 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .message-item.sent .message-time {
   text-align: right;
+  justify-content: flex-end;
 }
 
 .message-item.received .message-time {
   text-align: left;
+  justify-content: flex-start;
+}
+
+/* Indicador de visto */
+.message-read-indicator {
+  font-size: 10px;
+  color: #10b981;
+  font-weight: bold;
+}
+
+.message-read-indicator.unread {
+  color: #666666;
 }
 
 .message-date-divider {
@@ -577,12 +593,12 @@
     display: none;
   }
 
-  /* Chat activo en móvil */
-  .chat-active {
-    display: none !important;
+  /* Chat activo en móvil - CORREGIDO */
+  .chat-area {
+    display: none;
   }
   
-  .chat-active.mobile-show {
+  .chat-area.mobile-show {
     display: flex !important;
     position: fixed;
     top: 52px;
@@ -591,6 +607,10 @@
     bottom: 0;
     z-index: 1000;
     background-color: #ffffff;
+  }
+  
+  .chat-active {
+    display: flex !important;
   }
 
   /* Ajustes de mensajes en móvil */
