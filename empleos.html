@@ -6,6 +6,7 @@
   <title>Empleos - LaburitoYa</title>
   <link rel="stylesheet" href="home.css" />
   <link rel="stylesheet" href="home-responsive-additions.css" />
+  <link rel="stylesheet" href="mobile-avatar-menu.css" />
   <style>
     .empleos-container {
       max-width: 1128px;
@@ -330,8 +331,41 @@
             </a>
           </div>
         </div>
-        <div class="nav-btn nav-avatar-btn" id="navPerfil">
-          <img src="https://via.placeholder.com/40" alt="Perfil" class="nav-avatar" id="navAvatar" onclick="window.location.href='profile.html'" style="cursor: pointer;" />
+        <div class="nav-btn nav-dropdown nav-avatar-btn" id="navPerfil">
+          <img src="https://via.placeholder.com/40" alt="Perfil" class="nav-avatar" id="navAvatar" style="cursor: pointer;" />
+          <!-- Dropdown del avatar (visible en móvil) -->
+          <div class="dropdown-menu dropdown-avatar">
+            <a href="profile.html" class="dropdown-item">
+              <span>👤</span> Ver perfil
+            </a>
+            <div class="dropdown-divider"></div>
+            <div class="search-box-dropdown">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="searchInputAvatar" placeholder="Buscar empleos, personas..." />
+            </div>
+            <div class="search-results-dropdown" id="searchResultsDropdownAvatar" style="display: none;"></div>
+            <div class="dropdown-divider"></div>
+            <a href="home.html" class="dropdown-item">
+              <span>🏠</span> Inicio
+            </a>
+            <a href="empleos.html" class="dropdown-item">
+              <span>💼</span> Empleos
+            </a>
+            <a href="messages.html" class="dropdown-item">
+              <span>💬</span> Mensajes
+            </a>
+            <div class="dropdown-divider"></div>
+            <a href="quienes-somos.html" class="dropdown-item">
+              <span>👥</span> Quiénes somos
+            </a>
+            <a href="politicas.html" class="dropdown-item">
+              <span>📋</span> Políticas
+            </a>
+            <div class="dropdown-divider"></div>
+            <a href="#" class="dropdown-item" id="btnCerrarSesionAvatar">
+              <span>🚪</span> Cerrar sesión
+            </a>
+          </div>
         </div>
       </div>
     </div>
@@ -406,8 +440,55 @@
       document.body.appendChild(scriptElement);
     });
     
-    // Inicializar dropdown de +INFO
+    // Funcionalidad del menú hamburguesa y avatar
     document.addEventListener('DOMContentLoaded', function() {
+      const hamburger = document.getElementById('navHamburger');
+      const mobileMenu = document.getElementById('mobileMenu');
+      const mobileLogout = document.getElementById('mobileLogout');
+      const navPerfil = document.getElementById('navPerfil');
+      const navAvatar = document.getElementById('navAvatar');
+
+      // Dropdown del avatar
+      if (navPerfil && navAvatar) {
+        navAvatar.addEventListener('click', function(e) {
+          e.stopPropagation();
+          const isMobile = window.innerWidth <= 768;
+          
+          if (isMobile) {
+            // En móvil, toggle dropdown
+            navPerfil.classList.toggle('active');
+          } else {
+            // En desktop, ir a perfil
+            window.location.href = 'profile.html';
+          }
+        });
+      }
+
+      // Cerrar sesión desde el dropdown del avatar
+      const btnCerrarSesionAvatar = document.getElementById('btnCerrarSesionAvatar');
+      if (btnCerrarSesionAvatar) {
+        btnCerrarSesionAvatar.addEventListener('click', function(e) {
+          e.preventDefault();
+          if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
+            if (window.auth) {
+              window.auth.cerrarSesion();
+            } else {
+              localStorage.removeItem('currentUser');
+              window.location.href = 'login.html';
+            }
+          }
+        });
+      }
+
+      // Búsqueda en el dropdown del avatar
+      const searchInputAvatar = document.getElementById('searchInputAvatar');
+      if (searchInputAvatar && window.search) {
+        searchInputAvatar.addEventListener('input', function() {
+          window.search.buscar(this.value, 'searchResultsDropdownAvatar');
+        });
+      }
+
+      // Inicializar dropdown de +INFO
       const navInfo = document.getElementById('navInfo');
       if (navInfo) {
         navInfo.addEventListener('click', function(e) {
@@ -416,20 +497,6 @@
           }
         });
       }
-      
-      // Cerrar dropdown al hacer click fuera
-      document.addEventListener('click', function(e) {
-        const navInfo = document.getElementById('navInfo');
-        if (navInfo && !navInfo.contains(e.target)) {
-          navInfo.classList.remove('active');
-        }
-        
-        // Cerrar dropdown de notificaciones al hacer click fuera
-        const navNotificaciones = document.getElementById('navNotificaciones');
-        if (navNotificaciones && !navNotificaciones.contains(e.target)) {
-          navNotificaciones.classList.remove('active');
-        }
-      });
       
       // Inicializar dropdown de notificaciones
       const navNotificaciones = document.getElementById('navNotificaciones');
@@ -441,11 +508,7 @@
         });
       }
 
-      // Funcionalidad del menú hamburguesa
-      const hamburger = document.getElementById('navHamburger');
-      const mobileMenu = document.getElementById('mobileMenu');
-      const mobileLogout = document.getElementById('mobileLogout');
-
+      // Funcionalidad del menú hamburguesa (solo para desktop)
       if (hamburger && mobileMenu) {
         hamburger.addEventListener('click', function(e) {
           e.stopPropagation();
@@ -478,6 +541,19 @@
           }
         });
       }
+
+      // Cerrar dropdowns al hacer clic fuera
+      document.addEventListener('click', function(e) {
+        if (navInfo && !navInfo.contains(e.target)) {
+          navInfo.classList.remove('active');
+        }
+        if (navNotificaciones && !navNotificaciones.contains(e.target)) {
+          navNotificaciones.classList.remove('active');
+        }
+        if (navPerfil && !navPerfil.contains(e.target)) {
+          navPerfil.classList.remove('active');
+        }
+      });
     });
   </script>
 </body>
