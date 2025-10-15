@@ -6,6 +6,7 @@ let searchTimeout = null;
 function inicializarBusqueda() {
   const usuarioActual = auth.obtenerUsuarioActual();
   
+  // Inicializar búsqueda en dropdown +INFO
   const searchInput = document.getElementById('searchInput');
   if (searchInput) {
     searchInput.addEventListener('input', function(e) {
@@ -19,24 +20,53 @@ function inicializarBusqueda() {
       // Esperar 300ms antes de buscar
       if (query.length >= 2) {
         searchTimeout = setTimeout(() => {
-          realizarBusqueda(query);
+          realizarBusqueda(query, 'searchResultsDropdown');
         }, 300);
       } else {
-        ocultarResultados();
+        ocultarResultados('searchResultsDropdown');
       }
     });
     
     // Cerrar resultados al hacer click fuera
     document.addEventListener('click', function(e) {
       if (!e.target.closest('.search-box-dropdown') && !e.target.closest('#searchResultsDropdown')) {
-        ocultarResultados();
+        ocultarResultados('searchResultsDropdown');
+      }
+    });
+  }
+  
+  // Inicializar búsqueda en dropdown del avatar
+  const searchInputAvatar = document.getElementById('searchInputAvatar');
+  if (searchInputAvatar) {
+    searchInputAvatar.addEventListener('input', function(e) {
+      const query = e.target.value.trim();
+      
+      // Limpiar timeout anterior
+      if (searchTimeout) {
+        clearTimeout(searchTimeout);
+      }
+      
+      // Esperar 300ms antes de buscar
+      if (query.length >= 2) {
+        searchTimeout = setTimeout(() => {
+          realizarBusqueda(query, 'searchResultsDropdownAvatar');
+        }, 300);
+      } else {
+        ocultarResultados('searchResultsDropdownAvatar');
+      }
+    });
+    
+    // Cerrar resultados al hacer click fuera
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.search-box-dropdown') && !e.target.closest('#searchResultsDropdownAvatar')) {
+        ocultarResultados('searchResultsDropdownAvatar');
       }
     });
   }
 }
 
 // ========== REALIZAR BÚSQUEDA ==========
-async function realizarBusqueda(query) {
+async function realizarBusqueda(query, containerId = 'searchResultsDropdown') {
   const queryLower = query.toLowerCase();
   
   try {
@@ -46,10 +76,19 @@ async function realizarBusqueda(query) {
       buscarUsuarios(queryLower)
     ]);
     
-    mostrarResultados(posts, usuarios, query);
+    mostrarResultados(posts, usuarios, query, containerId);
     
   } catch (error) {
     console.error('Error en búsqueda:', error);
+  }
+}
+
+// ========== FUNCIÓN PÚBLICA PARA BUSCAR ==========
+function buscar(query, containerId = 'searchResultsDropdown') {
+  if (query && query.trim().length >= 2) {
+    realizarBusqueda(query.trim(), containerId);
+  } else {
+    ocultarResultados(containerId);
   }
 }
 
@@ -148,12 +187,12 @@ async function buscarUsuarios(query) {
 }
 
 // ========== MOSTRAR RESULTADOS ==========
-function mostrarResultados(posts, usuarios, query) {
+function mostrarResultados(posts, usuarios, query, containerId = 'searchResultsDropdown') {
   // Obtener contenedor de resultados en el dropdown
-  let searchResults = document.getElementById('searchResultsDropdown');
+  let searchResults = document.getElementById(containerId);
   
   if (!searchResults) {
-    console.error('No se encontró el contenedor de resultados');
+    console.error(`No se encontró el contenedor de resultados: ${containerId}`);
     return;
   }
   
@@ -270,8 +309,8 @@ function crearItemPost(post, query) {
 }
 
 // ========== OCULTAR RESULTADOS ==========
-function ocultarResultados() {
-  const searchResults = document.getElementById('searchResultsDropdown');
+function ocultarResultados(containerId = 'searchResultsDropdown') {
+  const searchResults = document.getElementById(containerId);
   if (searchResults) {
     searchResults.style.display = 'none';
     searchResults.innerHTML = '';
@@ -303,6 +342,7 @@ function calcularTiempoTranscurrido(fecha) {
 // Exportar funciones
 window.search = {
   inicializarBusqueda,
+  buscar,
   verTodosResultados
 };
 
