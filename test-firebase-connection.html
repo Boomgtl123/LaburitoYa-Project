@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Conexión Firebase</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .test-box {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .test-box h2 {
+      margin-top: 0;
+      color: #1976d2;
+    }
+    .result {
+      padding: 15px;
+      border-radius: 4px;
+      margin: 10px 0;
+      font-family: monospace;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .success {
+      background: #e8f5e9;
+      color: #2e7d32;
+      border-left: 4px solid #4caf50;
+    }
+    .error {
+      background: #ffebee;
+      color: #c62828;
+      border-left: 4px solid #f44336;
+    }
+    .info {
+      background: #e3f2fd;
+      color: #1565c0;
+      border-left: 4px solid #2196f3;
+    }
+    button {
+      padding: 12px 24px;
+      background: #1976d2;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 5px;
+    }
+    button:hover {
+      background: #1565c0;
+    }
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #1976d2;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-left: 10px;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <h1>🔍 Test de Conexión a Firebase</h1>
+  
+  <div class="test-box">
+    <h2>1. Test de Conexión Básica</h2>
+    <button onclick="testBasicConnection()">🌐 Probar Conexión</button>
+    <div id="basicResult"></div>
+  </div>
+
+  <div class="test-box">
+    <h2>2. Test de Mensajes</h2>
+    <button onclick="testMessages()">💬 Verificar Mensajes</button>
+    <div id="messagesResult"></div>
+  </div>
+
+  <div class="test-box">
+    <h2>3. Test de Usuarios</h2>
+    <button onclick="testUsers()">👥 Verificar Usuarios</button>
+    <div id="usersResult"></div>
+  </div>
+
+  <div class="test-box">
+    <h2>4. Test de Usuario Actual</h2>
+    <button onclick="testCurrentUser()">👤 Verificar Sesión</button>
+    <div id="currentUserResult"></div>
+  </div>
+
+  <div class="test-box">
+    <h2>5. Test Completo de Carga de Conversaciones</h2>
+    <button onclick="testFullConversations()">📱 Simular Carga de Chats</button>
+    <div id="fullTestResult"></div>
+  </div>
+
+  <script>
+    const FIREBASE_URL = "https://laburitoya-6e55d-default-rtdb.firebaseio.com";
+
+    function showLoading(elementId) {
+      const element = document.getElementById(elementId);
+      element.innerHTML = '<div class="result info">⏳ Cargando...<span class="loading"></span></div>';
+    }
+
+    function showResult(elementId, message, type = 'info') {
+      const element = document.getElementById(elementId);
+      element.innerHTML = `<div class="result ${type}">${message}</div>`;
+    }
+
+    async function testBasicConnection() {
+      showLoading('basicResult');
+      try {
+        console.log('🌐 Probando conexión básica a Firebase...');
+        const response = await fetch(`${FIREBASE_URL}/.json`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          showResult('basicResult', 
+            `✅ Conexión exitosa!\n\nStatus: ${response.status}\nDatos recibidos: ${data ? 'Sí' : 'No'}`, 
+            'success'
+          );
+          console.log('✅ Conexión exitosa:', data);
+        } else {
+          showResult('basicResult', 
+            `❌ Error de conexión\n\nStatus: ${response.status}\nStatusText: ${response.statusText}`, 
+            'error'
+          );
+          console.error('❌ Error:', response.status, response.statusText);
+        }
+      } catch (error) {
+        showResult('basicResult', 
+          `❌ Error: ${error.message}\n\nPosibles causas:\n- Sin conexión a internet\n- Firebase bloqueado\n- CORS error`, 
+          'error'
+        );
+        console.error('❌ Error:', error);
+      }
+    }
+
+    async function testMessages() {
+      showLoading('messagesResult');
+      try {
+        console.log('💬 Verificando mensajes en Firebase...');
+        const response = await fetch(`${FIREBASE_URL}/mensajes.json`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          
+          if (data) {
+            const count = Object.keys(data).length;
+            showResult('messagesResult', 
+              `✅ Mensajes encontrados: ${count}\n\nPrimeros IDs:\n${Object.keys(data).slice(0, 5).join('\n')}`, 
+              'success'
+            );
+            console.log('✅ Mensajes:', data);
+          } else {
+            showResult('messagesResult', 
+              `ℹ️ No hay mensajes en la base de datos\n\nEsto es normal si no se han enviado mensajes aún.`, 
+              'info'
+            );
+            console.log('ℹ️ No hay mensajes');
+          }
+        } else {
+          showResult('messagesResult', 
+            `❌ Error al obtener mensajes\n\nStatus: ${response.status}`, 
+            'error'
+          );
+        }
+      } catch (error) {
+        showResult('messagesResult', 
+          `❌ Error: ${error.message}`, 
+          'error'
+        );
+        console.error('❌ Error:', error);
+      }
+    }
+
+    async function testUsers() {
+      showLoading('usersResult');
+      try {
+        console.log('👥 Verificando usuarios en Firebase...');
+        const response = await fetch(`${FIREBASE_URL}/usuarios.json`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          
+          if (data) {
+            const count = Object.keys(data).length;
+            const usersList = Object.entries(data).slice(0, 5).map(([id, user]) => 
+              `- ${user.nombre || 'Sin nombre'} (${user.correo || 'Sin correo'})`
+            ).join('\n');
+            
+            showResult('usersResult', 
+              `✅ Usuarios encontrados: ${count}\n\nPrimeros usuarios:\n${usersList}`, 
+              'success'
+            );
+            console.log('✅ Usuarios:', data);
+          } else {
+            showResult('usersResult', 
+              `❌ No hay usuarios en la base de datos\n\nEsto es un problema crítico.`, 
+              'error'
+            );
+            console.log('❌ No hay usuarios');
+          }
+        } else {
+          showResult('usersResult', 
+            `❌ Error al obtener usuarios\n\nStatus: ${response.status}`, 
+            'error'
+          );
+        }
+      } catch (error) {
+        showResult('usersResult', 
+          `❌ Error: ${error.message}`, 
+          'error'
+        );
+        console.error('❌ Error:', error);
+      }
+    }
+
+    async function testCurrentUser() {
+      showLoading('currentUserResult');
+      try {
+        console.log('👤 Verificando usuario actual...');
+        const currentUser = localStorage.getItem('usuarioActual');
+        
+        if (!currentUser) {
+          showResult('currentUserResult', 
+            `❌ No hay usuario en sesión\n\nDebes iniciar sesión primero en login.html`, 
+            'error'
+          );
+          return;
+        }
+
+        const user = JSON.parse(currentUser);
+        
+        // Verificar que el usuario existe en Firebase
+        const response = await fetch(`${FIREBASE_URL}/usuarios/${user.id}.json`);
+        
+        if (response.ok) {
+          const userData = await response.json();
+          
+          if (userData) {
+            showResult('currentUserResult', 
+              `✅ Usuario autenticado correctamente\n\nID: ${user.id}\nNombre: ${user.nombre}\nCorreo: ${user.correo}\n\n✅ Usuario existe en Firebase`, 
+              'success'
+            );
+            console.log('✅ Usuario actual:', user);
+            console.log('✅ Datos en Firebase:', userData);
+          } else {
+            showResult('currentUserResult', 
+              `⚠️ Usuario en sesión pero NO existe en Firebase\n\nID: ${user.id}\nNombre: ${user.nombre}\n\nEsto puede causar problemas.`, 
+              'error'
+            );
+          }
+        }
+      } catch (error) {
+        showResult('currentUserResult', 
+          `❌ Error: ${error.message}`, 
+          'error'
+        );
+        console.error('❌ Error:', error);
+      }
+    }
+
+    async function testFullConversations() {
+      showLoading('fullTestResult');
+      let log = '';
+      
+      try {
+        log += '🔄 Iniciando simulación de carga de conversaciones...\n\n';
+        
+        // 1. Verificar usuario
+        log += '1️⃣ Verificando usuario actual...\n';
+        const currentUser = localStorage.getItem('usuarioActual');
+        
+        if (!currentUser) {
+          log += '❌ ERROR: No hay usuario en sesión\n';
+          showResult('fullTestResult', log, 'error');
+          return;
+        }
+        
+        const user = JSON.parse(currentUser);
+        log += `✅ Usuario: ${user.nombre} (ID: ${user.id})\n\n`;
+        
+        // 2. Obtener mensajes
+        log += '2️⃣ Obteniendo mensajes de Firebase...\n';
+        const response = await fetch(`${FIREBASE_URL}/mensajes.json`);
+        
+        if (!response.ok) {
+          log += `❌ ERROR: Status ${response.status}\n`;
+          showResult('fullTestResult', log, 'error');
+          return;
+        }
+        
+        const data = await response.json();
+        
+        if (!data) {
+          log += '❌ No hay mensajes en la base de datos\n';
+          log += 'ℹ️ Esto es normal si no has enviado mensajes aún\n';
+          showResult('fullTestResult', log, 'info');
+          return;
+        }
+        
+        log += `✅ Mensajes obtenidos: ${Object.keys(data).length}\n\n`;
+        
+        // 3. Filtrar conversaciones del usuario
+        log += '3️⃣ Filtrando conversaciones del usuario...\n';
+        const conversaciones = {};
+        
+        for (const id in data) {
+          const mensaje = data[id];
+          
+          if (mensaje.de === user.id || mensaje.para === user.id) {
+            const otroUsuarioId = mensaje.de === user.id ? mensaje.para : mensaje.de;
+            
+            if (!conversaciones[otroUsuarioId]) {
+              conversaciones[otroUsuarioId] = {
+                ultimoMensaje: mensaje,
+                mensajes: []
+              };
+            }
+            
+            conversaciones[otroUsuarioId].mensajes.push(mensaje);
+            
+            if (new Date(mensaje.fecha) > new Date(conversaciones[otroUsuarioId].ultimoMensaje.fecha)) {
+              conversaciones[otroUsuarioId].ultimoMensaje = mensaje;
+            }
+          }
+        }
+        
+        const numConversaciones = Object.keys(conversaciones).length;
+        log += `✅ Conversaciones encontradas: ${numConversaciones}\n\n`;
+        
+        if (numConversaciones === 0) {
+          log += '❌ No tienes conversaciones\n';
+          log += 'ℹ️ Envía un mensaje desde una publicación para crear una conversación\n';
+          showResult('fullTestResult', log, 'info');
+          return;
+        }
+        
+        // 4. Obtener datos de usuarios
+        log += '4️⃣ Obteniendo datos de usuarios...\n';
+        for (const userId in conversaciones) {
+          const userResponse = await fetch(`${FIREBASE_URL}/usuarios/${userId}.json`);
+          if (userResponse.ok) {
+            const userData = await userResponse.json();
+            if (userData) {
+              log += `✅ Usuario: ${userData.nombre}\n`;
+            } else {
+              log += `⚠️ Usuario ${userId} no encontrado\n`;
+            }
+          }
+        }
+        
+        log += '\n✅ SIMULACIÓN COMPLETADA EXITOSAMENTE\n';
+        log += `\n📊 Resumen:\n`;
+        log += `- Mensajes totales: ${Object.keys(data).length}\n`;
+        log += `- Tus conversaciones: ${numConversaciones}\n`;
+        log += `\n✅ Los chats DEBERÍAN cargarse correctamente`;
+        
+        showResult('fullTestResult', log, 'success');
+        console.log('✅ Simulación completada');
+        
+      } catch (error) {
+        log += `\n❌ ERROR: ${error.message}\n`;
+        log += `\nStack: ${error.stack}`;
+        showResult('fullTestResult', log, 'error');
+        console.error('❌ Error en simulación:', error);
+      }
+    }
+
+    // Auto-ejecutar test básico al cargar
+    window.addEventListener('DOMContentLoaded', () => {
+      console.log('🚀 Test de Firebase cargado');
+      testBasicConnection();
+    });
+  </script>
+</body>
+</html>
