@@ -212,13 +212,17 @@ async function cargarConversaciones() {
     // Renderizar conversaciones
     conversationsList.innerHTML = '';
     
-    for (const [userId, conv] of conversacionesOrdenadas) {
-      const usuario = await obtenerUsuario(userId);
+    // Obtener todos los usuarios en paralelo para mejorar rendimiento
+    const usuariosPromises = conversacionesOrdenadas.map(([userId]) => obtenerUsuario(userId));
+    const usuarios = await Promise.all(usuariosPromises);
+    
+    conversacionesOrdenadas.forEach(([userId, conv], index) => {
+      const usuario = usuarios[index];
       if (usuario) {
         const conversationElement = crearElementoConversacion(userId, usuario, conv);
         conversationsList.appendChild(conversationElement);
       }
-    }
+    });
     
   } catch (error) {
     console.error('Error al cargar conversaciones:', error);
