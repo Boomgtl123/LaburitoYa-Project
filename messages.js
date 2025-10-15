@@ -45,17 +45,19 @@ window.addEventListener('DOMContentLoaded', function() {
 
 // ========== INICIALIZAR PÁGINA ==========
 function inicializarPagina() {
+  console.log('🔧 [MESSAGES] Iniciando configuración de página...');
+  
   // Exponer funciones globalmente
   window.cargarMensajes = cargarMensajes;
   window.cargarConversaciones = cargarConversaciones;
+  console.log('✅ [MESSAGES] Funciones expuestas globalmente');
   
   // Actualizar navbar
+  console.log('🎨 [MESSAGES] Actualizando navbar...');
   actualizarNavbar();
   
-  // Cargar conversaciones
-  cargarConversaciones();
-  
   // Event listeners
+  console.log('🎯 [MESSAGES] Configurando event listeners...');
   configurarEventListeners();
   
   // Verificar si hay un usuario específico en la URL
@@ -63,8 +65,15 @@ function inicializarPagina() {
   const userId = urlParams.get('user');
   
   if (userId && userId !== usuarioActual.id) {
+    console.log('👤 [MESSAGES] Usuario específico en URL:', userId);
     iniciarConversacion(userId);
   }
+  
+  // Cargar conversaciones - IMPORTANTE: Esto debe ejecutarse
+  console.log('📥 [MESSAGES] Llamando a cargarConversaciones()...');
+  cargarConversaciones().catch(error => {
+    console.error('❌ [MESSAGES] Error crítico al cargar conversaciones:', error);
+  });
   
   // Actualizar conversaciones cada 15 segundos (reducido para evitar refresh constante)
   intervalActualizacion = setInterval(() => {
@@ -73,6 +82,8 @@ function inicializarPagina() {
     }
     cargarConversaciones(); // Ya incluye actualización del contador
   }, 15000);
+  
+  console.log('✅ [MESSAGES] Página inicializada correctamente');
 }
 
 // ========== ACTUALIZAR NAVBAR ==========
@@ -192,6 +203,20 @@ async function cargarConversaciones() {
     return;
   }
   
+  // Verificar que el usuario esté autenticado
+  if (!usuarioActual || !usuarioActual.id) {
+    console.error('❌ [MESSAGES] Error: No hay usuario autenticado');
+    conversationsList.innerHTML = `
+      <div style="padding: 20px; text-align: center;">
+        <p style="color: #d32f2f; margin-bottom: 10px;">❌ No hay sesión activa</p>
+        <button onclick="window.location.href='login.html'" style="padding: 8px 16px; background: #1976d2; color: white; border: none; border-radius: 4px; cursor: pointer;">
+          🔐 Iniciar Sesión
+        </button>
+      </div>
+    `;
+    return;
+  }
+  
   // Mostrar indicador de carga
   conversationsList.innerHTML = `
     <div class="loading-conversations">
@@ -202,15 +227,21 @@ async function cargarConversaciones() {
   
   try {
     console.log('🌐 [MESSAGES] Consultando Firebase...');
+    console.log('👤 [MESSAGES] Usuario ID:', usuarioActual.id);
     
     // Agregar timeout para detectar problemas de conexión
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 segundos timeout
+    const timeoutId = setTimeout(() => {
+      console.error('⏱️ [MESSAGES] Timeout: La petición tardó más de 10 segundos');
+      controller.abort();
+    }, 10000); // 10 segundos timeout
     
     const response = await fetch("https://laburitoya-6e55d-default-rtdb.firebaseio.com/mensajes.json", {
       signal: controller.signal
     });
     clearTimeout(timeoutId);
+    
+    console.log('📡 [MESSAGES] Respuesta recibida. Status:', response.status);
     
     if (!response.ok) {
       throw new Error(`Error HTTP: ${response.status}`);
