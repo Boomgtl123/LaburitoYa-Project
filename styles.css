@@ -148,28 +148,55 @@ body:has(form#registerForm) {
 
 /* ========== LOGIN (OVERRIDES) ========== */
 /* Hacer la tarjeta de inicio de sesión centrada, responsive y con color #0a66c2 */
+body:has(form#loginForm) {
+  background: var(--background-gray);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
 body:has(form#loginForm) .container {
   background: var(--linkedin-blue);
   color: var(--white);
   border: none;
+  max-width: 400px;
+  width: 100%;
+  padding: 40px;
+  border-radius: 8px;
+  box-shadow: var(--shadow-md);
+}
+
+body:has(form#loginForm) .logo {
+  width: 100%;
+  max-width: 200px;
+  margin: 0 auto 30px;
+  display: block;
+  filter: brightness(0) invert(1);
 }
 
 body:has(form#loginForm) h1 {
   color: var(--white);
+  text-align: center;
+  margin-bottom: 24px;
 }
 
 body:has(form#loginForm) p {
   color: var(--white);
+  text-align: center;
 }
 
 body:has(form#loginForm) a {
   color: #ffffff;
   text-decoration: underline;
+  font-weight: 600;
 }
 
 body:has(form#loginForm) button[type="submit"] {
   background-color: #ffffff;
   color: var(--linkedin-blue);
+  font-weight: 600;
 }
 
 body:has(form#loginForm) button[type="submit"]:hover {
@@ -177,8 +204,18 @@ body:has(form#loginForm) button[type="submit"]:hover {
   color: var(--linkedin-blue-hover);
 }
 
-/* Logo en páginas de auth */
-.container:not(.index)::before {
+body:has(form#loginForm) input {
+  background-color: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+body:has(form#loginForm) input:focus {
+  background-color: #ffffff;
+  border-color: #ffffff;
+}
+
+/* Logo en páginas de auth (excepto login que ya tiene logo en HTML) */
+.container:not(.index):not(:has(form#loginForm))::before {
   content: '';
   display: block;
   width: 120px;
@@ -338,6 +375,14 @@ button[type="submit"]:active {
     padding: 30px 24px;
   }
 
+  body:has(form#loginForm) .container {
+    padding: 30px 24px;
+  }
+
+  body:has(form#loginForm) .logo {
+    max-width: 180px;
+  }
+
   h1 {
     font-size: 24px;
   }
@@ -354,6 +399,24 @@ button[type="submit"]:active {
 
   .container:not(.index) {
     padding: 24px 20px;
+  }
+
+  body:has(form#loginForm) {
+    padding: 16px;
+  }
+
+  body:has(form#loginForm) .container {
+    padding: 24px 20px;
+  }
+
+  body:has(form#loginForm) .logo {
+    max-width: 150px;
+    margin-bottom: 20px;
+  }
+
+  body:has(form#loginForm) h1 {
+    font-size: 22px;
+    margin-bottom: 20px;
   }
 
   .btn {
