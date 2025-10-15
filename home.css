@@ -12,6 +12,13 @@ body {
   line-height: 1.5;
 }
 
+/* ========== VERIFIED BADGE (GLOBAL FOR APP PAGES USING home.css) ========== */
+.verified-badge {
+  color: #0a66c2 !important;
+  font-weight: bold;
+  margin-left: 4px;
+}
+
 /* ========== NAVBAR ========== */
 .navbar {
   background: linear-gradient(135deg, #4a5fd9 0%, #5b6fe0 100%);

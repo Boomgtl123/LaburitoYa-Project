@@ -642,7 +642,7 @@ async function mostrarListaUsuarios() {
           <div style="display: flex; align-items: center; gap: 10px;">
             <img src="${usuario.foto || 'https://via.placeholder.com/32'}" style="width: 32px; height: 32px; border-radius: 50%;" />
             <div>
-              <strong>${usuario.nombre}</strong>${esVerificado ? ' <span style="color: #1DA1F2;">✓</span>' : ''}
+              <strong>${usuario.nombre}</strong>${esVerificado ? ' <span class="verified-badge">✓</span>' : ''}
               <br><small style="color: #666;">${usuario.correo}</small>
             </div>
           </div>
