@@ -1748,11 +1748,151 @@ body {
   background-color: rgba(255, 255, 255, 0.3);
 }
 
+/* ========== DROPDOWN DEL AVATAR (MÓVIL) ========== */
+.dropdown-avatar {
+  display: none;
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  min-width: 280px;
+  max-width: 320px;
+  z-index: 1000;
+  padding: 8px 0;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.nav-dropdown.active .dropdown-avatar {
+  display: block;
+}
+
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 1.75rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  min-width: var(--touch-target);
+  min-height: var(--touch-target);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  line-height: 1;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-hamburger:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: scale(1.05);
+}
+
+.nav-hamburger:active {
+  transform: scale(0.95);
+}
+
+/* Menú móvil desplegable con animación suave */
+.mobile-menu {
+  display: none;
+=======
 /* ========== RESPONSIVE ========== */
 
-/* ========== MENÚ HAMBURGUESA (MÓVIL) ========== */
+/* Menú móvil desplegable - ELIMINADO (ahora se usa dropdown del avatar) */
+.mobile-menu {
+  display: none !important;
+=======
+/* ========== MENÚ HAMBURGUESA (MÓVIL) - ELIMINADO ========== */
 .nav-hamburger {
-  display: none; /* Oculto por defecto en desktop */
+  display: none !important; /* Oculto permanentemente */
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 1.75rem;
+=======
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 1.75rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  min-width: var(--touch-target);
+  min-height: var(--touch-target);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  line-height: 1;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-hamburger:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: scale(1.05);
+}
+
+.nav-hamburger:active {
+  transform: scale(0.95);
+}
+
+/* Menú móvil desplegable con animación suave */
+.mobile-menu {
+  display: none;
+=======
+/* Campanita de notificaciones en móvil */
+.nav-notifications-mobile .nav-icon {
+  font-size: 24px;
+  color: white;
+}
+
+/* ========== RESPONSIVE ========== */
+
+/* Menú móvil desplegable con animación suave */
+.mobile-menu {
+  display: none;
+=======
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 1.75rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  min-width: var(--touch-target);
+  min-height: var(--touch-target);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  line-height: 1;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-hamburger:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: scale(1.05);
+}
+
+.nav-hamburger:active {
+  transform: scale(0.95);
+}
+
+/* Menú móvil desplegable con animación suave */
+.mobile-menu {
+  display: none;
+=======
+/* ========== RESPONSIVE ========== */
+
+/* Menú móvil desplegable - ELIMINADO (ahora se usa dropdown del avatar) */
+.mobile-menu {
+  display: none !important;
+=======
+/* ========== MENÚ HAMBURGUESA (MÓVIL) - ELIMINADO ========== */
+.nav-hamburger {
+  display: none !important; /* Oculto permanentemente */
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 1.75rem;
+=======
   background: transparent;
   border: none;
   color: white;
