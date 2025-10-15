@@ -49,14 +49,13 @@ function inicializarPagina() {
     iniciarConversacion(userId);
   }
   
-  // Actualizar conversaciones cada 10 segundos (reducido para evitar refresh constante)
+  // Actualizar conversaciones cada 15 segundos (reducido para evitar refresh constante)
   intervalActualizacion = setInterval(() => {
     if (conversacionActiva) {
       cargarMensajes(conversacionActiva, true); // true = actualización silenciosa
     }
-    cargarConversaciones();
-    actualizarContadorNotificaciones();
-  }, 10000);
+    cargarConversaciones(); // Ya incluye actualización del contador
+  }, 15000);
 }
 
 // ========== ACTUALIZAR NAVBAR ==========
@@ -183,6 +182,9 @@ async function cargarConversaciones() {
       return;
     }
     
+    // Limpiar contador de mensajes no leídos antes de recalcular
+    mensajesNoLeidos = {};
+    
     // Agrupar mensajes por conversación
     const conversaciones = {};
     
@@ -212,6 +214,8 @@ async function cargarConversaciones() {
     if (Object.keys(conversaciones).length === 0) {
       conversationsList.innerHTML = '';
       if (noConversations) noConversations.style.display = 'block';
+      // Actualizar contador a 0
+      actualizarContadorNotificaciones();
       return;
     }
     
@@ -236,6 +240,9 @@ async function cargarConversaciones() {
         conversationsList.appendChild(conversationElement);
       }
     });
+    
+    // Actualizar contador de notificaciones después de renderizar
+    actualizarContadorNotificaciones();
     
   } catch (error) {
     console.error('Error al cargar conversaciones:', error);
@@ -268,10 +275,18 @@ function crearElementoConversacion(userId, usuario, conversacion) {
   const tiempo = calcularTiempoTranscurrido(ultimoMensaje.fecha);
   const badgeNoLeidos = noLeidos > 0 ? `<span class="unread-badge">${noLeidos}</span>` : '';
   
+  // Renderizar nombre con badge si existe la función
+  let nombreConBadge = usuario.nombre;
+  if (window.auth && typeof window.auth.renderNombreConBadge === 'function') {
+    nombreConBadge = window.auth.renderNombreConBadge(usuario.nombre, usuario);
+  } else if (usuario.verificado) {
+    nombreConBadge = `${usuario.nombre} <span class="verified-badge">✓</span>`;
+  }
+  
   div.innerHTML = `
     <img src="${usuario.foto || 'https://via.placeholder.com/48'}" alt="${usuario.nombre}" class="conversation-avatar" />
     <div class="conversation-info">
-      <p class="conversation-name">${auth.renderNombreConBadge(usuario.nombre, usuario)}</p>
+      <p class="conversation-name">${nombreConBadge}</p>
       <p class="conversation-last-message">${textoMensaje}</p>
     </div>
     <span class="conversation-time">${tiempo}</span>
@@ -314,7 +329,18 @@ async function abrirConversacion(userId, usuario) {
   const chatUserStatus = document.getElementById('chatUserStatus');
   
   if (chatAvatar) chatAvatar.src = usuario.foto || 'https://via.placeholder.com/40';
-  if (chatUserName) chatUserName.innerHTML = auth.renderNombreConBadge(usuario.nombre, usuario);
+  
+  // Renderizar nombre con badge
+  if (chatUserName) {
+    let nombreConBadge = usuario.nombre;
+    if (window.auth && typeof window.auth.renderNombreConBadge === 'function') {
+      nombreConBadge = window.auth.renderNombreConBadge(usuario.nombre, usuario);
+    } else if (usuario.verificado) {
+      nombreConBadge = `${usuario.nombre} <span class="verified-badge">✓</span>`;
+    }
+    chatUserName.innerHTML = nombreConBadge;
+  }
+  
   if (chatUserStatus) chatUserStatus.textContent = usuario.perfil || 'Usuario';
   
   // Actualizar conversaciones activas
