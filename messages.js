@@ -44,13 +44,14 @@ window.addEventListener('DOMContentLoaded', function() {
 });
 
 // ========== INICIALIZAR PÁGINA ==========
-function inicializarPagina() {
+async function inicializarPagina() {
   console.log('🔧 [MESSAGES] Iniciando configuración de página...');
   
-  // Exponer funciones globalmente
+  // Exponer funciones globalmente ANTES de cualquier otra cosa
   window.cargarMensajes = cargarMensajes;
   window.cargarConversaciones = cargarConversaciones;
   console.log('✅ [MESSAGES] Funciones expuestas globalmente');
+  console.log('🔍 [MESSAGES] Tipo de cargarConversaciones:', typeof cargarConversaciones);
   
   // Actualizar navbar
   console.log('🎨 [MESSAGES] Actualizando navbar...');
@@ -71,9 +72,26 @@ function inicializarPagina() {
   
   // Cargar conversaciones - IMPORTANTE: Esto debe ejecutarse
   console.log('📥 [MESSAGES] Llamando a cargarConversaciones()...');
-  cargarConversaciones().catch(error => {
+  console.log('🔍 [MESSAGES] cargarConversaciones es función?', typeof cargarConversaciones === 'function');
+  
+  try {
+    await cargarConversaciones();
+  } catch (error) {
     console.error('❌ [MESSAGES] Error crítico al cargar conversaciones:', error);
-  });
+    // Mostrar error en la UI
+    const conversationsList = document.getElementById('conversationsList');
+    if (conversationsList) {
+      conversationsList.innerHTML = `
+        <div style="padding: 20px; text-align: center;">
+          <p style="color: #d32f2f; margin-bottom: 10px;">❌ Error al cargar conversaciones</p>
+          <p style="font-size: 12px; color: #666;">${error.message}</p>
+          <button onclick="location.reload()" style="padding: 8px 16px; background: #1976d2; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px;">
+            🔄 Recargar
+          </button>
+        </div>
+      `;
+    }
+  }
   
   // Actualizar conversaciones cada 15 segundos (reducido para evitar refresh constante)
   intervalActualizacion = setInterval(() => {
