@@ -144,7 +144,7 @@ async function cargarDatosUsuario() {
     const profileContact = document.getElementById('profileContact');
     
     if (profilePhoto) profilePhoto.src = usuario.foto || DEFAULT_AVATAR;
-    if (profileName) profileName.textContent = usuario.nombre || 'Usuario';
+    if (profileName) profileName.innerHTML = auth.renderNombreConBadge(usuario.nombre || 'Usuario', usuario);
     if (profileType) {
       const perfilTexto = usuario.perfil === 'Trabajador' ? 'Buscando oportunidades laborales' : 'Buscando contratar personal';
       profileType.textContent = perfilTexto;
@@ -492,7 +492,7 @@ function crearItemUsuario(usuario) {
   div.innerHTML = `
     <img src="${usuario.foto || DEFAULT_AVATAR}" alt="${usuario.nombre}" class="follower-avatar" onerror="this.src='${DEFAULT_AVATAR}'" />
     <div class="follower-info">
-      <p class="follower-name">${usuario.nombre}</p>
+      <p class="follower-name">${auth.renderNombreConBadge(usuario.nombre, usuario)}</p>
       <p class="follower-details">${perfilTexto} • ${usuario.zona || 'Ubicación no especificada'}</p>
     </div>
     <a href="messages.html?user=${usuario.id}" class="btn-message-follower">💬 Mensaje</a>

@@ -243,7 +243,7 @@ function crearElementoConversacion(userId, usuario, conversacion) {
   div.innerHTML = `
     <img src="${usuario.foto || 'https://via.placeholder.com/48'}" alt="${usuario.nombre}" class="conversation-avatar" />
     <div class="conversation-info">
-      <p class="conversation-name">${usuario.nombre}</p>
+      <p class="conversation-name">${auth.renderNombreConBadge(usuario.nombre, usuario)}</p>
       <p class="conversation-last-message">${textoMensaje}</p>
     </div>
     <span class="conversation-time">${tiempo}</span>
@@ -273,7 +273,7 @@ async function abrirConversacion(userId, usuario) {
   const chatUserStatus = document.getElementById('chatUserStatus');
   
   if (chatAvatar) chatAvatar.src = usuario.foto || 'https://via.placeholder.com/40';
-  if (chatUserName) chatUserName.textContent = usuario.nombre;
+  if (chatUserName) chatUserName.innerHTML = auth.renderNombreConBadge(usuario.nombre, usuario);
   if (chatUserStatus) chatUserStatus.textContent = usuario.perfil || 'Usuario';
   
   // Actualizar conversaciones activas

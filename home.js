@@ -60,7 +60,7 @@ function actualizarDatosUsuario() {
   const sidebarBio = document.getElementById('sidebarBio');
   
   if (sidebarAvatar) sidebarAvatar.src = usuarioActual.foto || DEFAULT_AVATAR;
-  if (sidebarNombre) sidebarNombre.textContent = usuarioActual.nombre;
+  if (sidebarNombre) sidebarNombre.innerHTML = auth.renderNombreConBadge(usuarioActual.nombre, usuarioActual);
   if (sidebarPerfil) {
     const perfilTexto = usuarioActual.perfil === 'Trabajador' ? 'Buscando oportunidades laborales' : 'Buscando contratar personal';
     sidebarPerfil.textContent = perfilTexto;
@@ -366,6 +366,31 @@ async function cargarPosts() {
 
     todosLosPosts = posts;
     
+    // Construir caché de usuarios (autores y comentaristas) para mostrar badge verificado/CEO
+    try {
+      const userIdsSet = new Set();
+      posts.forEach(p => {
+        if (p.userId) userIdsSet.add(p.userId);
+        if (Array.isArray(p.comentarios)) {
+          p.comentarios.forEach(c => { if (c && c.userId) userIdsSet.add(c.userId); });
+        }
+      });
+      window._usuariosPosts = window._usuariosPosts || {};
+      const ids = Array.from(userIdsSet);
+      await Promise.all(ids.map(async (uid) => {
+        try {
+          const data = await auth.obtenerUsuarioPorId(uid);
+          if (data) {
+            window._usuariosPosts[uid] = { id: uid, ...data };
+          }
+        } catch (e) {
+          console.error('Error al cachear usuario', uid, e);
+        }
+      }));
+    } catch (e) {
+      console.error('Error construyendo caché de usuarios para badges:', e);
+    }
+
     if (posts.length === 0) {
       if (noPostsMessage) {
         noPostsMessage.innerHTML = '<p>📝 No hay publicaciones con este hashtag.</p>';
@@ -502,8 +527,9 @@ function crearElementoPost(post) {
   const likeCount = post.likes ? post.likes.length : 0;
   const commentCount = post.comentarios ? post.comentarios.length : 0;
 
-  // Obtener datos del usuario del post para verificar si está verificado
-  const esVerificado = auth.estaVerificado({ verificado: post.userVerificado });
+  // Obtener usuario del post desde caché (incluye verificado/CEO si está en caché)
+  const usuarioDelPost = (window._usuariosPosts && window._usuariosPosts[post.userId]) || null;
+  const nombreConBadge = auth.renderNombreConBadge(post.userName, usuarioDelPost || { verificado: post.userVerificado });
 
   div.innerHTML = `
     <div class="post-header">
@@ -511,8 +537,7 @@ function crearElementoPost(post) {
       <div class="post-info">
         <div style="display: flex; align-items: center; gap: 8px;">
           <h4 class="post-username" style="cursor: pointer; color: #000000e6; transition: color 0.2s;" onclick="verPerfil('${post.userId}')" onmouseover="this.style.color='#0a66c2'" onmouseout="this.style.color='#000000e6'">
-            ${post.userName}
-            ${esVerificado ? '<span class="verified-badge" style="color: #1DA1F2; margin-left: 4px;">✓</span>' : ''}
+            ${nombreConBadge}
           </h4>
           ${post.userId !== usuarioActual.id ? `
             <button class="btn-follow" data-user-id="${post.userId}" style="padding: 4px 12px; font-size: 13px; border: 1px solid #0a66c2; background: white; color: #0a66c2; border-radius: 16px; cursor: pointer; font-weight: 600; transition: all 0.2s;">
@@ -609,7 +634,7 @@ function renderizarComentarios(comentarios) {
       <div class="comment-item">
         <img src="${comentario.userFoto || DEFAULT_AVATAR}" alt="${comentario.userName}" class="comment-avatar" loading="lazy" onerror="this.src='${DEFAULT_AVATAR}'" />
         <div class="comment-content">
-          <p class="comment-author">${comentario.userName}</p>
+          <p class="comment-author">${auth.renderNombreConBadge(comentario.userName, (window._usuariosPosts && window._usuariosPosts[comentario.userId]) || null)}</p>
           <p class="comment-text">${comentario.texto}</p>
           ${attachmentHTML}
           <span class="comment-time">${calcularTiempoTranscurrido(comentario.fecha)}</span>

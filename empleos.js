@@ -195,7 +195,7 @@ function crearCardEmpleo(empleo, index) {
     <div class="empleo-card-header">
       <img src="${empleo.userFoto || DEFAULT_AVATAR}" alt="${empleo.userName}" class="empleo-avatar" />
       <div class="empleo-info">
-        <h3 class="empleo-empresa">${empleo.userName}</h3>
+        <h3 class="empleo-empresa">${auth.renderNombreConBadge(empleo.userName, { verificado: empleo.userVerificado })}</h3>
         <p class="empleo-tipo">💼 Empleador</p>
         <p class="empleo-ubicacion">
           <span>📍</span>
@@ -232,6 +232,18 @@ function crearCardEmpleo(empleo, index) {
   div.addEventListener('click', function() {
     window.location.href = `home.html?post=${empleo.id}`;
   });
+  
+  // Mejorar badge con datos reales del usuario (CEO o verificado)
+  if (empleo.userId && window.auth && typeof window.auth.getUsuarioPorIdCacheado === 'function') {
+    window.auth.getUsuarioPorIdCacheado(empleo.userId).then(u => {
+      if (u) {
+        const nameEl = div.querySelector('.empleo-empresa');
+        if (nameEl) {
+          nameEl.innerHTML = window.auth.renderNombreConBadge(empleo.userName, u);
+        }
+      }
+    }).catch(() => {});
+  }
   
   return div;
 }

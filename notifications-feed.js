@@ -266,7 +266,7 @@ function crearItemNotificacion(post, tipo) {
     <div class="notification-content-wrapper">
       <p class="notification-title">${title}</p>
       <p class="notification-description">
-        <strong>${post.userName}</strong>: ${contenido}
+        <strong>${auth.renderNombreConBadge(post.userName, { verificado: post.userVerificado })}</strong>: ${contenido}
       </p>
       <div class="notification-meta">
         <span class="notification-time">🕐 ${tiempo}</span>
@@ -275,6 +275,18 @@ function crearItemNotificacion(post, tipo) {
       </div>
     </div>
   `;
+
+  // Mejorar badge con datos reales del usuario (CEO o verificado)
+  if (post.userId && window.auth && typeof window.auth.getUsuarioPorIdCacheado === 'function') {
+    window.auth.getUsuarioPorIdCacheado(post.userId).then(u => {
+      if (u) {
+        const strongEl = div.querySelector('.notification-description strong');
+        if (strongEl) {
+          strongEl.innerHTML = window.auth.renderNombreConBadge(post.userName, u);
+        }
+      }
+    }).catch(() => {});
+  }
   
   div.addEventListener('click', function() {
     window.location.href = `home.html?post=${post.id}`;

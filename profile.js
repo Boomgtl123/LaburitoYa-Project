@@ -151,10 +151,9 @@ function cargarDatosUsuario() {
   const profileLocation = document.getElementById('profileLocation');
   const profileContact = document.getElementById('profileContact');
 
-  // Mostrar badge de verificación si el usuario está verificado
-  const esVerificado = auth.estaVerificado(usuarioActual);
+  // Mostrar badge de verificación o CEO junto al nombre
   if (profileName) {
-    profileName.innerHTML = `${usuarioActual.nombre}${esVerificado ? ' <span style="color: #1DA1F2;">✓</span>' : ''}`;
+    profileName.innerHTML = auth.renderNombreConBadge(usuarioActual.nombre, usuarioActual);
   }
 
   if (profileType) {
@@ -548,7 +547,7 @@ function crearItemUsuario(usuario) {
   div.innerHTML = `
     <img src="${avatar}" alt="${nombre}" class="follower-avatar" onerror="this.src='https://via.placeholder.com/50'" />
     <div class="follower-info">
-      <h4 class="follower-name">${nombre}</h4>
+      <h4 class="follower-name">${auth.renderNombreConBadge(nombre, usuario)}</h4>
       <p class="follower-details">${perfil} • ${zona}</p>
     </div>
     <a href="messages.html?user=${usuario.id}" class="btn-message-follower">

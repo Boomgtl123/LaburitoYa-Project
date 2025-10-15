@@ -209,7 +209,7 @@ function crearItemUsuario(usuario) {
   div.innerHTML = `
     <img src="${usuario.foto || 'https://via.placeholder.com/40'}" alt="${usuario.nombre}" class="search-result-avatar" />
     <div class="search-result-info">
-      <p class="search-result-name">${usuario.nombre}</p>
+      <p class="search-result-name">${auth.renderNombreConBadge(usuario.nombre, usuario)}</p>
       <p class="search-result-subtitle">
         ${usuario.username ? `@${usuario.username} • ` : ''}${usuario.perfil || 'Usuario'}
       </p>
@@ -244,12 +244,24 @@ function crearItemPost(post, query) {
   div.innerHTML = `
     <img src="${post.userFoto || 'https://via.placeholder.com/40'}" alt="${post.userName}" class="search-result-avatar" />
     <div class="search-result-info">
-      <p class="search-result-name">${post.userName}</p>
+      <p class="search-result-name">${auth.renderNombreConBadge(post.userName, { verificado: post.userVerificado })}</p>
       <p class="search-result-content">${contenidoResaltado}</p>
       <p class="search-result-time">${tiempo}</p>
     </div>
   `;
   
+  // Intento de mejora del badge con datos reales del usuario (CEO o verificado)
+  if (post.userId && window.auth && typeof window.auth.getUsuarioPorIdCacheado === 'function') {
+    window.auth.getUsuarioPorIdCacheado(post.userId).then(u => {
+      if (u) {
+        const nameEl = div.querySelector('.search-result-name');
+        if (nameEl) {
+          nameEl.innerHTML = window.auth.renderNombreConBadge(post.userName, u);
+        }
+      }
+    }).catch(() => {});
+  }
+
   div.addEventListener('click', function() {
     window.location.href = `home.html?post=${post.id}`;
   });

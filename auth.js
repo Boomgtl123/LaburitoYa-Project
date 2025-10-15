@@ -204,6 +204,37 @@ function inicializarNavbar() {
   }
 }
 
+/* Utilidad: renderizar nombre con badge de verificado o CEO */
+function renderNombreConBadge(nombre, usuario) {
+  try {
+    const mostrarBadge = estaVerificado(usuario) || esCEO(usuario);
+    return `${nombre}${mostrarBadge ? ' <span class="verified-badge" style="color: #1DA1F2; font-weight: bold; margin-left: 4px;">✓</span>' : ''}`;
+  } catch (e) {
+    return nombre;
+  }
+}
+
+/* Cache simple de usuarios por ID */
+async function getUsuarioPorIdCacheado(userId) {
+  try {
+    if (!userId) return null;
+    window._usuarioCache = window._usuarioCache || {};
+    if (window._usuarioCache[userId]) {
+      return window._usuarioCache[userId];
+    }
+    const data = await obtenerUsuarioPorId(userId);
+    if (data) {
+      const usuario = { id: userId, ...data };
+      window._usuarioCache[userId] = usuario;
+      return usuario;
+    }
+    return null;
+  } catch (e) {
+    console.error('Error en getUsuarioPorIdCacheado:', e);
+    return null;
+  }
+}
+
 // Exportar funciones para uso global
 window.auth = {
   guardarSesion,
@@ -224,5 +255,7 @@ window.auth = {
   bloquearUsuario,
   desbloquearUsuario,
   verificarUsuario,
-  obtenerTodosLosUsuarios
+  obtenerTodosLosUsuarios,
+  renderNombreConBadge,
+  getUsuarioPorIdCacheado
 };
