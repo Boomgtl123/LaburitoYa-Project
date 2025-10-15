@@ -6,7 +6,6 @@
   <title>Inicio - LaburitoYa</title>
   <link rel="stylesheet" href="home.css" />
   <link rel="stylesheet" href="home-responsive-additions.css" />
-  <link rel="stylesheet" href="mobile-menu-avatar.css" />
   <style>
     .verified-badge {
       color: #0a66c2 !important; /* color consistente con el index */
@@ -20,8 +19,10 @@
   <nav class="navbar">
     <div class="nav-container">
       <div class="nav-left">
-        <!-- Campanita de notificaciones (visible en móvil en la izquierda) -->
-        <div class="nav-btn nav-dropdown nav-notifications-mobile" id="navNotificaciones">
+        <!-- Botón hamburguesa (solo visible en móvil) -->
+        <button class="nav-hamburger" id="navHamburger">⋮</button>
+        
+        <div class="nav-btn nav-dropdown" id="navNotificaciones">
           <span class="nav-icon">🔔</span>
           <span class="notification-badge" id="notificationsBadgeIcon" style="display: none;">0</span>
           <div class="dropdown-menu dropdown-notifications">
@@ -78,44 +79,20 @@
             </a>
           </div>
         </div>
-        <!-- Avatar con dropdown (en móvil muestra menú completo) -->
-        <div class="nav-btn nav-dropdown nav-avatar-btn" id="navPerfil">
-          <img src="https://via.placeholder.com/40" alt="Perfil" class="nav-avatar" id="navAvatar" style="cursor: pointer;" />
-          <!-- Dropdown del avatar (visible en móvil) -->
-          <div class="dropdown-menu dropdown-avatar">
-            <a href="profile.html" class="dropdown-item">
-              <span>👤</span> Ver perfil
-            </a>
-            <div class="dropdown-divider"></div>
-            <a href="home.html" class="dropdown-item">
-              <span>🏠</span> Inicio
-            </a>
-            <a href="empleos.html" class="dropdown-item">
-              <span>💼</span> Empleos
-            </a>
-            <a href="messages.html" class="dropdown-item">
-              <span>💬</span> Mensajes
-            </a>
-            <div class="dropdown-divider"></div>
-            <div class="search-box-dropdown">
-              <span class="search-icon">🔍</span>
-              <input type="text" id="searchInputMobile" placeholder="Buscar empleos, personas..." />
-            </div>
-            <div class="search-results-dropdown" id="searchResultsDropdownMobile" style="display: none;"></div>
-            <div class="dropdown-divider"></div>
-            <a href="quienes-somos.html" class="dropdown-item">
-              <span>👥</span> Quiénes somos
-            </a>
-            <a href="politicas.html" class="dropdown-item">
-              <span>📋</span> Políticas
-            </a>
-            <div class="dropdown-divider"></div>
-            <a href="#" class="dropdown-item" id="btnCerrarSesionAvatar">
-              <span>🚪</span> Cerrar sesión
-            </a>
-          </div>
+        <div class="nav-btn nav-avatar-btn" id="navPerfil">
+          <img src="https://via.placeholder.com/40" alt="Perfil" class="nav-avatar" id="navAvatar" onclick="window.location.href='profile.html'" style="cursor: pointer;" />
         </div>
       </div>
+    </div>
+
+    <!-- Menú móvil desplegable -->
+    <div class="mobile-menu" id="mobileMenu">
+      <a href="home.html" class="mobile-menu-item active">INICIO</a>
+      <a href="empleos.html" class="mobile-menu-item">EMPLEOS</a>
+      <a href="messages.html" class="mobile-menu-item">MENSAJES</a>
+      <a href="quienes-somos.html" class="mobile-menu-item">Quiénes somos</a>
+      <a href="politicas.html" class="mobile-menu-item">Políticas</a>
+      <a href="#" class="mobile-menu-item" id="mobileLogout">Cerrar sesión</a>
     </div>
   </nav>
 
@@ -230,82 +207,42 @@
       document.body.appendChild(scriptElement);
     });
 
-    // Funcionalidad del menú de avatar y dropdowns
+    // Funcionalidad del menú hamburguesa
     document.addEventListener('DOMContentLoaded', function() {
-      // Dropdown del avatar
-      const navPerfil = document.getElementById('navPerfil');
-      const navAvatar = document.getElementById('navAvatar');
-      
-      if (navPerfil && navAvatar) {
-        // En desktop, click en avatar va a perfil
-        // En móvil, click en avatar abre dropdown
-        navAvatar.addEventListener('click', function(e) {
+      const hamburger = document.getElementById('navHamburger');
+      const mobileMenu = document.getElementById('mobileMenu');
+      const mobileLogout = document.getElementById('mobileLogout');
+
+      if (hamburger && mobileMenu) {
+        hamburger.addEventListener('click', function(e) {
           e.stopPropagation();
-          const isMobile = window.innerWidth <= 768;
-          
-          if (isMobile) {
-            // En móvil, toggle dropdown
-            navPerfil.classList.toggle('active');
-          } else {
-            // En desktop, ir a perfil
-            window.location.href = 'profile.html';
+          mobileMenu.classList.toggle('active');
+        });
+
+        // Cerrar menú al hacer clic fuera
+        document.addEventListener('click', function(e) {
+          if (!mobileMenu.contains(e.target) && !hamburger.contains(e.target)) {
+            mobileMenu.classList.remove('active');
           }
+        });
+
+        // Cerrar menú al hacer clic en un enlace
+        const menuItems = mobileMenu.querySelectorAll('.mobile-menu-item');
+        menuItems.forEach(item => {
+          item.addEventListener('click', function() {
+            mobileMenu.classList.remove('active');
+          });
         });
       }
 
-      // Cerrar sesión desde el dropdown del avatar
-      const btnCerrarSesionAvatar = document.getElementById('btnCerrarSesionAvatar');
-      if (btnCerrarSesionAvatar) {
-        btnCerrarSesionAvatar.addEventListener('click', function(e) {
+      // Funcionalidad de cerrar sesión en menú móvil
+      if (mobileLogout) {
+        mobileLogout.addEventListener('click', function(e) {
           e.preventDefault();
           if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
-            if (window.auth) {
-              window.auth.cerrarSesion();
-            } else {
-              localStorage.removeItem('currentUser');
-              window.location.href = 'login.html';
-            }
+            localStorage.removeItem('currentUser');
+            window.location.href = 'login.html';
           }
-        });
-      }
-
-      // Funcionalidad de dropdowns (Info y Notificaciones)
-      const navInfo = document.getElementById('navInfo');
-      if (navInfo) {
-        navInfo.addEventListener('click', function(e) {
-          if (!e.target.closest('.dropdown-menu')) {
-            this.classList.toggle('active');
-          }
-        });
-      }
-
-      const navNotificaciones = document.getElementById('navNotificaciones');
-      if (navNotificaciones) {
-        navNotificaciones.addEventListener('click', function(e) {
-          if (!e.target.closest('.dropdown-menu')) {
-            this.classList.toggle('active');
-          }
-        });
-      }
-
-      // Cerrar dropdowns al hacer clic fuera
-      document.addEventListener('click', function(e) {
-        if (navInfo && !navInfo.contains(e.target)) {
-          navInfo.classList.remove('active');
-        }
-        if (navNotificaciones && !navNotificaciones.contains(e.target)) {
-          navNotificaciones.classList.remove('active');
-        }
-        if (navPerfil && !navPerfil.contains(e.target)) {
-          navPerfil.classList.remove('active');
-        }
-      });
-
-      // Búsqueda en el dropdown del avatar (móvil)
-      const searchInputMobile = document.getElementById('searchInputMobile');
-      if (searchInputMobile && window.search) {
-        searchInputMobile.addEventListener('input', function() {
-          window.search.buscar(this.value, 'searchResultsDropdownMobile');
         });
       }
     });
