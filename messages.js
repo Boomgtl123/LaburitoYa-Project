@@ -4,6 +4,12 @@ let conversacionActiva = null;
 let intervalActualizacion = null;
 let mensajesNoLeidos = {};
 
+// Exponer variables globales para acceso desde HTML
+window.usuarioActual = null;
+window.conversacionActiva = null;
+window.cargarMensajes = null;
+window.cargarConversaciones = null;
+
 // ========== PROTEGER PÁGINA Y CARGAR USUARIO ==========
 window.addEventListener('DOMContentLoaded', function() {
   // Verificar sesión
@@ -13,6 +19,7 @@ window.addEventListener('DOMContentLoaded', function() {
   
   // Obtener usuario actual
   usuarioActual = auth.obtenerUsuarioActual();
+  window.usuarioActual = usuarioActual;
   
   if (usuarioActual) {
     inicializarPagina();
@@ -21,6 +28,10 @@ window.addEventListener('DOMContentLoaded', function() {
 
 // ========== INICIALIZAR PÁGINA ==========
 function inicializarPagina() {
+  // Exponer funciones globalmente
+  window.cargarMensajes = cargarMensajes;
+  window.cargarConversaciones = cargarConversaciones;
+  
   // Actualizar navbar
   actualizarNavbar();
   
@@ -38,13 +49,14 @@ function inicializarPagina() {
     iniciarConversacion(userId);
   }
   
-  // Actualizar conversaciones cada 5 segundos
+  // Actualizar conversaciones cada 10 segundos (reducido para evitar refresh constante)
   intervalActualizacion = setInterval(() => {
     if (conversacionActiva) {
-      cargarMensajes(conversacionActiva);
+      cargarMensajes(conversacionActiva, true); // true = actualización silenciosa
     }
     cargarConversaciones();
-  }, 5000);
+    actualizarContadorNotificaciones();
+  }, 10000);
 }
 
 // ========== ACTUALIZAR NAVBAR ==========
@@ -276,6 +288,7 @@ function crearElementoConversacion(userId, usuario, conversacion) {
 // ========== ABRIR CONVERSACIÓN ==========
 async function abrirConversacion(userId, usuario) {
   conversacionActiva = userId;
+  window.conversacionActiva = userId;
   
   // Marcar mensajes como leídos
   await marcarMensajesComoLeidos(userId);
@@ -338,7 +351,7 @@ async function iniciarConversacion(userId) {
 }
 
 // ========== CARGAR MENSAJES ==========
-async function cargarMensajes(userId) {
+async function cargarMensajes(userId, silencioso = false) {
   const chatMessages = document.getElementById('chatMessages');
   if (!chatMessages) return;
   
@@ -347,7 +360,9 @@ async function cargarMensajes(userId) {
     const data = await response.json();
     
     if (!data) {
-      chatMessages.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">No hay mensajes aún. ¡Envía el primero!</p>';
+      if (!silencioso) {
+        chatMessages.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">No hay mensajes aún. ¡Envía el primero!</p>';
+      }
       return;
     }
     
@@ -365,37 +380,53 @@ async function cargarMensajes(userId) {
     mensajes.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
     
     if (mensajes.length === 0) {
-      chatMessages.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">No hay mensajes aún. ¡Envía el primero!</p>';
+      if (!silencioso) {
+        chatMessages.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">No hay mensajes aún. ¡Envía el primero!</p>';
+      }
       return;
     }
     
-    // Renderizar mensajes
-    chatMessages.innerHTML = '';
+    // Guardar posición del scroll antes de actualizar
+    const scrollPos = chatMessages.scrollTop;
+    const scrollHeight = chatMessages.scrollHeight;
+    const isAtBottom = scrollHeight - scrollPos - chatMessages.clientHeight < 50;
     
-    let fechaAnterior = null;
-    
-    mensajes.forEach(mensaje => {
-      const fechaMensaje = new Date(mensaje.fecha).toLocaleDateString();
+    // Renderizar mensajes solo si hay cambios
+    const currentMessagesCount = chatMessages.querySelectorAll('.message-item').length;
+    if (!silencioso || currentMessagesCount !== mensajes.length) {
+      chatMessages.innerHTML = '';
       
-      // Agregar divisor de fecha si cambió el día
-      if (fechaMensaje !== fechaAnterior) {
-        const divider = document.createElement('div');
-        divider.className = 'message-date-divider';
-        divider.innerHTML = `<span class="date-divider-text">${formatearFecha(mensaje.fecha)}</span>`;
-        chatMessages.appendChild(divider);
-        fechaAnterior = fechaMensaje;
+      let fechaAnterior = null;
+      
+      mensajes.forEach(mensaje => {
+        const fechaMensaje = new Date(mensaje.fecha).toLocaleDateString();
+        
+        // Agregar divisor de fecha si cambió el día
+        if (fechaMensaje !== fechaAnterior) {
+          const divider = document.createElement('div');
+          divider.className = 'message-date-divider';
+          divider.innerHTML = `<span class="date-divider-text">${formatearFecha(mensaje.fecha)}</span>`;
+          chatMessages.appendChild(divider);
+          fechaAnterior = fechaMensaje;
+        }
+        
+        const messageElement = crearElementoMensaje(mensaje);
+        chatMessages.appendChild(messageElement);
+      });
+      
+      // Scroll al final solo si estaba al final o no es actualización silenciosa
+      if (!silencioso || isAtBottom) {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      } else {
+        chatMessages.scrollTop = scrollPos;
       }
-      
-      const messageElement = crearElementoMensaje(mensaje);
-      chatMessages.appendChild(messageElement);
-    });
-    
-    // Scroll al final
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
     
   } catch (error) {
     console.error('Error al cargar mensajes:', error);
-    chatMessages.innerHTML = '<p style="text-align: center; color: #d32f2f; padding: 20px;">Error al cargar mensajes</p>';
+    if (!silencioso) {
+      chatMessages.innerHTML = '<p style="text-align: center; color: #d32f2f; padding: 20px;">Error al cargar mensajes</p>';
+    }
   }
 }
 
@@ -414,10 +445,25 @@ function crearElementoMensaje(mensaje) {
     `<span class="message-read-indicator ${mensaje.leido ? '' : 'unread'}">${mensaje.leido ? '✓✓' : '✓'}</span>` : 
     '';
   
+  // Contenido del mensaje (texto o audio)
+  let contenidoMensaje = '';
+  if (mensaje.tipo === 'audio' && mensaje.audio) {
+    contenidoMensaje = `
+      <div class="message-audio">
+        <audio controls>
+          <source src="${mensaje.audio}" type="audio/webm">
+          Tu navegador no soporta audio.
+        </audio>
+      </div>
+    `;
+  } else {
+    contenidoMensaje = `<div class="message-bubble">${mensaje.mensaje}</div>`;
+  }
+  
   div.innerHTML = `
     <img src="${avatar || 'https://via.placeholder.com/32'}" alt="Avatar" class="message-avatar" />
     <div class="message-content">
-      <div class="message-bubble">${mensaje.mensaje}</div>
+      ${contenidoMensaje}
       <span class="message-time">${tiempo} ${vistoIndicador}</span>
     </div>
   `;
@@ -475,6 +521,7 @@ async function enviarMensaje(e) {
 // ========== CERRAR CHAT ==========
 function cerrarChat() {
   conversacionActiva = null;
+  window.conversacionActiva = null;
   
   const chatEmpty = document.getElementById('chatEmpty');
   const chatActive = document.getElementById('chatActive');
@@ -590,16 +637,40 @@ async function marcarMensajesComoLeidos(userId) {
 
 // ========== ACTUALIZAR CONTADOR DE NOTIFICACIONES ==========
 async function actualizarContadorNotificaciones() {
-  const totalNoLeidos = Object.values(mensajesNoLeidos).reduce((sum, count) => sum + count, 0);
-  
-  const notificationsBadge = document.getElementById('notificationsBadge');
-  if (notificationsBadge) {
-    if (totalNoLeidos > 0) {
-      notificationsBadge.textContent = totalNoLeidos;
-      notificationsBadge.style.display = 'flex';
+  try {
+    // Recalcular mensajes no leídos desde la base de datos
+    const response = await fetch("https://laburitoya-6e55d-default-rtdb.firebaseio.com/mensajes.json");
+    const data = await response.json();
+    
+    if (!data) {
+      mensajesNoLeidos = {};
     } else {
-      notificationsBadge.style.display = 'none';
+      // Limpiar contador
+      mensajesNoLeidos = {};
+      
+      // Contar mensajes no leídos por conversación
+      for (const id in data) {
+        const mensaje = data[id];
+        if (mensaje.para === usuarioActual.id && !mensaje.leido) {
+          const otroUsuarioId = mensaje.de;
+          mensajesNoLeidos[otroUsuarioId] = (mensajesNoLeidos[otroUsuarioId] || 0) + 1;
+        }
+      }
     }
+    
+    const totalNoLeidos = Object.values(mensajesNoLeidos).reduce((sum, count) => sum + count, 0);
+    
+    const notificationsBadge = document.getElementById('notificationsBadge');
+    if (notificationsBadge) {
+      if (totalNoLeidos > 0) {
+        notificationsBadge.textContent = totalNoLeidos;
+        notificationsBadge.style.display = 'flex';
+      } else {
+        notificationsBadge.style.display = 'none';
+      }
+    }
+  } catch (error) {
+    console.error('Error al actualizar contador de notificaciones:', error);
   }
 }
 
