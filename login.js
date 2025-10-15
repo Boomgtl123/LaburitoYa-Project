@@ -52,10 +52,12 @@ document.getElementById("loginForm").addEventListener("submit", async function (
     } else {
       mensaje.textContent = "Correo o contraseña incorrectos.";
       mensaje.style.color = "red";
+      alert("❌ Error de inicio de sesión\n\nEl correo o la contraseña que ingresaste son incorrectos. Por favor verifica tus datos e intenta nuevamente.");
     }
   } catch (err) {
     console.error(err);
     mensaje.textContent = "Error de red.";
     mensaje.style.color = "red";
+    alert("❌ Error de conexión\n\nNo se pudo conectar con el servidor. Por favor verifica tu conexión a internet e intenta nuevamente.");
   }
 });

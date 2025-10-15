@@ -584,7 +584,7 @@ function crearElementoPost(post) {
     </div>
     <div class="post-stats">
       ${likeCount > 0 ? `<span>${likeCount} ${likeCount === 1 ? 'recomendación' : 'recomendaciones'}</span>` : ''}
-      ${commentCount > 0 ? `<span>${commentCount} ${commentCount === 1 ? 'comentario' : 'comentarios'}</span>` : ''}
+      ${commentCount > 0 ? `<span onclick="toggleComentarios('${post.id}')" style="cursor: pointer;">${commentCount} ${commentCount === 1 ? 'comentario' : 'comentarios'}</span>` : ''}
     </div>
     <div class="post-actions">
       <button class="post-action-btn ${likeClass}" onclick="toggleLike('${post.id}', '${post.userId}')">

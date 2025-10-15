@@ -1,3 +1,37 @@
+/* ========== VARIABLES CSS ========== */
+:root {
+  --linkedin-blue: #0a66c2;
+  --linkedin-blue-hover: #004182;
+  --background-gray: #f3f2ef;
+  --white: #ffffff;
+  --text-primary: #000000e6;
+  --text-secondary: #666666;
+  --border-color: #e0e0e0;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+  
+  /* Espaciados responsive */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 1rem;
+  --spacing-md: 1.5rem;
+  --spacing-lg: 2rem;
+  --spacing-xl: 2.5rem;
+  
+  /* Tamaños de fuente responsive */
+  --font-xs: 0.75rem;
+  --font-sm: 0.875rem;
+  --font-base: 1rem;
+  --font-lg: 1.125rem;
+  --font-xl: 1.25rem;
+  
+  /* Tamaño mínimo táctil */
+  --touch-target: 48px;
+  
+  /* Navbar height */
+  --navbar-height: 64px;
+  --navbar-height-mobile: 60px;
+}
+
 /* Reset y estilos base */
 * {
   margin: 0;
@@ -7,9 +41,12 @@
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  background-color: #f3f2ef;
-  color: #000000e6;
+  background-color: var(--background-gray);
+  color: var(--text-primary);
   line-height: 1.5;
+  font-size: var(--font-base);
+  overflow-x: hidden; /* Prevenir scroll horizontal */
+  position: relative;
 }
 
 /* ========== VERIFIED BADGE (GLOBAL FOR APP PAGES USING home.css) ========== */
@@ -29,17 +66,18 @@ body {
   z-index: 1000;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   border-radius: 0 0 30px 30px;
+  width: 100%;
 }
 
 .nav-container {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 0 40px;
+  padding: 0 clamp(1rem, 3vw, 2.5rem);
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  height: 64px;
-  gap: 40px;
+  height: var(--navbar-height);
+  gap: clamp(1rem, 3vw, 2.5rem);
 }
 
 .nav-left,
@@ -81,18 +119,21 @@ body {
   background: transparent;
   border: none;
   color: white;
-  font-size: 12px;
+  font-size: var(--font-xs);
   font-weight: 700;
   letter-spacing: 0.5px;
-  padding: 10px 18px;
+  padding: 0.625rem 1.125rem;
+  min-height: var(--touch-target);
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
   text-decoration: none;
   display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
+  gap: 0.375rem;
   position: relative;
+  white-space: nowrap;
 }
 
 .nav-btn:hover {
@@ -691,11 +732,12 @@ body {
 /* ========== LAYOUT PRINCIPAL ========== */
 .main-layout {
   max-width: 1128px;
-  margin: 76px auto 0;
-  padding: 24px;
+  margin: calc(var(--navbar-height) + 12px) auto 0;
+  padding: clamp(1rem, 3vw, 1.5rem);
   display: grid;
   grid-template-columns: 225px 1fr 300px;
-  gap: 24px;
+  gap: clamp(1rem, 2vw, 1.5rem);
+  width: 100%;
 }
 
 /* ========== SIDEBAR IZQUIERDO - PERFIL ========== */
@@ -1032,67 +1074,88 @@ body {
 /* ========== SIDEBAR DERECHO - TENDENCIAS ========== */
 .right-sidebar {
   position: sticky;
-  top: 76px;
+  top: calc(var(--navbar-height) + 12px);
   height: fit-content;
 }
 
 .trends-card {
-  background-color: #ffffff;
-  border: 1px solid #e0e0e0;
+  background-color: var(--white);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
-  padding: 12px 16px;
+  padding: 0.75rem 1rem;
 }
 
 .card-title {
-  font-size: 16px;
+  font-size: var(--font-base);
   font-weight: 600;
-  color: #000000e6;
-  margin-bottom: 12px;
+  color: var(--text-primary);
+  margin-bottom: 0.75rem;
+}
+
+/* Grid responsive para tendencias: 1 columna móvil, 2 tablet, 3 desktop */
+.trends-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+@media (min-width: 768px) {
+  .trends-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .trends-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .trend-item {
-  padding: 8px 0;
+  padding: 0.5rem;
   cursor: pointer;
   border-radius: 4px;
-  transition: background-color 0.2s;
+  transition: all 0.2s ease;
 }
 
 .trend-item:hover {
-  background-color: #f3f2ef;
+  background-color: var(--background-gray);
+  transform: translateX(4px);
 }
 
 .trend-category {
-  font-size: 11px;
-  color: #666666;
-  margin: 0 0 2px 0;
+  font-size: var(--font-xs);
+  color: var(--text-secondary);
+  margin: 0 0 0.125rem 0;
   text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .trend-title {
-  font-size: 14px;
+  font-size: var(--font-sm);
   font-weight: 600;
-  color: #000000e6;
-  margin: 0 0 2px 0;
+  color: var(--text-primary);
+  margin: 0 0 0.125rem 0;
 }
 
 .trend-stats {
-  font-size: 12px;
-  color: #666666;
+  font-size: var(--font-xs);
+  color: var(--text-secondary);
   margin: 0;
 }
 
 .trends-subtitle {
-  font-size: 12px;
-  color: #666666;
-  margin-bottom: 12px;
+  font-size: var(--font-xs);
+  color: var(--text-secondary);
+  margin-bottom: 0.75rem;
 }
 
 .loading-trends,
 .no-trends {
-  font-size: 12px;
-  color: #666666;
+  font-size: var(--font-xs);
+  color: var(--text-secondary);
   text-align: center;
-  padding: 12px;
+  padding: 0.75rem;
 }
 
 /* ========== COMENTARIOS ========== */
@@ -1687,29 +1750,38 @@ body {
 
 /* ========== RESPONSIVE ========== */
 
-/* Menú hamburguesa (solo visible en móvil) */
+/* ========== MENÚ HAMBURGUESA (MÓVIL) ========== */
 .nav-hamburger {
-  display: none;
+  display: none; /* Oculto por defecto en desktop */
   background: transparent;
   border: none;
   color: white;
-  font-size: 28px;
+  font-size: 1.75rem;
   cursor: pointer;
-  padding: 8px;
+  padding: 0.5rem;
+  min-width: var(--touch-target);
+  min-height: var(--touch-target);
   border-radius: 8px;
-  transition: background-color 0.2s;
+  transition: all 0.3s ease;
   line-height: 1;
+  align-items: center;
+  justify-content: center;
 }
 
 .nav-hamburger:hover {
   background: rgba(255, 255, 255, 0.15);
+  transform: scale(1.05);
 }
 
-/* Menú móvil desplegable */
+.nav-hamburger:active {
+  transform: scale(0.95);
+}
+
+/* Menú móvil desplegable con animación suave */
 .mobile-menu {
   display: none;
   position: fixed;
-  top: 64px;
+  top: var(--navbar-height);
   left: 0;
   right: 0;
   background: white;
@@ -1718,22 +1790,28 @@ body {
   z-index: 999;
   max-height: 0;
   overflow: hidden;
-  transition: max-height 0.3s ease;
+  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+              opacity 0.3s ease;
+  opacity: 0;
 }
 
 .mobile-menu.active {
-  max-height: 400px;
+  max-height: 500px;
+  opacity: 1;
 }
 
 .mobile-menu-item {
   display: block;
-  padding: 16px 24px;
-  color: #000000e6;
+  padding: 1rem 1.5rem;
+  min-height: var(--touch-target);
+  color: var(--text-primary);
   text-decoration: none;
-  font-size: 16px;
+  font-size: var(--font-base);
   font-weight: 600;
-  border-bottom: 1px solid #e0e0e0;
-  transition: background-color 0.2s;
+  border-bottom: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
 }
 
 .mobile-menu-item:last-child {
@@ -1742,12 +1820,14 @@ body {
 }
 
 .mobile-menu-item:hover {
-  background-color: #f3f2ef;
+  background-color: var(--background-gray);
+  padding-left: 2rem;
 }
 
 .mobile-menu-item.active {
   background-color: #e8f5fd;
-  color: #0a66c2;
+  color: var(--linkedin-blue);
+  border-left: 4px solid var(--linkedin-blue);
 }
 
 @media (max-width: 1024px) {
@@ -1762,9 +1842,9 @@ body {
     gap: 16px;
   }
 
-  /* Mostrar menú hamburguesa */
+  /* Mostrar menú hamburguesa solo en móvil/tablet */
   .nav-hamburger {
-    display: block;
+    display: flex; /* Cambiar a flex para que se muestre */
   }
 
   /* Ocultar nav-left excepto hamburguesa y notificaciones */

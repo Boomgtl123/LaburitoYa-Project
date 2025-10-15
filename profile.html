@@ -5,21 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Mi Perfil - LaburitoYa</title>
   <link rel="stylesheet" href="home.css" />
-  <link rel="stylesheet" href="profile.css" />
-  <style>
-    .verified-badge {
-      color: #0a66c2 !important; /* color consistente con el index */
-      font-weight: bold;
-      margin-left: 4px;
-    }
-  </style>
+  <link rel="stylesheet" href="home-responsive-additions.css" />
+  <link rel="stylesheet" href="profile-instagram.css" />
 </head>
 <body>
   <!-- Navbar -->
   <nav class="navbar">
     <div class="nav-container">
       <div class="nav-left">
-        <!-- Botón hamburguesa (solo visible en móvil) -->
         <button class="nav-hamburger" id="navHamburger">⋮</button>
         
         <div class="nav-btn nav-dropdown" id="navNotificaciones">
@@ -43,7 +36,7 @@
         <a href="home.html" class="nav-btn">
           <span>INICIO</span>
         </a>
-        <a href="empleos.html" class="nav-btn" id="navEmpleos">
+        <a href="empleos.html" class="nav-btn">
           <span>EMPLEOS</span>
         </a>
       </div>
@@ -53,7 +46,7 @@
       </div>
 
       <div class="nav-right">
-        <a href="messages.html" class="nav-btn" id="navMensajes">
+        <a href="messages.html" class="nav-btn">
           <span>MENSAJES</span>
           <span class="notification-badge" id="notificationsBadge" style="display: none;">0</span>
         </a>
@@ -64,14 +57,12 @@
               <span class="search-icon">🔍</span>
               <input type="text" id="searchInput" placeholder="Buscar empleos, personas..." />
             </div>
-            <div class="search-results-dropdown" id="searchResultsDropdown" style="display: none;">
-              <!-- Resultados de búsqueda aparecerán aquí -->
-            </div>
+            <div class="search-results-dropdown" id="searchResultsDropdown" style="display: none;"></div>
             <div class="dropdown-divider"></div>
-            <a href="quienes-somos.html" class="dropdown-item" id="btnQuienesSomos">
+            <a href="quienes-somos.html" class="dropdown-item">
               <span>👥</span> Quiénes somos
             </a>
-            <a href="politicas.html" class="dropdown-item" id="btnPoliticas">
+            <a href="politicas.html" class="dropdown-item">
               <span>📋</span> Políticas
             </a>
             <a href="#" class="dropdown-item" id="btnCerrarSesion">
@@ -79,13 +70,13 @@
             </a>
           </div>
         </div>
-        <div class="nav-btn nav-avatar-btn" id="navPerfil">
+        <div class="nav-btn nav-avatar-btn">
           <img src="https://via.placeholder.com/40" alt="Perfil" class="nav-avatar" id="navAvatar" onclick="window.location.href='profile.html'" style="cursor: pointer;" />
         </div>
       </div>
     </div>
 
-    <!-- Menú móvil desplegable -->
+    <!-- Menú móvil -->
     <div class="mobile-menu" id="mobileMenu">
       <a href="home.html" class="mobile-menu-item">INICIO</a>
       <a href="empleos.html" class="mobile-menu-item">EMPLEOS</a>
@@ -96,235 +87,319 @@
     </div>
   </nav>
 
-  <!-- Contenido del perfil -->
-  <div class="profile-container">
-    <div class="profile-content">
-      <!-- Header del perfil -->
-      <div class="profile-header-card">
-        <div class="profile-cover"></div>
-        <div class="profile-main-info">
-          <div class="profile-photo-container">
-            <img src="https://via.placeholder.com/150" alt="Foto de perfil" id="profilePhoto" class="profile-photo" />
-            <button class="btn-change-photo" id="btnChangePhoto">
-              📷
+  <!-- Contenedor del perfil estilo Instagram -->
+  <div class="profile-instagram-container">
+    
+    <!-- Banner del perfil -->
+    <div class="profile-banner" id="profileBanner">
+      <div class="profile-banner-content"></div>
+    </div>
+
+    <!-- Header del perfil -->
+    <div class="profile-header-wrapper">
+      <header class="profile-instagram-header">
+      <!-- Foto de perfil -->
+      <div class="profile-instagram-photo-wrapper">
+        <img src="https://via.placeholder.com/150" alt="Foto de perfil" id="profilePhoto" class="profile-instagram-photo" />
+        <button class="profile-change-photo-btn" id="btnChangePhoto" title="Cambiar foto">
+          📷
+        </button>
+        <input type="file" id="photoInput" accept="image/*" style="display: none;" />
+      </div>
+
+      <!-- Información del perfil -->
+      <div class="profile-instagram-info">
+        <!-- Línea 1: Username y botones -->
+        <div class="profile-instagram-top-row">
+          <h1 class="profile-instagram-username" id="profileUsername">@cargando</h1>
+          <div class="profile-instagram-actions">
+            <button class="profile-btn profile-btn-secondary" id="btnEditProfile">
+              <span class="profile-btn-icon">✏️</span>
+              <span>Editar perfil</span>
             </button>
-            <input type="file" id="photoInput" accept="image/*" style="display: none;" />
+            <button class="profile-btn profile-btn-secondary" id="btnShareProfile">
+              <span class="profile-btn-icon">🔗</span>
+              <span>Compartir</span>
+            </button>
           </div>
-          <div class="profile-info-section">
-            <div class="profile-basic-info">
-              <h1 id="profileName">Cargando...</h1>
-              <p class="profile-type" id="profileType">Cargando...</p>
-              <div class="profile-contact-info">
-                <span class="contact-item" id="profileLocation">📍 Cargando...</span>
-                <span class="contact-item" id="profileContact">📞 Cargando...</span>
-              </div>
-            </div>
-            
-            <!-- Estadísticas integradas en el header -->
-            <div class="profile-stats-inline">
-              <div class="stat-item-inline">
-                <span class="stat-number-inline" id="statPosts">0</span>
-                <span class="stat-label-inline">Publicaciones</span>
-              </div>
-              <div class="stat-divider"></div>
-              <div class="stat-item-inline">
-                <span class="stat-number-inline" id="statLikes">0</span>
-                <span class="stat-label-inline">Recomendaciones</span>
-              </div>
-              <div class="stat-divider"></div>
-              <div class="stat-item-inline stat-clickable" id="statSeguidoresBox">
-                <span class="stat-number-inline" id="statSeguidores">0</span>
-                <span class="stat-label-inline">Seguidores</span>
-              </div>
-              <div class="stat-divider"></div>
-              <div class="stat-item-inline stat-clickable" id="statSeguidosBox">
-                <span class="stat-number-inline" id="statSeguidos">0</span>
-                <span class="stat-label-inline">Siguiendo</span>
-              </div>
-            </div>
+        </div>
+
+        <!-- Línea 2: Estadísticas -->
+        <div class="profile-instagram-stats">
+          <div class="profile-stat-item">
+            <span class="profile-stat-number" id="statPosts">0</span>
+            <span class="profile-stat-label">publicaciones</span>
+          </div>
+          <div class="profile-stat-item clickable" id="statSeguidoresBox">
+            <span class="profile-stat-number" id="statSeguidores">0</span>
+            <span class="profile-stat-label">seguidores</span>
+          </div>
+          <div class="profile-stat-item clickable" id="statSeguidosBox">
+            <span class="profile-stat-number" id="statSeguidos">0</span>
+            <span class="profile-stat-label">siguiendo</span>
+          </div>
+        </div>
+
+        <!-- Botón de estadísticas detalladas -->
+        <button class="profile-stats-btn" id="btnViewStats">
+          <span>📊</span>
+          <span>Ver estadísticas detalladas</span>
+        </button>
+
+        <!-- Línea 3: Información del usuario -->
+        <div class="profile-instagram-details">
+          <h2 class="profile-full-name" id="profileFullName">
+            Nombre Completo
+            <span class="verified-badge" id="profileVerifiedBadge" style="display: none;">✓</span>
+          </h2>
+          <p class="profile-bio" id="profileBio">Bio del usuario...</p>
+          <div class="profile-contact-row">
+            <span class="profile-contact-item" id="profileType">
+              💼 Tipo de perfil
+            </span>
+            <span class="profile-contact-item" id="profileLocation">
+              📍 Ubicación
+            </span>
+            <span class="profile-contact-item" id="profileContact">
+              📞 Contacto
+            </span>
           </div>
         </div>
       </div>
+    </header>
+    </div>
 
-      <!-- Formulario de edición -->
-      <div class="profile-edit-card">
-        <div class="card-header">
-          <h2>Editar perfil</h2>
-          <button class="btn-toggle-edit" id="btnToggleEdit">✏️ Editar</button>
-        </div>
-        
-        <form id="profileForm" class="profile-form" style="display: none;">
-          <div class="form-group">
-            <label for="editNombre">Nombre completo *</label>
-            <input type="text" id="editNombre" required />
+    <!-- Tabs de navegación -->
+    <div class="profile-content-wrapper">
+    <nav class="profile-instagram-tabs">
+      <button class="profile-tab active" data-tab="posts">
+        <span class="profile-tab-icon">📱</span>
+        <span>Publicaciones</span>
+      </button>
+      <button class="profile-tab" data-tab="saved">
+        <span class="profile-tab-icon">🔖</span>
+        <span>Guardados</span>
+      </button>
+    </nav>
+
+    </div>
+
+    <!-- Grid de publicaciones -->
+    <div class="profile-posts-grid" id="profilePostsGrid">
+      <!-- Las publicaciones se cargarán dinámicamente aquí -->
+      <div class="profile-no-posts">
+        <div class="profile-no-posts-icon">📷</div>
+        <h3>No hay publicaciones aún</h3>
+        <p>Cuando publiques fotos y videos, aparecerán aquí.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Modal de edición de perfil -->
+  <div class="profile-edit-modal" id="profileEditModal">
+    <div class="profile-edit-content">
+      <div class="profile-edit-header">
+        <h3 class="profile-edit-title">Editar perfil</h3>
+        <button class="profile-edit-close" id="btnCloseEditModal">✕</button>
+      </div>
+      
+      <div class="profile-edit-body">
+        <form class="profile-edit-form" id="profileEditForm">
+          
+          <div class="profile-form-group">
+            <label class="profile-form-label" for="editNombre">Nombre completo</label>
+            <input type="text" class="profile-form-input" id="editNombre" required />
           </div>
 
-          <div class="form-group">
-            <label for="editPerfil">Tipo de perfil *</label>
-            <select id="editPerfil" required>
+          <div class="profile-form-group">
+            <label class="profile-form-label" for="editUsername">Username</label>
+            <input type="text" class="profile-form-input" id="editUsername" disabled />
+            <span class="profile-form-hint">El username no se puede modificar</span>
+          </div>
+
+          <div class="profile-form-group">
+            <label class="profile-form-label" for="editBio">Biografía</label>
+            <textarea class="profile-form-textarea" id="editBio" maxlength="150" placeholder="Cuéntanos sobre ti..."></textarea>
+            <span class="profile-form-hint" id="bioCounter">0 / 150</span>
+          </div>
+
+          <div class="profile-form-group">
+            <label class="profile-form-label" for="editPerfil">Tipo de perfil</label>
+            <select class="profile-form-select" id="editPerfil" required>
               <option value="Trabajador">Busco trabajo</option>
               <option value="Empleador">Busco contratar</option>
             </select>
           </div>
 
-          <div class="form-group">
-            <label for="editTelefono">Teléfono *</label>
-            <input type="tel" id="editTelefono" required />
+          <div class="profile-form-group">
+            <label class="profile-form-label" for="editZona">Zona o ciudad</label>
+            <input type="text" class="profile-form-input" id="editZona" required />
           </div>
 
-          <div class="form-group">
-            <label for="editZona">Zona o ciudad *</label>
-            <input type="text" id="editZona" required />
+          <div class="profile-form-group">
+            <label class="profile-form-label" for="editTelefono">Teléfono</label>
+            <input type="tel" class="profile-form-input" id="editTelefono" required />
           </div>
 
-          <div class="form-group">
-            <label for="editBiografia">Biografía</label>
-            <textarea id="editBiografia" rows="4" placeholder="Cuéntanos sobre ti, tu experiencia, habilidades..."></textarea>
+          <div class="profile-form-group">
+            <label class="profile-form-label" for="editCorreo">Correo electrónico</label>
+            <input type="email" class="profile-form-input" id="editCorreo" disabled />
+            <span class="profile-form-hint">El correo no se puede modificar</span>
           </div>
 
-          <h3 style="margin-top: 24px; margin-bottom: 16px; font-size: 18px; color: #000000e6;">Redes Sociales</h3>
-
-          <div class="form-group">
-            <label for="editInstagram">📷 Instagram</label>
-            <input type="url" id="editInstagram" placeholder="https://instagram.com/tu_usuario" />
+          <!-- Selector de color del banner -->
+          <div class="profile-banner-selector">
+            <label class="profile-banner-selector-label">Color del banner</label>
+            
+            <!-- Preview del banner -->
+            <div class="profile-banner-preview" id="bannerPreview"></div>
+            
+            <!-- Colores sólidos -->
+            <div class="profile-color-options">
+              <div class="profile-color-options-title">Colores sólidos</div>
+              <div class="profile-color-grid" id="solidColorsGrid">
+                <!-- Los colores se generarán dinámicamente -->
+              </div>
+            </div>
+            
+            <!-- Gradientes -->
+            <div class="profile-color-options">
+              <div class="profile-color-options-title">Gradientes</div>
+              <div class="profile-gradient-grid" id="gradientsGrid">
+                <!-- Los gradientes se generarán dinámicamente -->
+              </div>
+            </div>
           </div>
 
-          <div class="form-group">
-            <label for="editTwitter">🐦 X (Twitter)</label>
-            <input type="url" id="editTwitter" placeholder="https://x.com/tu_usuario" />
-          </div>
-
-          <div class="form-group">
-            <label for="editThreads">🧵 Threads</label>
-            <input type="url" id="editThreads" placeholder="https://threads.net/@tu_usuario" />
-          </div>
-
-          <div class="form-group">
-            <label for="editFacebook">👥 Facebook</label>
-            <input type="url" id="editFacebook" placeholder="https://facebook.com/tu_usuario" />
-          </div>
-
-          <div class="form-group">
-            <label for="editTiktok">🎵 TikTok</label>
-            <input type="url" id="editTiktok" placeholder="https://tiktok.com/@tu_usuario" />
-          </div>
-
-          <div class="form-group">
-            <label for="editCorreo">Correo electrónico</label>
-            <input type="email" id="editCorreo" disabled />
-            <small>El correo no se puede modificar</small>
-          </div>
-
-          <div class="form-group">
-            <label for="editUsername">Username</label>
-            <input type="text" id="editUsername" disabled />
-            <small>El username no se puede modificar</small>
-          </div>
-
-          <div class="form-actions">
-            <button type="button" class="btn-cancel" id="btnCancel">Cancelar</button>
-            <button type="submit" class="btn-save">Guardar cambios</button>
-          </div>
-
-          <p id="mensajePerfil" class="mensaje-perfil"></p>
         </form>
-
-        <!-- Vista de solo lectura -->
-        <div id="profileView" class="profile-view">
-          <div class="view-item">
-            <strong>Nombre:</strong>
-            <span id="viewNombre">-</span>
-          </div>
-          <div class="view-item">
-            <strong>Username:</strong>
-            <span id="viewUsername">-</span>
-          </div>
-          <div class="view-item">
-            <strong>Tipo de perfil:</strong>
-            <span id="viewPerfil">-</span>
-          </div>
-          <div class="view-item">
-            <strong>Teléfono:</strong>
-            <span id="viewTelefono">-</span>
-          </div>
-          <div class="view-item">
-            <strong>Zona:</strong>
-            <span id="viewZona">-</span>
-          </div>
-          <div class="view-item">
-            <strong>Biografía:</strong>
-            <span id="viewBiografia">-</span>
-          </div>
-
-          <h3 style="margin-top: 24px; margin-bottom: 12px; font-size: 16px; color: #000000e6;">Redes Sociales</h3>
-          
-          <div class="view-item" id="viewInstagramContainer" style="display: none;">
-            <strong>📷 Instagram:</strong>
-            <a href="#" id="viewInstagram" target="_blank" style="color: #0a66c2; text-decoration: none;">-</a>
-          </div>
-          <div class="view-item" id="viewTwitterContainer" style="display: none;">
-            <strong>🐦 X (Twitter):</strong>
-            <a href="#" id="viewTwitter" target="_blank" style="color: #0a66c2; text-decoration: none;">-</a>
-          </div>
-          <div class="view-item" id="viewThreadsContainer" style="display: none;">
-            <strong>🧵 Threads:</strong>
-            <a href="#" id="viewThreads" target="_blank" style="color: #0a66c2; text-decoration: none;">-</a>
-          </div>
-          <div class="view-item" id="viewFacebookContainer" style="display: none;">
-            <strong>👥 Facebook:</strong>
-            <a href="#" id="viewFacebook" target="_blank" style="color: #0a66c2; text-decoration: none;">-</a>
-          </div>
-          <div class="view-item" id="viewTiktokContainer" style="display: none;">
-            <strong>🎵 TikTok:</strong>
-            <a href="#" id="viewTiktok" target="_blank" style="color: #0a66c2; text-decoration: none;">-</a>
-          </div>
-
-          <div class="view-item">
-            <strong>Correo:</strong>
-            <span id="viewCorreo">-</span>
-          </div>
-          <div class="view-item">
-            <strong>Miembro desde:</strong>
-            <span id="viewFecha">-</span>
-          </div>
-        </div>
       </div>
 
+      <div class="profile-edit-footer">
+        <button type="button" class="profile-btn-cancel" id="btnCancelEdit">Cancelar</button>
+        <button type="submit" form="profileEditForm" class="profile-btn-save" id="btnSaveProfile">Guardar</button>
+      </div>
+    </div>
+  </div>
 
-      <!-- Sección de Seguidores/Seguidos -->
-      <div class="followers-card" id="followersCard" style="display: none;">
-        <div class="card-header">
-          <h3 id="followersTitle">Seguidores</h3>
-          <button class="btn-close-followers" id="btnCloseFollowers">✕</button>
+  <!-- Modal de publicación -->
+  <div class="profile-post-modal" id="profilePostModal">
+    <button class="profile-post-modal-close" id="btnClosePostModal">✕</button>
+    <div class="profile-post-modal-content">
+      <div class="profile-post-modal-image">
+        <img src="" alt="Publicación" id="postModalImage" />
+      </div>
+      <div class="profile-post-modal-details">
+        <div class="profile-post-modal-header">
+          <img src="" alt="Usuario" class="profile-post-modal-avatar" id="postModalAvatar" />
+          <div class="profile-post-modal-user">
+            <div class="profile-post-modal-username" id="postModalUsername">@usuario</div>
+          </div>
+        </div>
+        <!-- Aquí se pueden agregar más detalles de la publicación -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de estadísticas detalladas -->
+  <div class="profile-stats-modal" id="profileStatsModal">
+    <div class="profile-stats-content">
+      <div class="profile-stats-header">
+        <h3 class="profile-stats-title">
+          <span>📊</span>
+          <span>Estadísticas Detalladas</span>
+        </h3>
+        <button class="profile-stats-close" id="btnCloseStatsModal">✕</button>
+      </div>
+      
+      <div class="profile-stats-body">
+        <!-- Grid de estadísticas principales -->
+        <div class="profile-stats-grid">
+          <div class="profile-stat-card">
+            <div class="profile-stat-card-icon">📱</div>
+            <div class="profile-stat-card-value" id="statsDetailPosts">0</div>
+            <div class="profile-stat-card-label">Publicaciones</div>
+          </div>
+          
+          <div class="profile-stat-card">
+            <div class="profile-stat-card-icon">❤️</div>
+            <div class="profile-stat-card-value" id="statsDetailLikes">0</div>
+            <div class="profile-stat-card-label">Likes totales</div>
+          </div>
+          
+          <div class="profile-stat-card">
+            <div class="profile-stat-card-icon">💬</div>
+            <div class="profile-stat-card-value" id="statsDetailComments">0</div>
+            <div class="profile-stat-card-label">Comentarios</div>
+          </div>
+          
+          <div class="profile-stat-card">
+            <div class="profile-stat-card-icon">👁️</div>
+            <div class="profile-stat-card-value" id="statsDetailViews">0</div>
+            <div class="profile-stat-card-label">Vistas de perfil</div>
+          </div>
+          
+          <div class="profile-stat-card">
+            <div class="profile-stat-card-icon">👥</div>
+            <div class="profile-stat-card-value" id="statsDetailFollowers">0</div>
+            <div class="profile-stat-card-label">Seguidores</div>
+          </div>
+          
+          <div class="profile-stat-card">
+            <div class="profile-stat-card-icon">🔗</div>
+            <div class="profile-stat-card-value" id="statsDetailFollowing">0</div>
+            <div class="profile-stat-card-label">Siguiendo</div>
+          </div>
         </div>
         
-        <div class="followers-tabs">
-          <button class="tab-btn active" id="tabSeguidores">Seguidores</button>
-          <button class="tab-btn" id="tabSeguidos">Siguiendo</button>
-        </div>
+        <div class="profile-stats-divider"></div>
         
-        <div class="followers-list" id="followersList">
-          <div class="loading-followers">Cargando...</div>
+        <!-- Información adicional -->
+        <div class="profile-stats-info">
+          <div class="profile-stat-info-item">
+            <div class="profile-stat-info-icon">📅</div>
+            <div class="profile-stat-info-content">
+              <div class="profile-stat-info-label">Miembro desde</div>
+              <div class="profile-stat-info-value" id="statsDetailMemberSince">Cargando...</div>
+            </div>
+          </div>
+          
+          <div class="profile-stat-info-item">
+            <div class="profile-stat-info-icon">🕐</div>
+            <div class="profile-stat-info-content">
+              <div class="profile-stat-info-label">Última actividad</div>
+              <div class="profile-stat-info-value" id="statsDetailLastActivity">Cargando...</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- Botón flotante de WhatsApp -->
+  <a href="https://wa.me/5491234567890?text=Hola,%20necesito%20ayuda%20con%20LaburitoYa" 
+     class="floating-contact-btn" 
+     target="_blank" 
+     rel="noopener noreferrer"
+     aria-label="Contactar por WhatsApp">
+  </a>
+
+  <!-- Scripts -->
   <script src="auth.js"></script>
   <script src="followers.js"></script>
-  <script src="profile.js"></script>
+  <script src="profile-instagram.js"></script>
+  
   <!-- Scripts opcionales -->
   <script>
-    // Cargar módulos opcionales de forma segura
-    const optionalScripts = ['search.js', 'notifications-feed.js'];
+    const optionalScripts = ['search.js', 'notifications.js', 'notifications-feed.js'];
     optionalScripts.forEach(script => {
       const scriptElement = document.createElement('script');
       scriptElement.src = script;
-      scriptElement.onerror = () => console.warn(`⚠️ ${script} no disponible, continuando sin él`);
+      scriptElement.onerror = () => console.warn(`⚠️ ${script} no disponible`);
       document.body.appendChild(scriptElement);
     });
-    
-    // Inicializar dropdown de +INFO
+
+    // Menú hamburguesa y dropdowns
     document.addEventListener('DOMContentLoaded', function() {
       const navInfo = document.getElementById('navInfo');
       if (navInfo) {
@@ -334,16 +409,28 @@
           }
         });
       }
-      
-      // Cerrar dropdown al hacer click fuera
+
       document.addEventListener('click', function(e) {
         const navInfo = document.getElementById('navInfo');
         if (navInfo && !navInfo.contains(e.target)) {
           navInfo.classList.remove('active');
         }
+        
+        const navNotificaciones = document.getElementById('navNotificaciones');
+        if (navNotificaciones && !navNotificaciones.contains(e.target)) {
+          navNotificaciones.classList.remove('active');
+        }
       });
 
-      // Funcionalidad del menú hamburguesa
+      const navNotificaciones = document.getElementById('navNotificaciones');
+      if (navNotificaciones) {
+        navNotificaciones.addEventListener('click', function(e) {
+          if (!e.target.closest('.dropdown-menu')) {
+            this.classList.toggle('active');
+          }
+        });
+      }
+
       const hamburger = document.getElementById('navHamburger');
       const mobileMenu = document.getElementById('mobileMenu');
       const mobileLogout = document.getElementById('mobileLogout');
@@ -354,14 +441,12 @@
           mobileMenu.classList.toggle('active');
         });
 
-        // Cerrar menú al hacer clic fuera
         document.addEventListener('click', function(e) {
           if (!mobileMenu.contains(e.target) && !hamburger.contains(e.target)) {
             mobileMenu.classList.remove('active');
           }
         });
 
-        // Cerrar menú al hacer clic en un enlace
         const menuItems = mobileMenu.querySelectorAll('.mobile-menu-item');
         menuItems.forEach(item => {
           item.addEventListener('click', function() {
@@ -370,13 +455,31 @@
         });
       }
 
-      // Funcionalidad de cerrar sesión en menú móvil
       if (mobileLogout) {
         mobileLogout.addEventListener('click', function(e) {
           e.preventDefault();
           if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
-            localStorage.removeItem('currentUser');
-            window.location.href = 'login.html';
+            if (window.auth) {
+              window.auth.cerrarSesion();
+            } else {
+              localStorage.removeItem('usuarioActual');
+              window.location.href = 'login.html';
+            }
+          }
+        });
+      }
+
+      const btnCerrarSesion = document.getElementById('btnCerrarSesion');
+      if (btnCerrarSesion) {
+        btnCerrarSesion.addEventListener('click', function(e) {
+          e.preventDefault();
+          if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
+            if (window.auth) {
+              window.auth.cerrarSesion();
+            } else {
+              localStorage.removeItem('usuarioActual');
+              window.location.href = 'login.html';
+            }
           }
         });
       }
