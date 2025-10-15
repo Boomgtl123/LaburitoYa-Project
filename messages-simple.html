@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mensajes - LaburitoYa (Simple)</title>
+  <link rel="stylesheet" href="messages.css" />
+  <style>
+    /* Estilos inline para asegurar que carguen */
+    .loading-conversations {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      gap: 12px;
+    }
+    .spinner-small {
+      width: 24px;
+      height: 24px;
+      border: 3px solid #e0e0e0;
+      border-top-color: #0a66c2;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <h1 style="padding: 20px;">Mensajes - Versión Simple</h1>
+  
+  <div style="max-width: 400px; margin: 0 auto; background: white; border: 1px solid #ddd; border-radius: 8px;">
+    <div style="padding: 20px; border-bottom: 1px solid #ddd;">
+      <h2 style="margin: 0;">Conversaciones</h2>
+    </div>
+    
+    <div id="conversationsList" style="min-height: 300px;">
+      <div class="loading-conversations">
+        <div class="spinner-small"></div>
+        <p>Cargando conversaciones...</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="debug" style="max-width: 800px; margin: 20px auto; padding: 20px; background: #f5f5f5; border-radius: 8px; font-family: monospace; font-size: 12px;"></div>
+
+  <script>
+    // Script inline para debugging
+    const debug = document.getElementById('debug');
+    function log(msg) {
+      console.log(msg);
+      debug.innerHTML += msg + '<br>';
+    }
+
+    log('🚀 Iniciando...');
+
+    // Verificar usuario
+    const usuarioActualStr = localStorage.getItem('usuarioActual');
+    if (!usuarioActualStr) {
+      log('❌ No hay usuario en sesión');
+      document.getElementById('conversationsList').innerHTML = '<p style="padding: 20px; text-align: center;">No hay sesión activa. <a href="login.html">Iniciar sesión</a></p>';
+    } else {
+      const usuarioActual = JSON.parse(usuarioActualStr);
+      log('✅ Usuario: ' + usuarioActual.nombre);
+      
+      // Cargar conversaciones
+      log('📥 Cargando conversaciones...');
+      
+      fetch('https://laburitoya-6e55d-default-rtdb.firebaseio.com/mensajes.json')
+        .then(response => {
+          log('📡 Respuesta recibida: ' + response.status);
+          return response.json();
+        })
+        .then(data => {
+          log('📊 Datos: ' + (data ? 'Sí' : 'No'));
+          
+          if (!data) {
+            document.getElementById('conversationsList').innerHTML = '<p style="padding: 20px; text-align: center;">No hay mensajes</p>';
+            return;
+          }
+          
+          // Agrupar conversaciones
+          const conversaciones = {};
+          for (const id in data) {
+            const mensaje = data[id];
+            if (mensaje.de === usuarioActual.id || mensaje.para === usuarioActual.id) {
+              const otroUsuarioId = mensaje.de === usuarioActual.id ? mensaje.para : mensaje.de;
+              
+              if (!conversaciones[otroUsuarioId]) {
+                conversaciones[otroUsuarioId] = {
+                  ultimoMensaje: mensaje,
+                  mensajes: []
+                };
+              }
+              
+              conversaciones[otroUsuarioId].mensajes.push(mensaje);
+              
+              if (new Date(mensaje.fecha) > new Date(conversaciones[otroUsuarioId].ultimoMensaje.fecha)) {
+                conversaciones[otroUsuarioId].ultimoMensaje = mensaje;
+              }
+            }
+          }
+          
+          const numConv = Object.keys(conversaciones).length;
+          log('✅ Conversaciones encontradas: ' + numConv);
+          
+          if (numConv === 0) {
+            document.getElementById('conversationsList').innerHTML = '<p style="padding: 20px; text-align: center;">No tienes conversaciones</p>';
+            return;
+          }
+          
+          // Renderizar
+          const conversationsList = document.getElementById('conversationsList');
+          conversationsList.innerHTML = '';
+          
+          // Obtener usuarios y renderizar
+          const promises = Object.keys(conversaciones).map(userId => {
+            return fetch(`https://laburitoya-6e55d-default-rtdb.firebaseio.com/usuarios/${userId}.json`)
+              .then(r => r.json())
+              .then(usuario => {
+                if (!usuario) return null;
+                
+                const conv = conversaciones[userId];
+                const ultimoMensaje = conv.ultimoMensaje;
+                const esEnviado = ultimoMensaje.de === usuarioActual.id;
+                const textoMensaje = esEnviado ? `Tú: ${ultimoMensaje.mensaje}` : ultimoMensaje.mensaje;
+                
+                const div = document.createElement('div');
+                div.style.cssText = 'display: flex; gap: 12px; padding: 12px; border-bottom: 1px solid #f3f2ef; cursor: pointer;';
+                div.innerHTML = `
+                  <img src="${usuario.foto || 'https://via.placeholder.com/48'}" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover;" />
+                  <div style="flex: 1;">
+                    <p style="margin: 0 0 4px 0; font-weight: 600;">${usuario.nombre}</p>
+                    <p style="margin: 0; font-size: 13px; color: #666;">${textoMensaje}</p>
+                  </div>
+                `;
+                
+                div.addEventListener('click', () => {
+                  alert('Conversación con ' + usuario.nombre);
+                });
+                
+                conversationsList.appendChild(div);
+                log('✅ Renderizada conversación con: ' + usuario.nombre);
+              });
+          });
+          
+          Promise.all(promises).then(() => {
+            log('🎉 TODAS LAS CONVERSACIONES CARGADAS');
+          });
+        })
+        .catch(error => {
+          log('❌ ERROR: ' + error.message);
+          document.getElementById('conversationsList').innerHTML = '<p style="padding: 20px; text-align: center; color: red;">Error: ' + error.message + '</p>';
+        });
+    }
+  </script>
+</body>
+</html>
