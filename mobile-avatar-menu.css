@@ -1,0 +1,67 @@
+/* ========== MENÚ DEL AVATAR EN MÓVIL ========== */
+
+/* Dropdown del avatar */
+.dropdown-avatar {
+  display: none;
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  min-width: 280px;
+  max-width: 320px;
+  z-index: 1000;
+  padding: 8px 0;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.nav-dropdown.active .dropdown-avatar {
+  display: block;
+}
+
+/* Estilos responsive */
+@media (max-width: 768px) {
+  /* Ocultar botón hamburguesa en móvil */
+  .nav-hamburger {
+    display: none !important;
+  }
+  
+  /* Ocultar menú móvil antiguo */
+  .mobile-menu {
+    display: none !important;
+  }
+  
+  /* Ajustar dropdown del avatar para móvil */
+  .dropdown-avatar {
+    min-width: 300px;
+    max-width: 90vw;
+    right: 0;
+  }
+  
+  /* Asegurar que el avatar sea clickeable */
+  .nav-avatar-btn {
+    position: relative;
+  }
+}
+
+@media (max-width: 480px) {
+  /* En pantallas muy pequeñas, el dropdown ocupa casi todo el ancho */
+  .dropdown-avatar {
+    min-width: calc(100vw - 32px);
+    max-width: calc(100vw - 32px);
+    right: -12px;
+  }
+}
+
+/* En desktop, ocultar el dropdown del avatar */
+@media (min-width: 769px) {
+  .dropdown-avatar {
+    display: none !important;
+  }
+  
+  .nav-dropdown.active .dropdown-avatar {
+    display: none !important;
+  }
+}
