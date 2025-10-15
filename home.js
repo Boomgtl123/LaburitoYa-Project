@@ -259,6 +259,7 @@ async function crearPublicacion(e) {
     userPerfil: usuarioActual.perfil,
     userTelefono: usuarioActual.telefono,
     userZona: usuarioActual.zona,
+    userVerificado: auth.estaVerificado(usuarioActual),
     hashtags: hashtags,
     likes: [],
     comentarios: [],
