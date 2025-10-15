@@ -138,11 +138,86 @@ function cargarDatosPerfil() {
     profileContact.innerHTML = `📞 ${usuarioPerfil.telefono || 'Sin teléfono'}`;
   }
   
+  // Generar botones de redes sociales
+  generarBotonesRedesSociales();
+  
   // Cargar estadísticas
   cargarEstadisticas();
   
   // Verificar si ya sigue al usuario
   verificarSeguimiento();
+}
+
+// ========== GENERAR BOTONES DE REDES SOCIALES ==========
+function generarBotonesRedesSociales() {
+  const socialLinksContainer = document.getElementById('profileSocialLinks');
+  if (!socialLinksContainer) return;
+  
+  socialLinksContainer.innerHTML = '';
+  
+  // Definir redes sociales disponibles
+  const redesSociales = [
+    {
+      nombre: 'instagram',
+      icono: '📷',
+      url: usuarioPerfil.redesSociales?.instagram,
+      baseUrl: 'https://instagram.com/'
+    },
+    {
+      nombre: 'facebook',
+      icono: '👤',
+      url: usuarioPerfil.redesSociales?.facebook,
+      baseUrl: 'https://facebook.com/'
+    },
+    {
+      nombre: 'twitter',
+      icono: '🐦',
+      url: usuarioPerfil.redesSociales?.twitter,
+      baseUrl: 'https://twitter.com/'
+    },
+    {
+      nombre: 'linkedin',
+      icono: '💼',
+      url: usuarioPerfil.redesSociales?.linkedin,
+      baseUrl: 'https://linkedin.com/in/'
+    },
+    {
+      nombre: 'whatsapp',
+      icono: '💬',
+      url: usuarioPerfil.telefono,
+      baseUrl: 'https://wa.me/'
+    },
+    {
+      nombre: 'email',
+      icono: '✉️',
+      url: usuarioPerfil.correo,
+      baseUrl: 'mailto:'
+    }
+  ];
+  
+  // Generar botones solo para redes que tengan información
+  redesSociales.forEach(red => {
+    if (red.url && red.url.trim() !== '') {
+      const btn = document.createElement('a');
+      btn.className = `profile-social-btn ${red.nombre}`;
+      btn.href = red.nombre === 'email' ? `${red.baseUrl}${red.url}` : 
+                 red.nombre === 'whatsapp' ? `${red.baseUrl}${red.url.replace(/\D/g, '')}` :
+                 red.url.startsWith('http') ? red.url : `${red.baseUrl}${red.url}`;
+      btn.target = '_blank';
+      btn.rel = 'noopener noreferrer';
+      btn.innerHTML = red.icono;
+      btn.title = red.nombre.charAt(0).toUpperCase() + red.nombre.slice(1);
+      
+      socialLinksContainer.appendChild(btn);
+    }
+  });
+  
+  // Si no hay redes sociales, ocultar el contenedor
+  if (socialLinksContainer.children.length === 0) {
+    socialLinksContainer.style.display = 'none';
+  } else {
+    socialLinksContainer.style.display = 'flex';
+  }
 }
 
 // ========== GENERAR USERNAME ==========
@@ -676,7 +751,8 @@ window.publicProfileInstagram = {
   toggleSeguir,
   compartirPerfil,
   abrirModalEstadisticas,
-  cerrarModalEstadisticas
+  cerrarModalEstadisticas,
+  generarBotonesRedesSociales
 };
 
 console.log('✅ public-profile-instagram.js cargado correctamente');
