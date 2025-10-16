@@ -9,8 +9,8 @@ let conversacionActiva = null;
 window.addEventListener('DOMContentLoaded', function() {
   console.log('🔄 [MESSAGES] DOM cargado, iniciando...');
   
-  // Verificar sesión
-  const usuarioActualStr = localStorage.getItem('usuarioActual');
+  // Verificar sesión - intentar ambas claves
+  let usuarioActualStr = localStorage.getItem('currentUser') || localStorage.getItem('usuarioActual');
   if (!usuarioActualStr) {
     console.error('❌ [MESSAGES] No hay sesión activa');
     mostrarError('No hay sesión activa', 'Por favor inicia sesión', 'login.html');
@@ -19,7 +19,7 @@ window.addEventListener('DOMContentLoaded', function() {
   
   try {
     usuarioActual = JSON.parse(usuarioActualStr);
-    console.log('✅ [MESSAGES] Usuario:', usuarioActual.nombre);
+    console.log('✅ [MESSAGES] Usuario:', usuarioActual.nombre, 'ID:', usuarioActual.id);
   } catch (e) {
     console.error('❌ [MESSAGES] Error al parsear usuario:', e);
     mostrarError('Error de sesión', 'Datos de sesión corruptos', 'login.html');
@@ -389,6 +389,7 @@ function configurarEventListeners() {
     btnCerrarSesion.addEventListener('click', (e) => {
       e.preventDefault();
       if (confirm('¿Cerrar sesión?')) {
+        localStorage.removeItem('currentUser');
         localStorage.removeItem('usuarioActual');
         window.location.href = 'login.html';
       }
