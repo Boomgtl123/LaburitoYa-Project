@@ -281,9 +281,16 @@ async function enviarMensajeDirectoTicket(destinatarioId, remitente, mensaje, ti
       throw new Error('Datos inválidos: falta destinatario o remitente');
     }
     
+    // IMPORTANTE: Verificar que destinatario y remitente sean diferentes
+    if (destinatarioId === remitente.id) {
+      console.error('❌ Error: El destinatario y remitente son la misma persona');
+      throw new Error('No se puede enviar mensaje a uno mismo');
+    }
+    
     // Crear ID de conversación (ordenado alfabéticamente)
     const conversacionId = [remitente.id, destinatarioId].sort().join('_');
     console.log('📨 Conversación ID:', conversacionId);
+    console.log('📨 Verificación: remitente !== destinatario:', remitente.id !== destinatarioId);
     
     // Crear mensaje con referencia al ticket
     const nuevoMensaje = {

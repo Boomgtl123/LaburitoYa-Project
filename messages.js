@@ -89,18 +89,54 @@ function cargarConversaciones() {
         return;
       }
       
-      // Agrupar conversaciones
+      // Agrupar conversaciones - soportar AMBAS estructuras
       const conversaciones = {};
-      for (const conversacionId in data) {
-        const mensajesConv = data[conversacionId];
+      
+      for (const key in data) {
+        const item = data[key];
         
-        // Iterar sobre los mensajes de cada conversación
-        for (const mensajeId in mensajesConv) {
-          const mensaje = mensajesConv[mensajeId];
+        // Verificar si es estructura anidada (objeto con múltiples mensajes) o plana (mensaje directo)
+        const esEstructuraAnidada = item && typeof item === 'object' && !item.mensaje && !item.de && !item.remitente;
+        
+        if (esEstructuraAnidada) {
+          // Estructura anidada: /mensajes/{conversacionId}/{mensajeId}
+          for (const mensajeId in item) {
+            const mensaje = item[mensajeId];
+            if (!mensaje || typeof mensaje !== 'object') continue;
+            
+            // Soportar ambos formatos: de/para y remitente/destinatario
+            const remitente = mensaje.remitente || mensaje.de;
+            const destinatario = mensaje.destinatario || mensaje.para;
+            
+            if (!remitente || !destinatario) continue;
+            
+            if (remitente === usuarioActual.id || destinatario === usuarioActual.id) {
+              const otroUsuarioId = remitente === usuarioActual.id ? destinatario : remitente;
+            
+              if (!conversaciones[otroUsuarioId]) {
+                conversaciones[otroUsuarioId] = {
+                  ultimoMensaje: mensaje,
+                  mensajes: []
+                };
+              }
+              
+              conversaciones[otroUsuarioId].mensajes.push(mensaje);
+              
+              if (new Date(mensaje.fecha) > new Date(conversaciones[otroUsuarioId].ultimoMensaje.fecha)) {
+                conversaciones[otroUsuarioId].ultimoMensaje = mensaje;
+              }
+            }
+          }
+        } else {
+          // Estructura plana: /mensajes/{mensajeId}
+          const mensaje = item;
+          if (!mensaje || typeof mensaje !== 'object') continue;
           
-          // Soportar ambos formatos: de/para (viejo) y remitente/destinatario (nuevo)
+          // Soportar ambos formatos
           const remitente = mensaje.remitente || mensaje.de;
           const destinatario = mensaje.destinatario || mensaje.para;
+          
+          if (!remitente || !destinatario) continue;
           
           if (remitente === usuarioActual.id || destinatario === usuarioActual.id) {
             const otroUsuarioId = remitente === usuarioActual.id ? destinatario : remitente;
@@ -258,21 +294,44 @@ function cargarMensajes(userId) {
         return;
       }
       
-      // Filtrar mensajes - soportar estructura anidada por conversación
+      // Filtrar mensajes - soportar AMBAS estructuras
       const mensajes = [];
-      for (const conversacionId in data) {
-        const mensajesConv = data[conversacionId];
+      
+      for (const key in data) {
+        const item = data[key];
         
-        for (const mensajeId in mensajesConv) {
-          const mensaje = mensajesConv[mensajeId];
+        // Verificar si es estructura anidada o plana
+        const esEstructuraAnidada = item && typeof item === 'object' && !item.mensaje && !item.de && !item.remitente;
+        
+        if (esEstructuraAnidada) {
+          // Estructura anidada
+          for (const mensajeId in item) {
+            const mensaje = item[mensajeId];
+            if (!mensaje || typeof mensaje !== 'object') continue;
+            
+            const remitente = mensaje.remitente || mensaje.de;
+            const destinatario = mensaje.destinatario || mensaje.para;
+            
+            if (!remitente || !destinatario) continue;
+            
+            if ((remitente === usuarioActual.id && destinatario === userId) ||
+                (remitente === userId && destinatario === usuarioActual.id)) {
+              mensajes.push({ id: mensajeId, ...mensaje });
+            }
+          }
+        } else {
+          // Estructura plana
+          const mensaje = item;
+          if (!mensaje || typeof mensaje !== 'object') continue;
           
-          // Soportar ambos formatos
           const remitente = mensaje.remitente || mensaje.de;
           const destinatario = mensaje.destinatario || mensaje.para;
           
+          if (!remitente || !destinatario) continue;
+          
           if ((remitente === usuarioActual.id && destinatario === userId) ||
               (remitente === userId && destinatario === usuarioActual.id)) {
-            mensajes.push({ id: mensajeId, ...mensaje });
+            mensajes.push({ id: key, ...mensaje });
           }
         }
       }
