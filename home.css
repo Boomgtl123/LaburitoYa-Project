@@ -163,7 +163,7 @@ body {
 }
 
 .nav-logo {
-  height: 65px;
+  height: 75px;
   width: auto;
   filter: brightness(0) invert(1);
   cursor: pointer;
@@ -207,6 +207,15 @@ body {
 
 .nav-icon {
   font-size: 20px;
+}
+
+/* Icono de notificaciones como imagen */
+.nav-icon-img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  display: inline-block;
+  vertical-align: middle;
 }
 
 .nav-avatar-btn {
@@ -1934,7 +1943,7 @@ body {
   }
 
   .nav-logo {
-    height: 45px;
+    height: 52px;
     transform: scale(1.35);
     transform-origin: center;
   }
@@ -2062,7 +2071,7 @@ body {
   }
 
   .nav-logo {
-    height: 40px;
+    height: 46px;
     transform: scale(1.25);
     transform-origin: center;
   }
