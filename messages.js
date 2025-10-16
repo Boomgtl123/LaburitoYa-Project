@@ -4,6 +4,11 @@ console.log('✅ [MESSAGES] Script cargado');
 
 let usuarioActual = null;
 let conversacionActiva = null;
+let mensajesCargados = [];
+let cargandoMensajesAntiguos = false;
+let todosLosMensajesCargados = false;
+const MENSAJES_POR_CARGA = 20;
+let ultimaActualizacionConversaciones = null;
 
 // ========== INICIALIZACIÓN ==========
 window.addEventListener('DOMContentLoaded', function() {
@@ -28,7 +33,7 @@ window.addEventListener('DOMContentLoaded', function() {
   
   // Exponer funciones globalmente
   window.cargarConversaciones = cargarConversaciones;
-  window.cargarMensajes = cargarMensajes;
+  window.cargarMensajesRecientes = cargarMensajesRecientes;
   window.usuarioActual = usuarioActual;
   window.conversacionActiva = null;
   
@@ -45,18 +50,40 @@ window.addEventListener('DOMContentLoaded', function() {
   // Cargar conversaciones
   cargarConversaciones();
   
-  // Actualizar cada 15 segundos
+  // Actualizar cada 30 segundos solo si hay cambios
   setInterval(() => {
     if (!conversacionActiva) {
-      cargarConversaciones();
+      cargarConversacionesSilencioso();
     }
-  }, 15000);
+  }, 30000);
   
   console.log('✅ [MESSAGES] Inicialización completada');
 });
 
+// ========== CARGAR CONVERSACIONES SILENCIOSO (SIN PARPADEO) ==========
+function cargarConversacionesSilencioso() {
+  // No recargar si hay una conversación activa
+  if (conversacionActiva) {
+    console.log('📥 [MESSAGES] Conversación activa, no recargar');
+    return;
+  }
+  
+  fetch('https://laburitoya-6e55d-default-rtdb.firebaseio.com/mensajes.json')
+    .then(response => response.json())
+    .then(data => {
+      const dataHash = JSON.stringify(data);
+      if (dataHash === ultimaActualizacionConversaciones) {
+        console.log('📥 [MESSAGES] Sin cambios en conversaciones');
+        return;
+      }
+      ultimaActualizacionConversaciones = dataHash;
+      cargarConversaciones(false);
+    })
+    .catch(err => console.error('❌ [MESSAGES] Error en actualización silenciosa:', err));
+}
+
 // ========== CARGAR CONVERSACIONES ==========
-function cargarConversaciones() {
+function cargarConversaciones(mostrarLoading = true) {
   console.log('📥 [MESSAGES] Cargando conversaciones...');
   
   const conversationsList = document.getElementById('conversationsList');
@@ -65,13 +92,15 @@ function cargarConversaciones() {
     return;
   }
   
-  // Mostrar loading
-  conversationsList.innerHTML = `
-    <div class="loading-conversations">
-      <div class="spinner-small"></div>
-      <p>Cargando conversaciones...</p>
-    </div>
-  `;
+  // Mostrar loading solo si es la primera carga
+  if (mostrarLoading) {
+    conversationsList.innerHTML = `
+      <div class="loading-conversations">
+        <div class="spinner-small"></div>
+        <p>Cargando conversaciones...</p>
+      </div>
+    `;
+  }
   
   fetch('https://laburitoya-6e55d-default-rtdb.firebaseio.com/mensajes.json')
     .then(response => {
@@ -104,6 +133,14 @@ function cargarConversaciones() {
             const mensaje = item[mensajeId];
             if (!mensaje || typeof mensaje !== 'object') continue;
             
+            // FILTRAR: Solo mensajes reales, no notificaciones
+            if (mensaje.tipo && mensaje.tipo !== 'mensaje') {
+              continue; // Saltar notificaciones de seguimiento, likes, comentarios
+            }
+            
+            // Verificar que tenga contenido de mensaje
+            if (!mensaje.mensaje) continue;
+            
             // Soportar ambos formatos: de/para y remitente/destinatario
             const remitente = mensaje.remitente || mensaje.de;
             const destinatario = mensaje.destinatario || mensaje.para;
@@ -131,6 +168,14 @@ function cargarConversaciones() {
           // Estructura plana: /mensajes/{mensajeId}
           const mensaje = item;
           if (!mensaje || typeof mensaje !== 'object') continue;
+          
+          // FILTRAR: Solo mensajes reales, no notificaciones
+          if (mensaje.tipo && mensaje.tipo !== 'mensaje') {
+            continue; // Saltar notificaciones de seguimiento, likes, comentarios
+          }
+          
+          // Verificar que tenga contenido de mensaje
+          if (!mensaje.mensaje) continue;
           
           // Soportar ambos formatos
           const remitente = mensaje.remitente || mensaje.de;
@@ -170,16 +215,31 @@ function cargarConversaciones() {
       const noConv = document.getElementById('noConversations');
       if (noConv) noConv.style.display = 'none';
       
-      // Ordenar por fecha
+      // Ordenar por fecha (más reciente primero)
       const conversacionesOrdenadas = Object.entries(conversaciones).sort((a, b) => {
         return new Date(b[1].ultimoMensaje.fecha) - new Date(a[1].ultimoMensaje.fecha);
       });
       
-      // Limpiar lista
-      conversationsList.innerHTML = '';
+      // Limpiar lista solo si mostrarLoading es true
+      if (mostrarLoading) {
+        conversationsList.innerHTML = '';
+      }
+      
+      // Guardar conversaciones ya renderizadas para evitar duplicados
+      const conversacionesExistentes = new Set();
+      document.querySelectorAll('.conversation-item').forEach(item => {
+        const userId = item.dataset.userId;
+        if (userId) conversacionesExistentes.add(userId);
+      });
       
       // Renderizar cada conversación
       conversacionesOrdenadas.forEach(([userId, conv]) => {
+        // Evitar duplicados
+        if (conversacionesExistentes.has(userId) && !mostrarLoading) {
+          return;
+        }
+        
+        // Renderizar conversación
         fetch(`https://laburitoya-6e55d-default-rtdb.firebaseio.com/usuarios/${userId}.json`)
           .then(r => r.json())
           .then(usuario => {
@@ -201,14 +261,27 @@ function cargarConversaciones() {
             
             const div = document.createElement('div');
             div.className = 'conversation-item';
+            div.dataset.userId = userId; // Agregar ID para evitar duplicados
             if (noLeidos > 0) div.classList.add('unread');
             if (conversacionActiva === userId) div.classList.add('active');
+            
+            // Indicador de visto mejorado
+            let indicadorVisto = '';
+            if (esEnviado) {
+              if (ultimoMensaje.leido) {
+                // Tick verde doble cuando está leído
+                indicadorVisto = '<span class="message-status read" title="Leído">✓✓</span>';
+              } else {
+                // Tick gris cuando está enviado pero no leído
+                indicadorVisto = '<span class="message-status sent" title="Enviado">✓</span>';
+              }
+            }
             
             div.innerHTML = `
               <img src="${obtenerAvatar(usuario, 48)}" alt="${usuario.nombre}" class="conversation-avatar" />
               <div class="conversation-info">
                 <p class="conversation-name">${auth.renderNombreConBadge(usuario.nombre, usuario)}</p>
-                <p class="conversation-last-message">${textoMensaje}</p>
+                <p class="conversation-last-message">${indicadorVisto} ${textoMensaje}</p>
               </div>
               <span class="conversation-time">${tiempo}</span>
               ${noLeidos > 0 ? `<span class="unread-badge">${noLeidos}</span>` : ''}
@@ -216,7 +289,25 @@ function cargarConversaciones() {
             
             div.addEventListener('click', () => abrirConversacion(userId, usuario));
             
-            conversationsList.appendChild(div);
+            if (mostrarLoading) {
+              conversationsList.appendChild(div);
+            } else {
+              // Insertar en orden si no es carga inicial
+              const items = Array.from(conversationsList.children);
+              let inserted = false;
+              for (let i = 0; i < items.length; i++) {
+                const itemUserId = items[i].dataset.userId;
+                const itemConv = conversaciones[itemUserId];
+                if (itemConv && new Date(conv.ultimoMensaje.fecha) > new Date(itemConv.ultimoMensaje.fecha)) {
+                  conversationsList.insertBefore(div, items[i]);
+                  inserted = true;
+                  break;
+                }
+              }
+              if (!inserted) {
+                conversationsList.appendChild(div);
+              }
+            }
             console.log('✅ [MESSAGES] Renderizada:', usuario.nombre);
           })
           .catch(err => console.error('❌ [MESSAGES] Error al obtener usuario:', err));
@@ -278,16 +369,25 @@ function abrirConversacion(userId, usuario) {
   // Marcar notificaciones de mensajes como leídas
   marcarNotificacionesMensajesComoLeidas(userId);
   
-  // Cargar mensajes
-  cargarMensajes(userId);
+  // Cargar mensajes (solo los últimos)
+  cargarMensajesRecientes(userId);
+  
+  // Recargar conversaciones después de marcar como leídos para actualizar el contador
+  setTimeout(() => {
+    cargarConversaciones(false);
+  }, 500);
 }
 
-// ========== CARGAR MENSAJES ==========
-function cargarMensajes(userId) {
-  console.log('📨 [MESSAGES] Cargando mensajes con:', userId);
+// ========== CARGAR MENSAJES RECIENTES (LAZY LOADING) ==========
+function cargarMensajesRecientes(userId) {
+  console.log('📨 [MESSAGES] Cargando mensajes recientes con:', userId);
   
   const chatMessages = document.getElementById('chatMessages');
   if (!chatMessages) return;
+  
+  // Resetear variables
+  mensajesCargados = [];
+  todosLosMensajesCargados = false;
   
   fetch('https://laburitoya-6e55d-default-rtdb.firebaseio.com/mensajes.json')
     .then(r => r.json())
@@ -297,17 +397,14 @@ function cargarMensajes(userId) {
         return;
       }
       
-      // Filtrar mensajes - soportar AMBAS estructuras
-      const mensajes = [];
+      // Filtrar TODOS los mensajes de esta conversación
+      const todosMensajes = [];
       
       for (const key in data) {
         const item = data[key];
-        
-        // Verificar si es estructura anidada o plana
         const esEstructuraAnidada = item && typeof item === 'object' && !item.mensaje && !item.de && !item.remitente;
         
         if (esEstructuraAnidada) {
-          // Estructura anidada
           for (const mensajeId in item) {
             const mensaje = item[mensajeId];
             if (!mensaje || typeof mensaje !== 'object') continue;
@@ -319,11 +416,10 @@ function cargarMensajes(userId) {
             
             if ((remitente === usuarioActual.id && destinatario === userId) ||
                 (remitente === userId && destinatario === usuarioActual.id)) {
-              mensajes.push({ id: mensajeId, ...mensaje });
+              todosMensajes.push({ id: mensajeId, ...mensaje });
             }
           }
         } else {
-          // Estructura plana
           const mensaje = item;
           if (!mensaje || typeof mensaje !== 'object') continue;
           
@@ -334,99 +430,174 @@ function cargarMensajes(userId) {
           
           if ((remitente === usuarioActual.id && destinatario === userId) ||
               (remitente === userId && destinatario === usuarioActual.id)) {
-            mensajes.push({ id: key, ...mensaje });
+            todosMensajes.push({ id: key, ...mensaje });
           }
         }
       }
       
-      // Ordenar por fecha
-      mensajes.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+      // Ordenar por fecha (más antiguos primero)
+      todosMensajes.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+      
+      // Guardar todos los mensajes
+      mensajesCargados = todosMensajes;
+      
+      // Cargar solo los últimos MENSAJES_POR_CARGA
+      const mensajesAMostrar = todosMensajes.slice(-MENSAJES_POR_CARGA);
+      
+      if (todosMensajes.length <= MENSAJES_POR_CARGA) {
+        todosLosMensajesCargados = true;
+      }
       
       // Renderizar
-      chatMessages.innerHTML = '';
+      renderizarMensajes(mensajesAMostrar, userId, true);
       
-      // Obtener datos del otro usuario para su foto
-      fetch(`https://laburitoya-6e55d-default-rtdb.firebaseio.com/usuarios/${userId}.json`)
-        .then(r => r.json())
-        .then(otroUsuario => {
-          mensajes.forEach(mensaje => {
-            const div = document.createElement('div');
-            // Soportar ambos formatos
-            const remitente = mensaje.remitente || mensaje.de;
-            const esEnviado = remitente === usuarioActual.id;
-            div.className = `message-item ${esEnviado ? 'sent' : 'received'}`;
-            
-            // Usar foto del remitente
-            let avatar;
-            if (esEnviado) {
-              avatar = obtenerAvatar(usuarioActual, 32);
-            } else {
-              // Usar foto del mensaje si está disponible, sino del usuario
-              if (mensaje.remitenteFoto) {
-                avatar = mensaje.remitenteFoto;
-              } else if (otroUsuario) {
-                avatar = obtenerAvatar(otroUsuario, 32);
-              } else {
-                avatar = avatarGenerico(32);
-              }
-            }
-            
-            const tiempo = new Date(mensaje.fecha).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
-            
-            // Formatear mensaje (convertir markdown básico)
-            let mensajeFormateado = mensaje.mensaje
-              .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // **texto** -> <strong>texto</strong>
-              .replace(/\n/g, '<br>'); // saltos de línea
-            
-            // Mensaje de texto
-            div.innerHTML = `
-              <img src="${avatar}" alt="Avatar" class="message-avatar" />
-              <div class="message-content">
-                <div class="message-bubble">${mensajeFormateado}</div>
-                <span class="message-time">${tiempo}</span>
-              </div>
-            `;
-            
-            chatMessages.appendChild(div);
-          });
-          
-          // Scroll al final para mostrar últimos mensajes
-          setTimeout(() => {
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-          }, 100);
-        })
-        .catch(err => {
-          console.error('❌ [MESSAGES] Error al obtener usuario:', err);
-          // Renderizar sin foto si falla
-          mensajes.forEach(mensaje => {
-            const div = document.createElement('div');
-            const remitente = mensaje.remitente || mensaje.de;
-            const esEnviado = remitente === usuarioActual.id;
-            div.className = `message-item ${esEnviado ? 'sent' : 'received'}`;
-            
-            const avatar = esEnviado ? obtenerAvatar(usuarioActual, 32) : avatarGenerico(32);
-            const tiempo = new Date(mensaje.fecha).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
-            let mensajeFormateado = mensaje.mensaje
-              .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-              .replace(/\n/g, '<br>');
-            
-            div.innerHTML = `
-              <img src="${avatar}" alt="Avatar" class="message-avatar" />
-              <div class="message-content">
-                <div class="message-bubble">${mensajeFormateado}</div>
-                <span class="message-time">${tiempo}</span>
-              </div>
-            `;
-            
-            chatMessages.appendChild(div);
-          });
-          
-          setTimeout(() => {
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-          }, 100);
-        });
+      // Configurar scroll listener para carga lazy
+      configurarScrollLazy(chatMessages, userId);
     })
     .catch(err => console.error('❌ [MESSAGES] Error al cargar mensajes:', err));
+}
+
+// ========== RENDERIZAR MENSAJES ==========
+function renderizarMensajes(mensajes, userId, scrollAlFinal = false) {
+  const chatMessages = document.getElementById('chatMessages');
+  if (!chatMessages) return;
+  
+  // Si es la primera carga, ocultar y limpiar
+  if (scrollAlFinal) {
+    chatMessages.style.opacity = '0';
+    chatMessages.innerHTML = '';
+  }
+  
+  fetch(`https://laburitoya-6e55d-default-rtdb.firebaseio.com/usuarios/${userId}.json`)
+    .then(r => r.json())
+    .then(otroUsuario => {
+      const fragment = document.createDocumentFragment();
+      
+      mensajes.forEach(mensaje => {
+        const div = document.createElement('div');
+        const remitente = mensaje.remitente || mensaje.de;
+        const esEnviado = remitente === usuarioActual.id;
+        div.className = `message-item ${esEnviado ? 'sent' : 'received'}`;
+        div.dataset.messageId = mensaje.id;
+        
+        let avatar;
+        if (esEnviado) {
+          avatar = obtenerAvatar(usuarioActual, 32);
+        } else {
+          if (mensaje.remitenteFoto) {
+            avatar = mensaje.remitenteFoto;
+          } else if (otroUsuario) {
+            avatar = obtenerAvatar(otroUsuario, 32);
+          } else {
+            avatar = avatarGenerico(32);
+          }
+        }
+        
+        const tiempo = new Date(mensaje.fecha).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+        let mensajeFormateado = mensaje.mensaje
+          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+          .replace(/\n/g, '<br>');
+        
+        div.innerHTML = `
+          <img src="${avatar}" alt="Avatar" class="message-avatar" />
+          <div class="message-content">
+            <div class="message-bubble">${mensajeFormateado}</div>
+            <span class="message-time">${tiempo}</span>
+          </div>
+        `;
+        
+        if (scrollAlFinal) {
+          fragment.appendChild(div);
+        } else {
+          // Insertar al principio para mensajes antiguos
+          chatMessages.insertBefore(div, chatMessages.firstChild);
+        }
+      });
+      
+      if (scrollAlFinal) {
+        chatMessages.appendChild(fragment);
+        
+        // Scroll al final INMEDIATAMENTE
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        
+        // Mostrar con fade-in
+        setTimeout(() => {
+          chatMessages.style.opacity = '1';
+        }, 50);
+      }
+    })
+    .catch(err => console.error('❌ [MESSAGES] Error al renderizar:', err));
+}
+
+// ========== CONFIGURAR SCROLL LAZY ==========
+function configurarScrollLazy(chatMessages, userId) {
+  // Remover listener anterior si existe
+  chatMessages.removeEventListener('scroll', chatMessages._scrollHandler);
+  
+  chatMessages._scrollHandler = function() {
+    // Si está cerca del top (scrollTop < 100px) y no está cargando
+    if (chatMessages.scrollTop < 100 && !cargandoMensajesAntiguos && !todosLosMensajesCargados) {
+      cargarMensajesAntiguos(userId);
+    }
+  };
+  
+  chatMessages.addEventListener('scroll', chatMessages._scrollHandler);
+}
+
+// ========== CARGAR MENSAJES ANTIGUOS ==========
+function cargarMensajesAntiguos(userId) {
+  if (cargandoMensajesAntiguos || todosLosMensajesCargados) return;
+  
+  cargandoMensajesAntiguos = true;
+  console.log('📜 [MESSAGES] Cargando mensajes antiguos...');
+  
+  const chatMessages = document.getElementById('chatMessages');
+  const scrollAnterior = chatMessages.scrollHeight;
+  
+  // Mostrar indicador de carga
+  const loadingDiv = document.createElement('div');
+  loadingDiv.id = 'loading-old-messages';
+  loadingDiv.style.cssText = 'text-align: center; padding: 10px; color: #666; font-size: 12px;';
+  loadingDiv.innerHTML = '<div class="spinner-small" style="margin: 0 auto;"></div><p style="margin: 5px 0 0 0;">Cargando mensajes antiguos...</p>';
+  chatMessages.insertBefore(loadingDiv, chatMessages.firstChild);
+  
+  // Calcular cuántos mensajes ya están mostrados
+  const mensajesMostrados = chatMessages.querySelectorAll('.message-item').length;
+  const totalMensajes = mensajesCargados.length;
+  
+  // Calcular índice de inicio para los siguientes mensajes
+  const indiceInicio = Math.max(0, totalMensajes - mensajesMostrados - MENSAJES_POR_CARGA);
+  const indiceFin = totalMensajes - mensajesMostrados;
+  
+  if (indiceInicio >= indiceFin || indiceInicio < 0) {
+    todosLosMensajesCargados = true;
+    loadingDiv.innerHTML = '<p style="margin: 0; color: #999; font-size: 12px;">📭 No hay más mensajes</p>';
+    setTimeout(() => loadingDiv.remove(), 2000);
+    cargandoMensajesAntiguos = false;
+    return;
+  }
+  
+  const mensajesACargar = mensajesCargados.slice(indiceInicio, indiceFin);
+  
+  setTimeout(() => {
+    // Remover indicador de carga
+    loadingDiv.remove();
+    
+    // Renderizar mensajes antiguos
+    renderizarMensajes(mensajesACargar, userId, false);
+    
+    // Mantener posición de scroll
+    setTimeout(() => {
+      const scrollNuevo = chatMessages.scrollHeight;
+      chatMessages.scrollTop = scrollNuevo - scrollAnterior;
+      cargandoMensajesAntiguos = false;
+    }, 100);
+    
+    // Verificar si ya cargamos todos
+    if (indiceInicio === 0) {
+      todosLosMensajesCargados = true;
+    }
+  }, 500);
 }
 
 // ========== CONFIGURAR EVENT LISTENERS ==========
@@ -484,8 +655,8 @@ function enviarMensaje() {
   .then(response => {
     if (response.ok) {
       messageInput.value = '';
-      cargarMensajes(conversacionActiva);
-      cargarConversaciones();
+      cargarMensajesRecientes(conversacionActiva);
+      cargarConversaciones(false);
       
       // Crear notificación para el destinatario
       crearNotificacionMensaje(conversacionActiva, mensaje);
@@ -632,6 +803,11 @@ async function marcarMensajesComoLeidos(userId) {
       });
       
       console.log('✅ [MESSAGES] Mensajes marcados como leídos:', Object.keys(updates).length);
+      
+      // Recargar conversaciones para actualizar el contador de no leídos (sin parpadeo)
+      setTimeout(() => {
+        cargarConversaciones(false);
+      }, 300);
     }
   } catch (error) {
     console.error('❌ [MESSAGES] Error al marcar mensajes como leídos:', error);

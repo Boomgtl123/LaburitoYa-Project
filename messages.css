@@ -6,6 +6,9 @@
   height: calc(100vh - 52px);
   margin-top: 52px;
   background-color: #f3f2ef;
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* ========== SIDEBAR DE CONVERSACIONES ========== */
@@ -153,6 +156,26 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Indicadores de estado de mensaje */
+.message-status {
+  font-size: 12px;
+  font-weight: bold;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.message-status.sent {
+  color: #999999; /* Gris para enviado pero no leído */
+}
+
+.message-status.read {
+  color: #10b981; /* Verde para leído */
 }
 
 .conversation-item.unread .conversation-last-message {
@@ -313,6 +336,8 @@
   flex-direction: column;
   gap: 16px;
   background-color: #f3f2ef;
+  transition: opacity 0.3s ease-in-out;
+  max-height: calc(100vh - 52px - 65px - 72px); /* viewport - navbar - chat-header - chat-input */
 }
 
 .message-group {
@@ -324,7 +349,8 @@
 .message-item {
   display: flex;
   gap: 8px;
-  max-width: 70%;
+  max-width: 600px;
+  width: fit-content;
 }
 
 .message-item.sent {
