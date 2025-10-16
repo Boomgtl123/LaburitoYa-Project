@@ -322,6 +322,11 @@ async function enviarMensajeDirectoTicket(destinatarioId, remitente, mensaje, ti
 
     // Actualizar o crear conversación
     console.log('📨 Actualizando conversación...');
+    
+    // Primero verificar si la conversación existe
+    const checkConversacion = await fetch(`${FIREBASE_URL}/conversaciones/${conversacionId}.json`);
+    const conversacionExiste = await checkConversacion.json();
+    
     const conversacion = {
       participantes: [remitente.id, destinatarioId],
       ultimoMensaje: nuevoMensaje.mensaje.substring(0, 100),
@@ -329,13 +334,32 @@ async function enviarMensajeDirectoTicket(destinatarioId, remitente, mensaje, ti
       [`noLeidos_${destinatarioId}`]: true
     };
 
-    const conversacionResponse = await fetch(`${FIREBASE_URL}/conversaciones/${conversacionId}.json`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(conversacion)
-    });
+    let conversacionResponse;
+    if (conversacionExiste) {
+      // Si existe, actualizar con PATCH
+      console.log('📨 Conversación existe, actualizando con PATCH...');
+      conversacionResponse = await fetch(`${FIREBASE_URL}/conversaciones/${conversacionId}.json`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(conversacion)
+      });
+    } else {
+      // Si no existe, crear con PUT
+      console.log('📨 Conversación no existe, creando con PUT...');
+      conversacionResponse = await fetch(`${FIREBASE_URL}/conversaciones/${conversacionId}.json`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(conversacion)
+      });
+    }
 
+    console.log('📨 Conversación response status:', conversacionResponse.status);
     console.log('📨 Conversación actualizada:', conversacionResponse.ok);
+    
+    if (!conversacionResponse.ok) {
+      const errorText = await conversacionResponse.text();
+      console.error('📨 Error al actualizar conversación:', errorText);
+    }
 
     // Crear notificación para el usuario
     console.log('📨 Creando notificación...');
