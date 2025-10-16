@@ -91,22 +91,32 @@ function cargarConversaciones() {
       
       // Agrupar conversaciones
       const conversaciones = {};
-      for (const id in data) {
-        const mensaje = data[id];
-        if (mensaje.de === usuarioActual.id || mensaje.para === usuarioActual.id) {
-          const otroUsuarioId = mensaje.de === usuarioActual.id ? mensaje.para : mensaje.de;
+      for (const conversacionId in data) {
+        const mensajesConv = data[conversacionId];
+        
+        // Iterar sobre los mensajes de cada conversación
+        for (const mensajeId in mensajesConv) {
+          const mensaje = mensajesConv[mensajeId];
           
-          if (!conversaciones[otroUsuarioId]) {
-            conversaciones[otroUsuarioId] = {
-              ultimoMensaje: mensaje,
-              mensajes: []
-            };
-          }
+          // Soportar ambos formatos: de/para (viejo) y remitente/destinatario (nuevo)
+          const remitente = mensaje.remitente || mensaje.de;
+          const destinatario = mensaje.destinatario || mensaje.para;
           
-          conversaciones[otroUsuarioId].mensajes.push(mensaje);
+          if (remitente === usuarioActual.id || destinatario === usuarioActual.id) {
+            const otroUsuarioId = remitente === usuarioActual.id ? destinatario : remitente;
           
-          if (new Date(mensaje.fecha) > new Date(conversaciones[otroUsuarioId].ultimoMensaje.fecha)) {
-            conversaciones[otroUsuarioId].ultimoMensaje = mensaje;
+            if (!conversaciones[otroUsuarioId]) {
+              conversaciones[otroUsuarioId] = {
+                ultimoMensaje: mensaje,
+                mensajes: []
+              };
+            }
+            
+            conversaciones[otroUsuarioId].mensajes.push(mensaje);
+            
+            if (new Date(mensaje.fecha) > new Date(conversaciones[otroUsuarioId].ultimoMensaje.fecha)) {
+              conversaciones[otroUsuarioId].ultimoMensaje = mensaje;
+            }
           }
         }
       }
@@ -140,13 +150,16 @@ function cargarConversaciones() {
             if (!usuario) return;
             
             const ultimoMensaje = conv.ultimoMensaje;
-            const esEnviado = ultimoMensaje.de === usuarioActual.id;
+            // Soportar ambos formatos
+            const remitente = ultimoMensaje.remitente || ultimoMensaje.de;
+            const esEnviado = remitente === usuarioActual.id;
             const textoMensaje = esEnviado ? `Tú: ${ultimoMensaje.mensaje}` : ultimoMensaje.mensaje;
             
-            // Contar no leídos
-            const noLeidos = conv.mensajes.filter(m => 
-              m.para === usuarioActual.id && !m.leido
-            ).length;
+            // Contar no leídos - soportar ambos formatos
+            const noLeidos = conv.mensajes.filter(m => {
+              const dest = m.destinatario || m.para;
+              return dest === usuarioActual.id && !m.leido;
+            }).length;
             
             const tiempo = calcularTiempo(ultimoMensaje.fecha);
             
@@ -245,13 +258,22 @@ function cargarMensajes(userId) {
         return;
       }
       
-      // Filtrar mensajes
+      // Filtrar mensajes - soportar estructura anidada por conversación
       const mensajes = [];
-      for (const id in data) {
-        const mensaje = data[id];
-        if ((mensaje.de === usuarioActual.id && mensaje.para === userId) ||
-            (mensaje.de === userId && mensaje.para === usuarioActual.id)) {
-          mensajes.push({ id, ...mensaje });
+      for (const conversacionId in data) {
+        const mensajesConv = data[conversacionId];
+        
+        for (const mensajeId in mensajesConv) {
+          const mensaje = mensajesConv[mensajeId];
+          
+          // Soportar ambos formatos
+          const remitente = mensaje.remitente || mensaje.de;
+          const destinatario = mensaje.destinatario || mensaje.para;
+          
+          if ((remitente === usuarioActual.id && destinatario === userId) ||
+              (remitente === userId && destinatario === usuarioActual.id)) {
+            mensajes.push({ id: mensajeId, ...mensaje });
+          }
         }
       }
       
@@ -262,17 +284,32 @@ function cargarMensajes(userId) {
       chatMessages.innerHTML = '';
       mensajes.forEach(mensaje => {
         const div = document.createElement('div');
-        const esEnviado = mensaje.de === usuarioActual.id;
+        // Soportar ambos formatos
+        const remitente = mensaje.remitente || mensaje.de;
+        const esEnviado = remitente === usuarioActual.id;
         div.className = `message-item ${esEnviado ? 'sent' : 'received'}`;
         
-        const avatar = esEnviado ? (usuarioActual.foto || generarAvatarPlaceholder(usuarioActual.nombre, 32)) : avatarGenerico(32);
+        // Usar foto del remitente si está disponible
+        let avatar;
+        if (esEnviado) {
+          avatar = usuarioActual.foto || generarAvatarPlaceholder(usuarioActual.nombre, 32);
+        } else {
+          // Si el mensaje tiene foto del remitente, usarla
+          avatar = mensaje.remitenteFoto || avatarGenerico(32);
+        }
+        
         const tiempo = new Date(mensaje.fecha).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+        
+        // Formatear mensaje (convertir markdown básico)
+        let mensajeFormateado = mensaje.mensaje
+          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // **texto** -> <strong>texto</strong>
+          .replace(/\n/g, '<br>'); // saltos de línea
         
         // Mensaje de texto
         div.innerHTML = `
           <img src="${avatar}" alt="Avatar" class="message-avatar" />
           <div class="message-content">
-            <div class="message-bubble">${mensaje.mensaje}</div>
+            <div class="message-bubble">${mensajeFormateado}</div>
             <span class="message-time">${tiempo}</span>
           </div>
         `;
