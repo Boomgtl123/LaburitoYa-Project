@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Panel de Administración - LaburitoYa</title>
+  <link rel="stylesheet" href="admin-panel.css" />
+  <style>
+    .verified-badge {
+      width: 16px;
+      height: 16px;
+      vertical-align: middle;
+      margin-left: 4px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="admin-navbar">
+    <div class="nav-container">
+      <div class="nav-left">
+        <img src="logo.png" alt="LaburitoYa" class="nav-logo" />
+        <h1>Panel de Administración</h1>
+      </div>
+      <div class="nav-right">
+        <div class="user-info">
+          <img src="https://via.placeholder.com/40" alt="Usuario" class="user-avatar" id="navAvatar" />
+          <div class="user-details">
+            <span class="user-name" id="navUserName">Usuario</span>
+            <span class="user-role" id="navUserRole">Rol</span>
+          </div>
+        </div>
+        <button class="btn-back" onclick="window.location.href='home.html'">
+          ← Volver al inicio
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Layout Principal -->
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+      <div class="sidebar-menu">
+        <button class="menu-item active" data-section="dashboard">
+          <span class="menu-icon">📊</span>
+          <span class="menu-text">Dashboard</span>
+        </button>
+        <button class="menu-item" data-section="usuarios" data-permission="bannear_usuarios,ver_usuarios">
+          <span class="menu-icon">👥</span>
+          <span class="menu-text">Usuarios</span>
+        </button>
+        <button class="menu-item" data-section="anuncios" data-permission="crear_anuncios">
+          <span class="menu-icon">📢</span>
+          <span class="menu-text">Anuncios</span>
+        </button>
+        <button class="menu-item" data-section="verificacion" data-permission="verificar_usuarios">
+          <span class="menu-icon">✓</span>
+          <span class="menu-text">Verificación</span>
+        </button>
+        <button class="menu-item" data-section="contenido" data-permission="destacar_posts">
+          <span class="menu-icon">✨</span>
+          <span class="menu-text">Contenido</span>
+        </button>
+        <button class="menu-item" data-section="empleos" data-permission="destacar_empleos">
+          <span class="menu-icon">💼</span>
+          <span class="menu-text">Empleos</span>
+        </button>
+        <button class="menu-item" data-section="soporte" data-permission="ver_tickets">
+          <span class="menu-icon">💬</span>
+          <span class="menu-text">Soporte</span>
+        </button>
+        <button class="menu-item" data-section="analytics" data-permission="ver_analytics">
+          <span class="menu-icon">📈</span>
+          <span class="menu-text">Analytics</span>
+        </button>
+        <button class="menu-item" data-section="comunidad" data-permission="gestionar_comunidad">
+          <span class="menu-icon">🎉</span>
+          <span class="menu-text">Comunidad</span>
+        </button>
+        <button class="menu-item" data-section="logs" data-permission="ver_estadisticas">
+          <span class="menu-icon">📋</span>
+          <span class="menu-text">Logs</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Contenido Principal -->
+    <main class="admin-content">
+      <!-- Dashboard -->
+      <section id="section-dashboard" class="content-section active">
+        <div class="section-header">
+          <h2>Dashboard General</h2>
+          <p>Resumen de estadísticas y actividad</p>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon" style="background: #4ECDC4;">👥</div>
+            <div class="stat-info">
+              <h3 id="statTotalUsuarios">0</h3>
+              <p>Total Usuarios</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background: #0A66C2;">✓</div>
+            <div class="stat-info">
+              <h3 id="statUsuariosVerificados">0</h3>
+              <p>Usuarios Verificados</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background: #95E1D3;">📝</div>
+            <div class="stat-info">
+              <h3 id="statTotalPosts">0</h3>
+              <p>Total Publicaciones</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background: #F38181;">📢</div>
+            <div class="stat-info">
+              <h3 id="statAnunciosActivos">0</h3>
+              <p>Anuncios Activos</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-grid">
+          <div class="dashboard-card">
+            <h3>Actividad Reciente</h3>
+            <div id="actividadReciente" class="activity-list">
+              <p class="loading">Cargando actividad...</p>
+            </div>
+          </div>
+
+          <div class="dashboard-card">
+            <h3>Equipo Administrativo</h3>
+            <div id="equipoAdmin" class="team-list">
+              <p class="loading">Cargando equipo...</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Usuarios -->
+      <section id="section-usuarios" class="content-section">
+        <div class="section-header">
+          <h2>Gestión de Usuarios</h2>
+          <div class="section-actions">
+            <input type="text" id="searchUsuarios" placeholder="Buscar usuarios..." class="search-input" />
+            <button class="btn-primary" id="btnAsignarRoles" style="display: none;">
+              👑 Asignar Roles
+            </button>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Usuario</th>
+                <th>Email</th>
+                <th>Perfil</th>
+                <th>Estado</th>
+                <th>Rol</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="usuariosTableBody">
+              <tr>
+                <td colspan="6" class="loading">Cargando usuarios...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Anuncios -->
+      <section id="section-anuncios" class="content-section">
+        <div class="section-header">
+          <h2>Gestión de Anuncios</h2>
+          <button class="btn-primary" id="btnNuevoAnuncio">
+            + Crear Anuncio
+          </button>
+        </div>
+
+        <div id="anunciosList" class="anuncios-grid">
+          <p class="loading">Cargando anuncios...</p>
+        </div>
+      </section>
+
+      <!-- Verificación -->
+      <section id="section-verificacion" class="content-section">
+        <div class="section-header">
+          <h2>Verificación de Usuarios</h2>
+          <p>Gestiona las verificaciones de perfiles</p>
+        </div>
+
+        <div class="verification-tabs">
+          <button class="tab-btn active" data-tab="pendientes">Pendientes</button>
+          <button class="tab-btn" data-tab="verificados">Verificados</button>
+        </div>
+
+        <div id="verificacionContent" class="verification-content">
+          <p class="loading">Cargando solicitudes...</p>
+        </div>
+      </section>
+
+      <!-- Contenido -->
+      <section id="section-contenido" class="content-section">
+        <div class="section-header">
+          <h2>Gestión de Contenido</h2>
+          <p>Destaca publicaciones importantes</p>
+        </div>
+
+        <div id="contenidoList" class="posts-grid">
+          <p class="loading">Cargando publicaciones...</p>
+        </div>
+      </section>
+
+      <!-- Empleos -->
+      <section id="section-empleos" class="content-section">
+        <div class="section-header">
+          <h2>Gestión de Empleos</h2>
+          <p>Destaca ofertas de empleo</p>
+        </div>
+
+        <div id="empleosList" class="empleos-grid">
+          <p class="loading">Cargando empleos...</p>
+        </div>
+      </section>
+
+      <!-- Soporte -->
+      <section id="section-soporte" class="content-section">
+        <div class="section-header">
+          <h2>Centro de Soporte</h2>
+          <div class="section-actions">
+            <select id="filterTickets" class="filter-select">
+              <option value="todos">Todos los tickets</option>
+              <option value="abiertos">Abiertos</option>
+              <option value="en_proceso">En proceso</option>
+              <option value="cerrados">Cerrados</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="ticketsList" class="tickets-list">
+          <p class="loading">Cargando tickets...</p>
+        </div>
+      </section>
+
+      <!-- Analytics -->
+      <section id="section-analytics" class="content-section">
+        <div class="section-header">
+          <h2>Analytics y Reportes</h2>
+          <button class="btn-secondary" id="btnExportarReporte">
+            📥 Exportar Reporte
+          </button>
+        </div>
+
+        <div class="analytics-grid">
+          <div class="analytics-card">
+            <h3>Crecimiento de Usuarios</h3>
+            <div id="chartUsuarios" class="chart-container">
+              <p class="loading">Cargando gráfico...</p>
+            </div>
+          </div>
+
+          <div class="analytics-card">
+            <h3>Actividad de Publicaciones</h3>
+            <div id="chartPosts" class="chart-container">
+              <p class="loading">Cargando gráfico...</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Comunidad -->
+      <section id="section-comunidad" class="content-section">
+        <div class="section-header">
+          <h2>Gestión de Comunidad</h2>
+          <button class="btn-primary" id="btnNuevoEvento">
+            + Crear Evento
+          </button>
+        </div>
+
+        <div class="comunidad-tabs">
+          <button class="tab-btn active" data-tab="eventos">Eventos</button>
+          <button class="tab-btn" data-tab="notificaciones">Notificaciones</button>
+          <button class="tab-btn" data-tab="encuestas">Encuestas</button>
+        </div>
+
+        <div id="comunidadContent" class="comunidad-content">
+          <p class="loading">Cargando contenido...</p>
+        </div>
+      </section>
+
+      <!-- Logs -->
+      <section id="section-logs" class="content-section">
+        <div class="section-header">
+          <h2>Registro de Actividad</h2>
+          <div class="section-actions">
+            <select id="filterLogs" class="filter-select">
+              <option value="todos">Todas las acciones</option>
+              <option value="asignar_rol">Asignación de roles</option>
+              <option value="crear_anuncio">Anuncios</option>
+              <option value="verificar_usuario">Verificaciones</option>
+              <option value="bannear_usuario">Moderación</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Usuario</th>
+                <th>Acción</th>
+                <th>Detalles</th>
+              </tr>
+            </thead>
+            <tbody id="logsTableBody">
+              <tr>
+                <td colspan="4" class="loading">Cargando logs...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal para crear/editar anuncio -->
+  <div id="modalAnuncio" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalAnuncioTitle">Crear Anuncio</h3>
+        <button class="modal-close" onclick="cerrarModalAnuncio()">&times;</button>
+      </div>
+      <form id="formAnuncio">
+        <div class="form-group">
+          <label>Título del Anuncio</label>
+          <input type="text" id="anuncioTitulo" required placeholder="Ej: ¡Nueva funcionalidad disponible!" />
+        </div>
+        <div class="form-group">
+          <label>Contenido</label>
+          <textarea id="anuncioContenido" required placeholder="Describe el anuncio..." rows="4"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Tipo de Anuncio</label>
+          <select id="anuncioTipo" required>
+            <option value="info">Información</option>
+            <option value="promocion">Promoción</option>
+            <option value="alerta">Alerta</option>
+            <option value="evento">Evento</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="anuncioDestacado" />
+            Destacar en el feed
+          </label>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" onclick="cerrarModalAnuncio()">Cancelar</button>
+          <button type="submit" class="btn-primary">Guardar Anuncio</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal para asignar rol -->
+  <div id="modalAsignarRol" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Asignar Rol</h3>
+        <button class="modal-close" onclick="cerrarModalRol()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>Usuario: <strong id="rolUsuarioNombre"></strong></p>
+        <div class="form-group">
+          <label>Seleccionar Rol</label>
+          <select id="selectRol" class="form-control">
+            <option value="">Sin rol</option>
+          </select>
+        </div>
+        <div id="rolDescripcion" class="rol-description"></div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" onclick="cerrarModalRol()">Cancelar</button>
+        <button type="button" class="btn-primary" onclick="confirmarAsignarRol()">Asignar Rol</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="auth.js"></script>
+  <script src="roles.js"></script>
+  <script src="admin-panel.js"></script>
+</body>
+</html>

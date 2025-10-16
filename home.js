@@ -365,6 +365,16 @@ async function cargarPosts() {
     }
 
     todosLosPosts = posts;
+
+    // Obtener anuncios activos si el sistema de roles está disponible
+    let anunciosActivos = [];
+    if (window.roles) {
+      try {
+        anunciosActivos = await window.roles.obtenerAnunciosActivos();
+      } catch (error) {
+        console.error('Error al cargar anuncios:', error);
+      }
+    }
     
     // Construir caché de usuarios (autores y comentaristas) para mostrar badge verificado/CEO
     try {
@@ -404,9 +414,17 @@ async function cargarPosts() {
     
     postList.innerHTML = '';
     
-    postsAMostrar.forEach(post => {
+    // Insertar posts con anuncios intercalados
+    postsAMostrar.forEach((post, index) => {
       const postElement = crearElementoPost(post);
       postList.appendChild(postElement);
+
+      // Insertar anuncio cada 5 posts
+      if (anunciosActivos.length > 0 && (index + 1) % 5 === 0) {
+        const anuncioIndex = Math.floor(index / 5) % anunciosActivos.length;
+        const anuncioElement = crearElementoAnuncio(anunciosActivos[anuncioIndex]);
+        postList.appendChild(anuncioElement);
+      }
       
       // Inicializar estado del carrusel si tiene múltiples fotos
       if (post.fotos && post.fotos.length > 1) {
@@ -1220,6 +1238,76 @@ window.verPerfil = verPerfil;
 window.abrirModalImagen = abrirModalImagen;
 window.cerrarModalImagen = cerrarModalImagen;
 window.actualizarBotonesSeguir = actualizarBotonesSeguir;
+
+// ========== CREAR ELEMENTO DE ANUNCIO ==========
+function crearElementoAnuncio(anuncio) {
+  const div = document.createElement('div');
+  div.className = 'post anuncio-post';
+  div.setAttribute('data-anuncio-id', anuncio.id);
+
+  const tipoIcons = {
+    'info': 'ℹ️',
+    'promocion': '🎁',
+    'alerta': '⚠️',
+    'evento': '📅'
+  };
+
+  const tipoColors = {
+    'info': '#2196F3',
+    'promocion': '#4CAF50',
+    'alerta': '#ff9800',
+    'evento': '#9c27b0'
+  };
+
+  const icono = tipoIcons[anuncio.tipo] || 'ℹ️';
+  const color = tipoColors[anuncio.tipo] || '#2196F3';
+
+  div.innerHTML = `
+    <div class="anuncio-header" style="background: ${color}20; padding: 15px; border-radius: 8px 8px 0 0; border-left: 4px solid ${color};">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 24px;">${icono}</span>
+        <div>
+          <span style="font-size: 12px; font-weight: 600; color: ${color}; text-transform: uppercase;">
+            ${anuncio.tipo === 'info' ? 'Información' : 
+              anuncio.tipo === 'promocion' ? 'Promoción' : 
+              anuncio.tipo === 'alerta' ? 'Alerta' : 'Evento'}
+          </span>
+          <h3 style="margin: 5px 0 0 0; font-size: 18px; font-weight: 700;">${anuncio.titulo}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="post-content" style="padding: 20px;">
+      <p style="font-size: 15px; line-height: 1.6; color: #333;">${anuncio.contenido}</p>
+      ${anuncio.destacado ? '<span style="display: inline-block; margin-top: 10px; padding: 4px 12px; background: #FFD70020; color: #FFD700; border-radius: 12px; font-size: 12px; font-weight: 600;">✨ Destacado</span>' : ''}
+    </div>
+    <div class="post-footer" style="padding: 15px 20px; background: #f5f5f5; border-radius: 0 0 8px 8px; font-size: 12px; color: #666;">
+      <span>📢 Anuncio oficial • ${formatearTiempo(anuncio.fechaCreacion)}</span>
+    </div>
+  `;
+
+  // Agregar estilos especiales para anuncios
+  div.style.border = `2px solid ${color}40`;
+  div.style.background = 'linear-gradient(to bottom, ' + color + '05, white)';
+
+  return div;
+}
+
+// Función auxiliar para formatear tiempo (si no existe)
+function formatearTiempo(fecha) {
+  const ahora = new Date();
+  const fechaPost = new Date(fecha);
+  const diferencia = ahora - fechaPost;
+  
+  const segundos = Math.floor(diferencia / 1000);
+  const minutos = Math.floor(segundos / 60);
+  const horas = Math.floor(minutos / 60);
+  const dias = Math.floor(horas / 24);
+  
+  if (dias > 0) return `Hace ${dias}d`;
+  if (horas > 0) return `Hace ${horas}h`;
+  if (minutos > 0) return `Hace ${minutos}m`;
+  return 'Ahora';
+}
 
 console.log('✅ home.js cargado correctamente');
 console.log('✅ Funciones de carrusel disponibles:', {

@@ -69,6 +69,10 @@
               <!-- Resultados de búsqueda aparecerán aquí -->
             </div>
             <div class="dropdown-divider"></div>
+            <!-- Botón Panel Admin (solo para usuarios con roles) -->
+            <a href="admin-panel.html" class="dropdown-item" id="btnAdminPanel" style="display: none;">
+              <span>👑</span> Panel de Administración
+            </a>
             <a href="quienes-somos.html" class="dropdown-item" id="btnQuienesSomos">
               <span>👥</span> Quiénes somos
             </a>
@@ -94,6 +98,10 @@
             </div>
             <div class="search-results-dropdown" id="searchResultsDropdownAvatar" style="display: none;"></div>
             <div class="dropdown-divider"></div>
+            <!-- Botón Panel Admin en menú avatar (solo para usuarios con roles) -->
+            <a href="admin-panel.html" class="dropdown-item" id="btnAdminPanelAvatar" style="display: none;">
+              <span>👑</span> Panel de Administración
+            </a>
             <a href="home.html" class="dropdown-item">
               <span>🏠</span> Inicio
             </a>
@@ -227,6 +235,7 @@
 
   <!-- Scripts en orden correcto -->
   <script src="auth.js"></script>
+  <script src="roles.js"></script>
   <script src="followers.js"></script>
   <script src="hashtags.js"></script>
   <script src="home.js"></script>
@@ -242,12 +251,26 @@
     });
 
     // Funcionalidad del menú hamburguesa y avatar
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', async function() {
       const hamburger = document.getElementById('navHamburger');
       const mobileMenu = document.getElementById('mobileMenu');
       const mobileLogout = document.getElementById('mobileLogout');
       const navPerfil = document.getElementById('navPerfil');
       const navAvatar = document.getElementById('navAvatar');
+
+      // Mostrar botón de admin panel si el usuario tiene permisos
+      if (window.auth && window.roles) {
+        const usuarioActual = window.auth.obtenerUsuarioActual();
+        if (usuarioActual) {
+          const esAdmin = await window.roles.esAdmin(usuarioActual.id);
+          if (esAdmin) {
+            const btnAdminPanel = document.getElementById('btnAdminPanel');
+            const btnAdminPanelAvatar = document.getElementById('btnAdminPanelAvatar');
+            if (btnAdminPanel) btnAdminPanel.style.display = 'flex';
+            if (btnAdminPanelAvatar) btnAdminPanelAvatar.style.display = 'flex';
+          }
+        }
+      }
 
       // Dropdown del avatar
       if (navPerfil && navAvatar) {
