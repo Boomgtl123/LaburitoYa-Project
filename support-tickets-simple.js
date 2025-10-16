@@ -271,11 +271,19 @@ async function agregarRespuesta(ticketId, mensaje, esUsuario = false) {
 async function enviarMensajeDirectoTicket(destinatarioId, remitente, mensaje, ticketId, asuntoTicket) {
   try {
     console.log('📨 Enviando mensaje directo por ticket...');
-    console.log('Destinatario:', destinatarioId);
-    console.log('Remitente:', remitente.nombre);
+    console.log('📨 Destinatario ID:', destinatarioId);
+    console.log('📨 Remitente:', remitente.nombre, '(ID:', remitente.id + ')');
+    console.log('📨 Ticket ID:', ticketId);
+    console.log('📨 FIREBASE_URL:', FIREBASE_URL);
+    
+    // Validar datos
+    if (!destinatarioId || !remitente || !remitente.id) {
+      throw new Error('Datos inválidos: falta destinatario o remitente');
+    }
     
     // Crear ID de conversación (ordenado alfabéticamente)
     const conversacionId = [remitente.id, destinatarioId].sort().join('_');
+    console.log('📨 Conversación ID:', conversacionId);
     
     // Crear mensaje con referencia al ticket
     const nuevoMensaje = {
@@ -289,18 +297,31 @@ async function enviarMensajeDirectoTicket(destinatarioId, remitente, mensaje, ti
       ticketId: ticketId // Referencia al ticket
     };
 
+    console.log('📨 Mensaje a enviar:', nuevoMensaje);
+    console.log('📨 URL completa:', `${FIREBASE_URL}/mensajes/${conversacionId}.json`);
+
     // Guardar mensaje en Firebase
+    console.log('📨 Enviando mensaje a Firebase...');
     const mensajeResponse = await fetch(`${FIREBASE_URL}/mensajes/${conversacionId}.json`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(nuevoMensaje)
     });
 
+    console.log('📨 Response status:', mensajeResponse.status);
+    console.log('📨 Response ok:', mensajeResponse.ok);
+
     if (!mensajeResponse.ok) {
-      throw new Error(`Error al enviar mensaje: ${mensajeResponse.status}`);
+      const errorText = await mensajeResponse.text();
+      console.error('📨 Error response:', errorText);
+      throw new Error(`Error al enviar mensaje: ${mensajeResponse.status} - ${errorText}`);
     }
 
+    const mensajeData = await mensajeResponse.json();
+    console.log('📨 Mensaje guardado con ID:', mensajeData.name);
+
     // Actualizar o crear conversación
+    console.log('📨 Actualizando conversación...');
     const conversacion = {
       participantes: [remitente.id, destinatarioId],
       ultimoMensaje: nuevoMensaje.mensaje.substring(0, 100),
@@ -308,13 +329,16 @@ async function enviarMensajeDirectoTicket(destinatarioId, remitente, mensaje, ti
       [`noLeidos_${destinatarioId}`]: true
     };
 
-    await fetch(`${FIREBASE_URL}/conversaciones/${conversacionId}.json`, {
+    const conversacionResponse = await fetch(`${FIREBASE_URL}/conversaciones/${conversacionId}.json`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(conversacion)
     });
 
+    console.log('📨 Conversación actualizada:', conversacionResponse.ok);
+
     // Crear notificación para el usuario
+    console.log('📨 Creando notificación...');
     const notificacion = {
       tipo: 'respuesta_ticket',
       titulo: 'Respuesta a tu ticket de soporte',
@@ -328,16 +352,19 @@ async function enviarMensajeDirectoTicket(destinatarioId, remitente, mensaje, ti
       url: 'messages.html'
     };
 
-    await fetch(`${FIREBASE_URL}/notificaciones/${destinatarioId}.json`, {
+    const notifResponse = await fetch(`${FIREBASE_URL}/notificaciones/${destinatarioId}.json`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(notificacion)
     });
 
+    console.log('📨 Notificación creada:', notifResponse.ok);
+
     console.log('✅ Mensaje directo enviado exitosamente');
     return { success: true };
   } catch (error) {
     console.error('❌ Error al enviar mensaje directo:', error);
+    console.error('❌ Error stack:', error.stack);
     return { success: false, error: error.message };
   }
 }
