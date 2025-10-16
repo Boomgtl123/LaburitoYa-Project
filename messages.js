@@ -272,6 +272,9 @@ function abrirConversacion(userId, usuario) {
     item.classList.remove('active');
   });
   
+  // Marcar mensajes como leídos
+  marcarMensajesComoLeidos(userId);
+  
   // Marcar notificaciones de mensajes como leídas
   marcarNotificacionesMensajesComoLeidas(userId);
   
@@ -341,42 +344,87 @@ function cargarMensajes(userId) {
       
       // Renderizar
       chatMessages.innerHTML = '';
-      mensajes.forEach(mensaje => {
-        const div = document.createElement('div');
-        // Soportar ambos formatos
-        const remitente = mensaje.remitente || mensaje.de;
-        const esEnviado = remitente === usuarioActual.id;
-        div.className = `message-item ${esEnviado ? 'sent' : 'received'}`;
-        
-        // Usar foto del remitente si está disponible
-        let avatar;
-        if (esEnviado) {
-          avatar = usuarioActual.foto || generarAvatarPlaceholder(usuarioActual.nombre, 32);
-        } else {
-          // Si el mensaje tiene foto del remitente, usarla
-          avatar = mensaje.remitenteFoto || avatarGenerico(32);
-        }
-        
-        const tiempo = new Date(mensaje.fecha).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
-        
-        // Formatear mensaje (convertir markdown básico)
-        let mensajeFormateado = mensaje.mensaje
-          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // **texto** -> <strong>texto</strong>
-          .replace(/\n/g, '<br>'); // saltos de línea
-        
-        // Mensaje de texto
-        div.innerHTML = `
-          <img src="${avatar}" alt="Avatar" class="message-avatar" />
-          <div class="message-content">
-            <div class="message-bubble">${mensajeFormateado}</div>
-            <span class="message-time">${tiempo}</span>
-          </div>
-        `;
-        
-        chatMessages.appendChild(div);
-      });
       
-      chatMessages.scrollTop = chatMessages.scrollHeight;
+      // Obtener datos del otro usuario para su foto
+      fetch(`https://laburitoya-6e55d-default-rtdb.firebaseio.com/usuarios/${userId}.json`)
+        .then(r => r.json())
+        .then(otroUsuario => {
+          mensajes.forEach(mensaje => {
+            const div = document.createElement('div');
+            // Soportar ambos formatos
+            const remitente = mensaje.remitente || mensaje.de;
+            const esEnviado = remitente === usuarioActual.id;
+            div.className = `message-item ${esEnviado ? 'sent' : 'received'}`;
+            
+            // Usar foto del remitente
+            let avatar;
+            if (esEnviado) {
+              avatar = obtenerAvatar(usuarioActual, 32);
+            } else {
+              // Usar foto del mensaje si está disponible, sino del usuario
+              if (mensaje.remitenteFoto) {
+                avatar = mensaje.remitenteFoto;
+              } else if (otroUsuario) {
+                avatar = obtenerAvatar(otroUsuario, 32);
+              } else {
+                avatar = avatarGenerico(32);
+              }
+            }
+            
+            const tiempo = new Date(mensaje.fecha).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+            
+            // Formatear mensaje (convertir markdown básico)
+            let mensajeFormateado = mensaje.mensaje
+              .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // **texto** -> <strong>texto</strong>
+              .replace(/\n/g, '<br>'); // saltos de línea
+            
+            // Mensaje de texto
+            div.innerHTML = `
+              <img src="${avatar}" alt="Avatar" class="message-avatar" />
+              <div class="message-content">
+                <div class="message-bubble">${mensajeFormateado}</div>
+                <span class="message-time">${tiempo}</span>
+              </div>
+            `;
+            
+            chatMessages.appendChild(div);
+          });
+          
+          // Scroll al final para mostrar últimos mensajes
+          setTimeout(() => {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+          }, 100);
+        })
+        .catch(err => {
+          console.error('❌ [MESSAGES] Error al obtener usuario:', err);
+          // Renderizar sin foto si falla
+          mensajes.forEach(mensaje => {
+            const div = document.createElement('div');
+            const remitente = mensaje.remitente || mensaje.de;
+            const esEnviado = remitente === usuarioActual.id;
+            div.className = `message-item ${esEnviado ? 'sent' : 'received'}`;
+            
+            const avatar = esEnviado ? obtenerAvatar(usuarioActual, 32) : avatarGenerico(32);
+            const tiempo = new Date(mensaje.fecha).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+            let mensajeFormateado = mensaje.mensaje
+              .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+              .replace(/\n/g, '<br>');
+            
+            div.innerHTML = `
+              <img src="${avatar}" alt="Avatar" class="message-avatar" />
+              <div class="message-content">
+                <div class="message-bubble">${mensajeFormateado}</div>
+                <span class="message-time">${tiempo}</span>
+              </div>
+            `;
+            
+            chatMessages.appendChild(div);
+          });
+          
+          setTimeout(() => {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+          }, 100);
+        });
     })
     .catch(err => console.error('❌ [MESSAGES] Error al cargar mensajes:', err));
 }
@@ -438,9 +486,39 @@ function enviarMensaje() {
       messageInput.value = '';
       cargarMensajes(conversacionActiva);
       cargarConversaciones();
+      
+      // Crear notificación para el destinatario
+      crearNotificacionMensaje(conversacionActiva, mensaje);
     }
   })
   .catch(error => console.error('❌ [MESSAGES] Error al enviar:', error));
+}
+
+// ========== CREAR NOTIFICACIÓN DE MENSAJE ==========
+async function crearNotificacionMensaje(destinatarioId, mensaje) {
+  try {
+    const notificacion = {
+      tipo: 'mensaje',
+      de: usuarioActual.id,
+      para: destinatarioId,
+      deNombre: usuarioActual.nombre,
+      deFoto: usuarioActual.foto || null,
+      mensaje: mensaje.substring(0, 100),
+      fecha: new Date().toISOString(),
+      leida: false,
+      url: 'messages.html'
+    };
+    
+    await fetch('https://laburitoya-6e55d-default-rtdb.firebaseio.com/notificaciones.json', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(notificacion)
+    });
+    
+    console.log('✅ [MESSAGES] Notificación creada para:', destinatarioId);
+  } catch (error) {
+    console.error('❌ [MESSAGES] Error al crear notificación:', error);
+  }
 }
 
 // ========== CERRAR CHAT ==========
@@ -456,6 +534,38 @@ function cerrarChat() {
   document.querySelectorAll('.conversation-item').forEach(item => {
     item.classList.remove('active');
   });
+}
+
+// ========== OBTENER AVATAR ==========
+function obtenerAvatar(usuario, size = 40) {
+  if (usuario && usuario.foto) {
+    return usuario.foto;
+  }
+  // Generar avatar con iniciales
+  return generarAvatarPlaceholder(usuario ? usuario.nombre : 'Usuario', size);
+}
+
+function generarAvatarPlaceholder(nombre, size = 40) {
+  const iniciales = nombre
+    .split(' ')
+    .map(n => n[0])
+    .join('')
+    .toUpperCase()
+    .substring(0, 2);
+  
+  const colores = ['#1976d2', '#388e3c', '#d32f2f', '#f57c00', '#7b1fa2', '#0097a7'];
+  const color = colores[nombre.length % colores.length];
+  
+  return `data:image/svg+xml,${encodeURIComponent(`
+    <svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
+      <rect width="${size}" height="${size}" fill="${color}"/>
+      <text x="50%" y="50%" font-size="${size * 0.4}" fill="white" text-anchor="middle" dy=".35em" font-family="Arial">${iniciales}</text>
+    </svg>
+  `)}`;
+}
+
+function avatarGenerico(size = 40) {
+  return generarAvatarPlaceholder('Usuario', size);
 }
 
 // ========== UTILIDADES ==========
@@ -487,6 +597,44 @@ function mostrarError(titulo, mensaje, redirectUrl) {
         </button>
       </div>
     `;
+  }
+}
+
+// ========== MARCAR MENSAJES COMO LEÍDOS ==========
+async function marcarMensajesComoLeidos(userId) {
+  try {
+    const response = await fetch('https://laburitoya-6e55d-default-rtdb.firebaseio.com/mensajes.json');
+    const data = await response.json();
+    
+    if (!data) return;
+    
+    const updates = {};
+    
+    for (const key in data) {
+      const item = data[key];
+      
+      // Estructura plana
+      if (item && item.mensaje) {
+        const remitente = item.remitente || item.de;
+        const destinatario = item.destinatario || item.para;
+        
+        // Marcar como leído si es un mensaje del otro usuario para mí
+        if (remitente === userId && destinatario === usuarioActual.id && !item.leido) {
+          updates[`/mensajes/${key}/leido`] = true;
+        }
+      }
+    }
+    
+    if (Object.keys(updates).length > 0) {
+      await fetch('https://laburitoya-6e55d-default-rtdb.firebaseio.com/.json', {
+        method: 'PATCH',
+        body: JSON.stringify(updates)
+      });
+      
+      console.log('✅ [MESSAGES] Mensajes marcados como leídos:', Object.keys(updates).length);
+    }
+  } catch (error) {
+    console.error('❌ [MESSAGES] Error al marcar mensajes como leídos:', error);
   }
 }
 
