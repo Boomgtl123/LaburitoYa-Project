@@ -28,7 +28,9 @@ window.addEventListener('DOMContentLoaded', function() {
   
   // Exponer funciones globalmente
   window.cargarConversaciones = cargarConversaciones;
+  window.cargarMensajes = cargarMensajes;
   window.usuarioActual = usuarioActual;
+  window.conversacionActiva = null;
   
   // Cargar avatar del usuario en el navbar
   const navAvatar = document.getElementById('navAvatar');
@@ -189,6 +191,7 @@ function cargarConversaciones() {
 function abrirConversacion(userId, usuario) {
   console.log('💬 [MESSAGES] Abriendo conversación con:', usuario.nombre);
   conversacionActiva = userId;
+  window.conversacionActiva = userId;
   
   // Actualizar UI
   const chatEmpty = document.getElementById('chatEmpty');
@@ -265,13 +268,30 @@ function cargarMensajes(userId) {
         const avatar = esEnviado ? (usuarioActual.foto || generarAvatarPlaceholder(usuarioActual.nombre, 32)) : avatarGenerico(32);
         const tiempo = new Date(mensaje.fecha).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
         
-        div.innerHTML = `
-          <img src="${avatar}" alt="Avatar" class="message-avatar" />
-          <div class="message-content">
-            <div class="message-bubble">${mensaje.mensaje}</div>
-            <span class="message-time">${tiempo}</span>
-          </div>
-        `;
+        // Verificar si es un mensaje de audio
+        if (mensaje.tipo === 'audio' && mensaje.audio) {
+          div.innerHTML = `
+            <img src="${avatar}" alt="Avatar" class="message-avatar" />
+            <div class="message-content">
+              <div class="message-bubble message-audio">
+                <audio controls>
+                  <source src="${mensaje.audio}" type="audio/webm">
+                  Tu navegador no soporta audio.
+                </audio>
+              </div>
+              <span class="message-time">${tiempo}</span>
+            </div>
+          `;
+        } else {
+          // Mensaje de texto normal
+          div.innerHTML = `
+            <img src="${avatar}" alt="Avatar" class="message-avatar" />
+            <div class="message-content">
+              <div class="message-bubble">${mensaje.mensaje}</div>
+              <span class="message-time">${tiempo}</span>
+            </div>
+          `;
+        }
         
         chatMessages.appendChild(div);
       });
