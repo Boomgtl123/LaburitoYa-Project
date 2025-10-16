@@ -70,6 +70,12 @@ function actualizarDatosUsuario() {
     sidebarBio.style.display = 'block';
   }
   
+  // Aplicar banner del usuario
+  const profileHeader = document.querySelector('.profile-header');
+  if (profileHeader && usuarioActual.bannerColor) {
+    profileHeader.style.background = usuarioActual.bannerColor;
+  }
+  
   const postFormAvatar = document.getElementById('postFormAvatar');
   if (postFormAvatar) {
     postFormAvatar.src = usuarioActual.foto || DEFAULT_AVATAR;
