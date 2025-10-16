@@ -1,0 +1,56 @@
+{
+  "rules": {
+    "usuarios": {
+      ".read": true,
+      ".write": true
+    },
+    "posts": {
+      ".read": true,
+      ".write": true
+    },
+    "publicaciones": {
+      ".read": true,
+      ".write": true
+    },
+    "mensajes": {
+      ".read": true,
+      ".write": true
+    },
+    "notificaciones": {
+      ".read": true,
+      ".write": true
+    },
+    "followers": {
+      ".read": true,
+      ".write": true
+    },
+    "comentarios": {
+      ".read": true,
+      ".write": true
+    },
+    "likes": {
+      ".read": true,
+      ".write": true
+    },
+    "hashtags": {
+      ".read": true,
+      ".write": true
+    },
+    "tendencias": {
+      ".read": true,
+      ".write": true
+    },
+    "anuncios": {
+      ".read": true,
+      ".write": true
+    },
+    "logs": {
+      ".read": true,
+      ".write": true
+    },
+    "tickets": {
+      ".read": true,
+      ".write": true
+    }
+  }
+}

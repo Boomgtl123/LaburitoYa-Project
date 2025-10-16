@@ -1,0 +1,166 @@
+/* ========== ESTILOS DE TICKETS EN ADMIN PANEL ========== */
+
+.tickets-list {
+  display: grid;
+  gap: 20px;
+}
+
+.ticket-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: all 0.3s;
+}
+
+.ticket-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  transform: translateY(-2px);
+}
+
+.ticket-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.ticket-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ticket-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.ticket-user h4 {
+  margin: 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.ticket-email {
+  font-size: 12px;
+  color: #666;
+}
+
+.ticket-badges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ticket-status-badge,
+.ticket-priority-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.ticket-status-badge.pendiente {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.ticket-status-badge.en_proceso {
+  background: #cfe2ff;
+  color: #084298;
+}
+
+.ticket-status-badge.resuelto {
+  background: #d1e7dd;
+  color: #0f5132;
+}
+
+.ticket-status-badge.cerrado {
+  background: #e2e3e5;
+  color: #41464b;
+}
+
+.ticket-priority-badge.baja {
+  background: #d1e7dd;
+  color: #0f5132;
+}
+
+.ticket-priority-badge.media {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.ticket-priority-badge.alta {
+  background: #ffe5d0;
+  color: #cc5500;
+}
+
+.ticket-priority-badge.urgente {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.ticket-body {
+  margin-bottom: 15px;
+}
+
+.ticket-subject {
+  margin: 0 0 10px 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.ticket-message {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  color: #666;
+  line-height: 1.5;
+}
+
+.ticket-meta {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: #999;
+}
+
+.ticket-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding-top: 15px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.ticket-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.ticket-user-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.ticket-user-info h4 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.ticket-user-info p {
+  margin: 5px 0 0 0;
+  font-size: 14px;
+  color: #666;
+}

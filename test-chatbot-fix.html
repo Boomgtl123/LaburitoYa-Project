@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test - Corrección Chatbot</title>
+  <link rel="stylesheet" href="support-chat.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .test-container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .test-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .test-header h1 {
+      color: #667eea;
+      margin-bottom: 10px;
+    }
+    .test-instructions {
+      background: #e3f2fd;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+      border-left: 4px solid #2196f3;
+    }
+    .test-instructions h3 {
+      margin-top: 0;
+      color: #1976d2;
+    }
+    .test-instructions ol {
+      margin: 10px 0;
+      padding-left: 20px;
+    }
+    .test-instructions li {
+      margin: 8px 0;
+    }
+    .test-status {
+      background: #f1f8e9;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border-left: 4px solid #4caf50;
+    }
+    .test-status h3 {
+      margin-top: 0;
+      color: #388e3c;
+    }
+    .console-output {
+      background: #263238;
+      color: #aed581;
+      padding: 15px;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      max-height: 300px;
+      overflow-y: auto;
+      margin-top: 20px;
+    }
+    .console-output .log {
+      margin: 5px 0;
+      padding: 3px 0;
+    }
+    .console-output .log.info { color: #81d4fa; }
+    .console-output .log.success { color: #aed581; }
+    .console-output .log.warning { color: #ffb74d; }
+    .console-output .log.error { color: #e57373; }
+    .btn-open-chat {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      display: block;
+      margin: 20px auto;
+      transition: all 0.3s;
+    }
+    .btn-open-chat:hover {
+      background: #5568d3;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+    .test-scenarios {
+      background: #fff3e0;
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 20px;
+      border-left: 4px solid #ff9800;
+    }
+    .test-scenarios h3 {
+      margin-top: 0;
+      color: #f57c00;
+    }
+    .test-scenarios ul {
+      margin: 10px 0;
+      padding-left: 20px;
+    }
+    .test-scenarios li {
+      margin: 8px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="test-container">
+    <div class="test-header">
+      <h1>🔧 Test de Corrección del Chatbot</h1>
+      <p>Verificación de mensajes duplicados corregidos</p>
+    </div>
+
+    <div class="test-status">
+      <h3>✅ Estado de la Corrección</h3>
+      <p><strong>Archivo modificado:</strong> support-chat.js</p>
+      <p><strong>Problema:</strong> Chatbot enviando mensajes duplicados</p>
+      <p><strong>Solución:</strong> Implementada y lista para probar</p>
+    </div>
+
+    <div class="test-instructions">
+      <h3>📋 Instrucciones de Prueba</h3>
+      <ol>
+        <li>Haz clic en el botón "Abrir Chat de Soporte" abajo</li>
+        <li>Prueba los siguientes escenarios:</li>
+        <ul>
+          <li>Escribe un mensaje y presiona <strong>Enter</strong></li>
+          <li>Escribe un mensaje y haz clic en el botón <strong>Enviar</strong></li>
+          <li>Haz clic en una <strong>sugerencia</strong></li>
+          <li>Intenta hacer clic <strong>múltiples veces rápidamente</strong> en el botón</li>
+          <li>Intenta presionar <strong>Enter múltiples veces</strong> rápidamente</li>
+        </ul>
+        <li>Observa la consola del navegador (F12) para ver los logs</li>
+        <li>Verifica que NO se envíen mensajes duplicados</li>
+      </ol>
+    </div>
+
+    <button class="btn-open-chat" onclick="abrirChat()">
+      💬 Abrir Chat de Soporte
+    </button>
+
+    <div class="test-scenarios">
+      <h3>🎯 Escenarios a Verificar</h3>
+      <ul>
+        <li><strong>✅ Esperado:</strong> Solo UN mensaje por acción</li>
+        <li><strong>✅ Esperado:</strong> Botón deshabilitado durante procesamiento</li>
+        <li><strong>✅ Esperado:</strong> Input deshabilitado durante procesamiento</li>
+        <li><strong>✅ Esperado:</strong> Mensaje de advertencia si intentas enviar mientras procesa</li>
+        <li><strong>❌ NO debe ocurrir:</strong> Mensajes duplicados</li>
+        <li><strong>❌ NO debe ocurrir:</strong> Múltiples respuestas del bot</li>
+      </ul>
+    </div>
+
+    <div class="console-output" id="consoleOutput">
+      <div class="log info">🔍 Consola de Debug - Los logs aparecerán aquí</div>
+      <div class="log info">💡 También puedes abrir la consola del navegador (F12) para ver más detalles</div>
+    </div>
+  </div>
+
+  <!-- Botón flotante de soporte -->
+  <button class="floating-support-btn" id="floatingSupportBtn" aria-label="Abrir chat de soporte">
+    💬
+    <span class="support-badge" id="supportBadge" style="display: none;">0</span>
+  </button>
+
+  <!-- Modal de chat de soporte -->
+  <div class="support-chat-modal" id="supportChatModal">
+    <div class="support-chat-header">
+      <div class="support-chat-header-info">
+        <div class="support-chat-avatar">🤖</div>
+        <div class="support-chat-title">
+          <h3>Soporte LaburitoYa</h3>
+          <div class="support-chat-status">
+            <span class="status-dot"></span>
+            <span>En línea</span>
+          </div>
+        </div>
+      </div>
+      <button class="support-chat-close" id="closeSupportChat">&times;</button>
+    </div>
+
+    <div class="support-quick-suggestions" id="quickSuggestions">
+      <h4>¿En qué puedo ayudarte?</h4>
+      <div class="suggestions-grid" id="suggestionsGrid">
+        <!-- Las sugerencias se cargarán dinámicamente -->
+      </div>
+    </div>
+
+    <div class="support-chat-messages" id="supportChatMessages">
+      <div class="welcome-message">
+        <h3>👋 ¡Hola!</h3>
+        <p>Soy tu asistente virtual. Estoy aquí para ayudarte con cualquier duda sobre LaburitoYa.</p>
+        <p style="color: #4caf50; font-weight: bold; margin-top: 10px;">✅ Sistema corregido - No más mensajes duplicados</p>
+      </div>
+    </div>
+
+    <div class="support-chat-input">
+      <div class="support-input-wrapper">
+        <textarea 
+          id="supportMessageInput" 
+          class="support-input-field" 
+          placeholder="Escribe tu mensaje..."
+          rows="1"
+        ></textarea>
+      </div>
+      <button class="support-send-btn" id="supportSendBtn">
+        ➤
+      </button>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="support-ai.js"></script>
+  <script src="support-chat.js"></script>
+  
+  <script>
+    // Interceptar console.log para mostrar en la página
+    const consoleOutput = document.getElementById('consoleOutput');
+    const originalLog = console.log;
+    const originalWarn = console.warn;
+    const originalError = console.error;
+
+    function addLog(message, type = 'info') {
+      const logDiv = document.createElement('div');
+      logDiv.className = `log ${type}`;
+      logDiv.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      consoleOutput.appendChild(logDiv);
+      consoleOutput.scrollTop = consoleOutput.scrollHeight;
+    }
+
+    console.log = function(...args) {
+      originalLog.apply(console, args);
+      const message = args.join(' ');
+      
+      if (message.includes('✅')) {
+        addLog(message, 'success');
+      } else if (message.includes('⚠️')) {
+        addLog(message, 'warning');
+      } else if (message.includes('📤') || message.includes('📥')) {
+        addLog(message, 'info');
+      } else {
+        addLog(message, 'info');
+      }
+    };
+
+    console.warn = function(...args) {
+      originalWarn.apply(console, args);
+      addLog(args.join(' '), 'warning');
+    };
+
+    console.error = function(...args) {
+      originalError.apply(console, args);
+      addLog(args.join(' '), 'error');
+    };
+
+    function abrirChat() {
+      const chatModal = document.getElementById('supportChatModal');
+      const floatingBtn = document.getElementById('floatingSupportBtn');
+      
+      if (chatModal) {
+        chatModal.classList.add('active');
+        addLog('Chat abierto - Listo para probar', 'success');
+      }
+    }
+
+    // Log inicial
+    setTimeout(() => {
+      addLog('Sistema de chat cargado correctamente', 'success');
+      addLog('Listo para probar las correcciones', 'info');
+    }, 500);
+  </script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+{
+  "rules": {
+    "usuarios": {
+      ".read": true,
+      ".write": true,
+      ".indexOn": ["correo", "nombre", "rol", "verificado"]
+    },
+    "posts": {
+      ".read": true,
+      ".write": true,
+      ".indexOn": ["usuarioId", "fecha", "hashtags"]
+    },
+    "publicaciones": {
+      ".read": true,
+      ".write": true,
+      ".indexOn": ["usuarioId", "fecha", "hashtags"]
+    },
+    "mensajes": {
+      ".read": true,
+      ".write": true,
+      "$conversacionId": {
+        ".indexOn": ["fecha", "remitente", "destinatario", "leido"]
+      }
+    },
+    "conversaciones": {
+      ".read": true,
+      ".write": true,
+      ".indexOn": ["ultimaActualizacion", "participantes"]
+    },
+    "notificaciones": {
+      ".read": true,
+      ".write": true,
+      "$usuarioId": {
+        ".indexOn": ["fecha", "leida", "tipo"]
+      }
+    },
+    "followers": {
+      ".read": true,
+      ".write": true,
+      "$usuarioId": {
+        ".indexOn": ["fecha"]
+      }
+    },
+    "comentarios": {
+      ".read": true,
+      ".write": true,
+      ".indexOn": ["postId", "usuarioId", "fecha"]
+    },
+    "likes": {
+      ".read": true,
+      ".write": true,
+      ".indexOn": ["postId", "usuarioId", "fecha"]
+    },
+    "hashtags": {
+      ".read": true,
+      ".write": true,
+      ".indexOn": ["contador", "ultimaActualizacion"]
+    },
+    "tendencias": {
+      ".read": true,
+      ".write": true,
+      ".indexOn": ["contador", "fecha"]
+    },
+    "anuncios": {
+      ".read": true,
+      ".write": true,
+      ".indexOn": ["activo", "fechaCreacion", "prioridad"]
+    },
+    "tickets": {
+      ".read": true,
+      ".write": true,
+      "$ticketId": {
+        ".indexOn": ["usuarioId", "estado", "prioridad", "fechaCreacion", "asignadoA"]
+      }
+    },
+    "roles": {
+      ".read": true,
+      ".write": true,
+      ".indexOn": ["rol", "fechaAsignacion"]
+    },
+    "logs": {
+      ".read": true,
+      ".write": true,
+      ".indexOn": ["fecha", "tipo", "usuarioId"]
+    },
+    "estadisticas": {
+      ".read": true,
+      ".write": true
+    },
+    "configuracion": {
+      ".read": true,
+      ".write": true
+    }
+  }
+}

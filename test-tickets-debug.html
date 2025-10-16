@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Debug - Sistema de Tickets</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .status {
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border-left: 4px solid #ccc;
+    }
+    .status.success { background: #e8f5e9; border-color: #4caf50; }
+    .status.error { background: #ffebee; border-color: #f44336; }
+    .status.warning { background: #fff3e0; border-color: #ff9800; }
+    .btn {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    .btn:hover { background: #5568d3; }
+    .log {
+      background: #263238;
+      color: #aed581;
+      padding: 15px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 12px;
+      max-height: 400px;
+      overflow-y: auto;
+      margin-top: 20px;
+    }
+    .log-entry {
+      margin: 5px 0;
+      padding: 3px 0;
+    }
+    .log-entry.error { color: #ff6b6b; }
+    .log-entry.success { color: #51cf66; }
+    .log-entry.info { color: #74c0fc; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔍 Diagnóstico del Sistema de Tickets</h1>
+    <p>Esta página te ayudará a identificar por qué no se están generando los tickets</p>
+
+    <h2>📊 Estado de los Sistemas</h2>
+    <div id="statusContainer"></div>
+
+    <h2>🧪 Pruebas</h2>
+    <button class="btn" onclick="verificarSistemas()">1. Verificar Sistemas Cargados</button>
+    <button class="btn" onclick="verificarFirebase()">2. Verificar Conexión Firebase</button>
+    <button class="btn" onclick="verificarAuth()">3. Verificar Autenticación</button>
+    <button class="btn" onclick="crearTicketPrueba()">4. Crear Ticket de Prueba</button>
+    <button class="btn" onclick="listarTickets()">5. Listar Tickets Existentes</button>
+
+    <h2>📝 Log de Eventos</h2>
+    <div id="logContainer" class="log"></div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="auth.js"></script>
+  <script src="roles.js"></script>
+  <script src="support-ai.js"></script>
+  <script src="support-tickets.js"></script>
+
+  <script>
+    const logContainer = document.getElementById('logContainer');
+    const statusContainer = document.getElementById('statusContainer');
+
+    function addLog(message, type = 'info') {
+      const time = new Date().toLocaleTimeString();
+      const logEntry = document.createElement('div');
+      logEntry.className = `log-entry ${type}`;
+      logEntry.textContent = `[${time}] ${message}`;
+      logContainer.appendChild(logEntry);
+      logContainer.scrollTop = logContainer.scrollHeight;
+      console.log(message);
+    }
+
+    function addStatus(name, status, message) {
+      const statusDiv = document.createElement('div');
+      statusDiv.className = `status ${status}`;
+      statusDiv.innerHTML = `<strong>${name}</strong><br>${message}`;
+      statusContainer.appendChild(statusDiv);
+    }
+
+    function clearStatus() {
+      statusContainer.innerHTML = '';
+    }
+
+    // Interceptar console
+    const originalLog = console.log;
+    const originalError = console.error;
+    const originalWarn = console.warn;
+
+    console.log = function(...args) {
+      originalLog.apply(console, args);
+      const message = args.join(' ');
+      if (!message.includes('[') || message.includes('✅') || message.includes('❌')) {
+        addLog(message, 'info');
+      }
+    };
+
+    console.error = function(...args) {
+      originalError.apply(console, args);
+      addLog('ERROR: ' + args.join(' '), 'error');
+    };
+
+    console.warn = function(...args) {
+      originalWarn.apply(console, args);
+      addLog('WARNING: ' + args.join(' '), 'warning');
+    };
+
+    // Verificar sistemas
+    function verificarSistemas() {
+      clearStatus();
+      addLog('=== VERIFICANDO SISTEMAS ===', 'info');
+
+      // 1. auth.js
+      if (window.auth) {
+        addStatus('✅ auth.js', 'success', 'Sistema de autenticación cargado');
+        addLog('✅ window.auth disponible', 'success');
+        
+        // Verificar funciones
+        const funciones = ['obtenerUsuarioActual', 'protegerPagina', 'obtenerUsuarioPorId'];
+        funciones.forEach(fn => {
+          if (typeof window.auth[fn] === 'function') {
+            addLog(`  ✅ auth.${fn}() disponible`, 'success');
+          } else {
+            addLog(`  ❌ auth.${fn}() NO disponible`, 'error');
+          }
+        });
+      } else {
+        addStatus('❌ auth.js', 'error', 'Sistema de autenticación NO disponible');
+        addLog('❌ window.auth NO disponible', 'error');
+      }
+
+      // 2. roles.js
+      if (window.roles) {
+        addStatus('✅ roles.js', 'success', 'Sistema de roles cargado');
+        addLog('✅ window.roles disponible', 'success');
+      } else {
+        addStatus('⚠️ roles.js', 'warning', 'Sistema de roles NO disponible (opcional)');
+        addLog('⚠️ window.roles NO disponible', 'warning');
+      }
+
+      // 3. support-ai.js
+      if (window.supportAI) {
+        addStatus('✅ support-ai.js', 'success', 'Sistema de IA cargado');
+        addLog('✅ window.supportAI disponible', 'success');
+      } else {
+        addStatus('❌ support-ai.js', 'error', 'Sistema de IA NO disponible');
+        addLog('❌ window.supportAI NO disponible', 'error');
+      }
+
+      // 4. support-tickets.js (EL MÁS IMPORTANTE)
+      if (window.supportTickets) {
+        addStatus('✅ support-tickets.js', 'success', 'Sistema de tickets cargado correctamente');
+        addLog('✅ window.supportTickets disponible', 'success');
+        
+        // Verificar funciones críticas
+        const funciones = ['crearTicket', 'obtenerTickets', 'obtenerTicket', 'agregarRespuesta'];
+        funciones.forEach(fn => {
+          if (typeof window.supportTickets[fn] === 'function') {
+            addLog(`  ✅ supportTickets.${fn}() disponible`, 'success');
+          } else {
+            addLog(`  ❌ supportTickets.${fn}() NO disponible`, 'error');
+          }
+        });
+
+        // Verificar constantes
+        if (window.supportTickets.TICKET_STATUS) {
+          addLog('  ✅ TICKET_STATUS disponible', 'success');
+        }
+        if (window.supportTickets.TICKET_PRIORITY) {
+          addLog('  ✅ TICKET_PRIORITY disponible', 'success');
+        }
+      } else {
+        addStatus('❌ support-tickets.js', 'error', 'Sistema de tickets NO disponible - ESTE ES EL PROBLEMA');
+        addLog('❌ window.supportTickets NO disponible - ESTE ES EL PROBLEMA', 'error');
+      }
+
+      addLog('=== VERIFICACIÓN COMPLETADA ===', 'info');
+    }
+
+    // Verificar Firebase
+    async function verificarFirebase() {
+      addLog('=== VERIFICANDO CONEXIÓN FIREBASE ===', 'info');
+      
+      try {
+        const response = await fetch('https://laburitoya-6e55d-default-rtdb.firebaseio.com/.json');
+        
+        if (response.ok) {
+          addLog('✅ Conexión a Firebase exitosa', 'success');
+          addStatus('✅ Firebase', 'success', 'Conexión establecida correctamente');
+        } else {
+          addLog(`❌ Error de conexión: ${response.status}`, 'error');
+          addStatus('❌ Firebase', 'error', `Error: ${response.status}`);
+        }
+      } catch (error) {
+        addLog(`❌ Error al conectar: ${error.message}`, 'error');
+        addStatus('❌ Firebase', 'error', error.message);
+      }
+    }
+
+    // Verificar autenticación
+    function verificarAuth() {
+      addLog('=== VERIFICANDO AUTENTICACIÓN ===', 'info');
+      
+      if (!window.auth) {
+        addLog('❌ Sistema de autenticación no disponible', 'error');
+        return;
+      }
+
+      const usuario = window.auth.obtenerUsuarioActual();
+      
+      if (usuario) {
+        addLog(`✅ Usuario autenticado: ${usuario.nombre}`, 'success');
+        addLog(`  ID: ${usuario.id}`, 'info');
+        addLog(`  Email: ${usuario.correo}`, 'info');
+        addStatus('✅ Autenticación', 'success', `Usuario: ${usuario.nombre}`);
+      } else {
+        addLog('❌ No hay usuario autenticado', 'error');
+        addLog('  Creando usuario de prueba...', 'info');
+        
+        // Crear usuario de prueba
+        const usuarioPrueba = {
+          id: 'test-' + Date.now(),
+          nombre: 'Usuario de Prueba',
+          correo: 'test@laburitoya.com',
+          foto: null
+        };
+        
+        localStorage.setItem('currentUser', JSON.stringify(usuarioPrueba));
+        addLog('✅ Usuario de prueba creado', 'success');
+        addStatus('✅ Autenticación', 'success', 'Usuario de prueba creado');
+      }
+    }
+
+    // Crear ticket de prueba
+    async function crearTicketPrueba() {
+      addLog('=== CREANDO TICKET DE PRUEBA ===', 'info');
+      
+      // Verificar que supportTickets esté disponible
+      if (!window.supportTickets) {
+        addLog('❌ window.supportTickets NO está disponible', 'error');
+        addLog('  El archivo support-tickets.js no se cargó correctamente', 'error');
+        addStatus('❌ Error', 'error', 'Sistema de tickets no disponible');
+        return;
+      }
+
+      // Verificar autenticación
+      if (!window.auth) {
+        addLog('❌ window.auth NO está disponible', 'error');
+        return;
+      }
+
+      let usuario = window.auth.obtenerUsuarioActual();
+      
+      if (!usuario) {
+        addLog('⚠️ No hay usuario autenticado, creando uno de prueba...', 'warning');
+        usuario = {
+          id: 'test-' + Date.now(),
+          nombre: 'Usuario de Prueba',
+          correo: 'test@laburitoya.com',
+          foto: null
+        };
+        localStorage.setItem('currentUser', JSON.stringify(usuario));
+        addLog('✅ Usuario de prueba creado', 'success');
+      }
+
+      // Datos del ticket
+      const ticketData = {
+        asunto: 'Ticket de prueba - ' + new Date().toLocaleTimeString(),
+        mensaje: 'Este es un ticket de prueba creado desde el sistema de diagnóstico.\n\nFecha: ' + new Date().toLocaleString(),
+        categoria: 'test',
+        prioridad: 'media',
+        conversacion: [
+          { rol: 'usuario', mensaje: 'Hola, tengo una consulta', fecha: new Date().toISOString() },
+          { rol: 'asistente', mensaje: 'Hola, ¿en qué puedo ayudarte?', fecha: new Date().toISOString() }
+        ]
+      };
+
+      addLog('Datos del ticket:', 'info');
+      addLog(JSON.stringify(ticketData, null, 2), 'info');
+
+      try {
+        addLog('Llamando a supportTickets.crearTicket()...', 'info');
+        const result = await window.supportTickets.crearTicket(ticketData);
+        
+        addLog('Resultado recibido:', 'info');
+        addLog(JSON.stringify(result, null, 2), 'info');
+        
+        if (result.success) {
+          addLog(`✅ ¡TICKET CREADO EXITOSAMENTE!`, 'success');
+          addLog(`  ID del ticket: ${result.ticketId}`, 'success');
+          addStatus('✅ Ticket Creado', 'success', `ID: ${result.ticketId.substring(0, 12)}...`);
+          
+          // Verificar en Firebase
+          setTimeout(() => {
+            addLog('Verificando en Firebase...', 'info');
+            verificarTicketEnFirebase(result.ticketId);
+          }, 1000);
+        } else {
+          addLog(`❌ Error al crear ticket: ${result.error}`, 'error');
+          addStatus('❌ Error', 'error', result.error);
+        }
+      } catch (error) {
+        addLog(`❌ Excepción al crear ticket: ${error.message}`, 'error');
+        addLog(`  Stack: ${error.stack}`, 'error');
+        addStatus('❌ Excepción', 'error', error.message);
+      }
+    }
+
+    // Verificar ticket en Firebase
+    async function verificarTicketEnFirebase(ticketId) {
+      try {
+        const response = await fetch(`https://laburitoya-6e55d-default-rtdb.firebaseio.com/tickets/${ticketId}.json`);
+        const data = await response.json();
+        
+        if (data) {
+          addLog('✅ Ticket encontrado en Firebase', 'success');
+          addLog(JSON.stringify(data, null, 2), 'info');
+        } else {
+          addLog('❌ Ticket NO encontrado en Firebase', 'error');
+        }
+      } catch (error) {
+        addLog(`❌ Error al verificar: ${error.message}`, 'error');
+      }
+    }
+
+    // Listar tickets
+    async function listarTickets() {
+      addLog('=== LISTANDO TICKETS EXISTENTES ===', 'info');
+      
+      if (!window.supportTickets) {
+        addLog('❌ Sistema de tickets no disponible', 'error');
+        return;
+      }
+
+      try {
+        const tickets = await window.supportTickets.obtenerTickets();
+        
+        addLog(`📋 Total de tickets: ${tickets.length}`, 'info');
+        
+        if (tickets.length === 0) {
+          addLog('  No hay tickets en el sistema', 'warning');
+          addStatus('⚠️ Sin Tickets', 'warning', 'No hay tickets creados');
+        } else {
+          tickets.forEach((ticket, index) => {
+            addLog(`\n  Ticket ${index + 1}:`, 'info');
+            addLog(`    ID: ${ticket.id}`, 'info');
+            addLog(`    Asunto: ${ticket.asunto}`, 'info');
+            addLog(`    Estado: ${ticket.estado}`, 'info');
+            addLog(`    Usuario: ${ticket.usuarioNombre}`, 'info');
+            addLog(`    Fecha: ${new Date(ticket.fechaCreacion).toLocaleString()}`, 'info');
+          });
+          addStatus('✅ Tickets Encontrados', 'success', `${tickets.length} tickets en el sistema`);
+        }
+      } catch (error) {
+        addLog(`❌ Error al listar tickets: ${error.message}`, 'error');
+        addStatus('❌ Error', 'error', error.message);
+      }
+    }
+
+    // Verificar al cargar
+    window.addEventListener('DOMContentLoaded', function() {
+      setTimeout(() => {
+        addLog('🚀 Página cargada, iniciando diagnóstico...', 'info');
+        verificarSistemas();
+      }, 500);
+    });
+  </script>
+</body>
+</html>

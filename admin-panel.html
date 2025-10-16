@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Panel de Administración - LaburitoYa</title>
   <link rel="stylesheet" href="admin-panel.css" />
+  <link rel="stylesheet" href="support-tickets.css" />
   <style>
     .verified-badge {
       width: 16px;
@@ -237,10 +238,49 @@
           <div class="section-actions">
             <select id="filterTickets" class="filter-select">
               <option value="todos">Todos los tickets</option>
-              <option value="abiertos">Abiertos</option>
+              <option value="pendiente">Pendientes</option>
               <option value="en_proceso">En proceso</option>
-              <option value="cerrados">Cerrados</option>
+              <option value="resuelto">Resueltos</option>
+              <option value="cerrado">Cerrados</option>
             </select>
+            <select id="filterPrioridad" class="filter-select">
+              <option value="todas">Todas las prioridades</option>
+              <option value="urgente">Urgente</option>
+              <option value="alta">Alta</option>
+              <option value="media">Media</option>
+              <option value="baja">Baja</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="stats-grid" style="margin-bottom: 20px;">
+          <div class="stat-card">
+            <div class="stat-icon" style="background: #ffc107;">📋</div>
+            <div class="stat-info">
+              <h3 id="statTicketsTotal">0</h3>
+              <p>Total Tickets</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background: #ff9800;">⏳</div>
+            <div class="stat-info">
+              <h3 id="statTicketsPendientes">0</h3>
+              <p>Pendientes</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background: #2196f3;">🔄</div>
+            <div class="stat-info">
+              <h3 id="statTicketsEnProceso">0</h3>
+              <p>En Proceso</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background: #4caf50;">✓</div>
+            <div class="stat-info">
+              <h3 id="statTicketsResueltos">0</h3>
+              <p>Resueltos</p>
+            </div>
           </div>
         </div>
 
@@ -405,6 +445,7 @@
   <!-- Scripts -->
   <script src="auth.js"></script>
   <script src="roles.js"></script>
+  <script src="support-tickets.js"></script>
   <script src="admin-panel.js"></script>
 </body>
 </html>

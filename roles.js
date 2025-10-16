@@ -274,12 +274,21 @@ async function crearAnuncio(anuncio) {
   const usuarioActual = window.auth ? window.auth.obtenerUsuarioActual() : null;
   
   if (!usuarioActual) {
+    console.error('No hay usuario autenticado');
     return { success: false, error: 'No hay usuario autenticado' };
   }
 
+  // Verificar permisos
   const puedeCrear = await tienePermiso(usuarioActual.id, 'crear_anuncios');
   if (!puedeCrear) {
+    console.error('Usuario sin permisos para crear anuncios');
     return { success: false, error: 'No tienes permisos para crear anuncios' };
+  }
+
+  // Validar datos del anuncio
+  if (!anuncio.titulo || !anuncio.contenido || !anuncio.tipo) {
+    console.error('Datos del anuncio incompletos');
+    return { success: false, error: 'Datos del anuncio incompletos' };
   }
 
   try {
@@ -291,23 +300,41 @@ async function crearAnuncio(anuncio) {
       activo: true
     };
 
+    console.log('Creando anuncio:', { titulo: nuevoAnuncio.titulo, tipo: nuevoAnuncio.tipo });
+
     const response = await fetch('https://laburitoya-6e55d-default-rtdb.firebaseio.com/anuncios.json', {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify(nuevoAnuncio)
     });
 
-    if (response.ok) {
-      const data = await response.json();
-      await registrarAccion('crear_anuncio', {
-        anuncioId: data.name,
-        titulo: anuncio.titulo
-      });
-      return { success: true, id: data.name };
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Error en respuesta de Firebase:', response.status, errorText);
+      return { success: false, error: `Error del servidor: ${response.status}` };
     }
-    return { success: false, error: 'Error al crear anuncio' };
+
+    const data = await response.json();
+    
+    if (!data || !data.name) {
+      console.error('Respuesta de Firebase sin ID');
+      return { success: false, error: 'Error al obtener ID del anuncio' };
+    }
+
+    console.log('Anuncio creado exitosamente:', data.name);
+
+    // Registrar acción
+    await registrarAccion('crear_anuncio', {
+      anuncioId: data.name,
+      titulo: anuncio.titulo
+    });
+    
+    return { success: true, id: data.name };
   } catch (error) {
     console.error('Error al crear anuncio:', error);
-    return { success: false, error: error.message };
+    return { success: false, error: `Error de conexión: ${error.message}` };
   }
 }
 
@@ -334,17 +361,29 @@ async function editarAnuncio(anuncioId, cambios) {
   const usuarioActual = window.auth ? window.auth.obtenerUsuarioActual() : null;
   
   if (!usuarioActual) {
+    console.error('No hay usuario autenticado');
     return { success: false, error: 'No hay usuario autenticado' };
   }
 
   const puedeEditar = await tienePermiso(usuarioActual.id, 'editar_anuncios');
   if (!puedeEditar) {
+    console.error('Usuario sin permisos para editar anuncios');
     return { success: false, error: 'No tienes permisos para editar anuncios' };
   }
 
+  if (!anuncioId) {
+    console.error('ID de anuncio no proporcionado');
+    return { success: false, error: 'ID de anuncio no válido' };
+  }
+
   try {
+    console.log('Editando anuncio:', anuncioId);
+
     const response = await fetch(`https://laburitoya-6e55d-default-rtdb.firebaseio.com/anuncios/${anuncioId}.json`, {
       method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify({
         ...cambios,
         editadoPor: usuarioActual.id,
@@ -352,14 +391,19 @@ async function editarAnuncio(anuncioId, cambios) {
       })
     });
 
-    if (response.ok) {
-      await registrarAccion('editar_anuncio', { anuncioId });
-      return { success: true };
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Error en respuesta de Firebase:', response.status, errorText);
+      return { success: false, error: `Error del servidor: ${response.status}` };
     }
-    return { success: false, error: 'Error al editar anuncio' };
+
+    console.log('Anuncio editado exitosamente');
+
+    await registrarAccion('editar_anuncio', { anuncioId });
+    return { success: true };
   } catch (error) {
     console.error('Error al editar anuncio:', error);
-    return { success: false, error: error.message };
+    return { success: false, error: `Error de conexión: ${error.message}` };
   }
 }
 

@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="home.css" />
   <link rel="stylesheet" href="home-responsive-additions.css" />
   <link rel="stylesheet" href="mobile-avatar-menu.css" />
+  <link rel="stylesheet" href="support-chat.css" />
   <style>
     .verified-badge {
       color: #0a66c2 !important; /* color consistente con el index */
@@ -225,19 +226,65 @@
     </aside>
   </div>
 
-  <!-- Botón flotante de contacto (WhatsApp) -->
-  <a href="https://wa.me/5491234567890?text=Hola,%20necesito%20ayuda%20con%20LaburitoYa" 
-     class="floating-contact-btn" 
-     target="_blank" 
-     rel="noopener noreferrer"
-     aria-label="Contactar por WhatsApp">
-  </a>
+  <!-- Botón flotante de soporte -->
+  <button class="floating-support-btn" id="floatingSupportBtn" aria-label="Abrir chat de soporte">
+    💬
+    <span class="support-badge" id="supportBadge" style="display: none;">0</span>
+  </button>
+
+  <!-- Modal de chat de soporte -->
+  <div class="support-chat-modal" id="supportChatModal">
+    <div class="support-chat-header">
+      <div class="support-chat-header-info">
+        <div class="support-chat-avatar">🤖</div>
+        <div class="support-chat-title">
+          <h3>Soporte LaburitoYa</h3>
+          <div class="support-chat-status">
+            <span class="status-dot"></span>
+            <span>En línea</span>
+          </div>
+        </div>
+      </div>
+      <button class="support-chat-close" id="closeSupportChat">&times;</button>
+    </div>
+
+    <div class="support-quick-suggestions" id="quickSuggestions">
+      <h4>¿En qué puedo ayudarte?</h4>
+      <div class="suggestions-grid" id="suggestionsGrid">
+        <!-- Las sugerencias se cargarán dinámicamente -->
+      </div>
+    </div>
+
+    <div class="support-chat-messages" id="supportChatMessages">
+      <div class="welcome-message">
+        <h3>👋 ¡Hola!</h3>
+        <p>Soy tu asistente virtual. Estoy aquí para ayudarte con cualquier duda sobre LaburitoYa.</p>
+      </div>
+    </div>
+
+    <div class="support-chat-input">
+      <div class="support-input-wrapper">
+        <textarea 
+          id="supportMessageInput" 
+          class="support-input-field" 
+          placeholder="Escribe tu mensaje..."
+          rows="1"
+        ></textarea>
+      </div>
+      <button class="support-send-btn" id="supportSendBtn">
+        ➤
+      </button>
+    </div>
+  </div>
 
   <!-- Scripts en orden correcto -->
   <script src="auth.js"></script>
   <script src="roles.js"></script>
   <script src="followers.js"></script>
   <script src="hashtags.js"></script>
+  <script src="support-ai.js"></script>
+  <script src="support-tickets-test.js"></script>
+  <script src="support-chat.js"></script>
   <script src="home.js"></script>
   <!-- Scripts opcionales que se cargarán si existen -->
   <script>

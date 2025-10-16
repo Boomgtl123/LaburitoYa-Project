@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test - Corrección de Tickets</title>
+  <link rel="stylesheet" href="support-chat.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    
+    .test-container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    
+    .test-header {
+      border-bottom: 2px solid #667eea;
+      padding-bottom: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .test-header h1 {
+      margin: 0;
+      color: #667eea;
+    }
+    
+    .test-section {
+      margin: 20px 0;
+      padding: 15px;
+      background: #f9f9f9;
+      border-radius: 5px;
+      border-left: 4px solid #667eea;
+    }
+    
+    .test-section h3 {
+      margin-top: 0;
+      color: #333;
+    }
+    
+    .status-indicator {
+      display: inline-block;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-weight: bold;
+      margin: 5px 0;
+    }
+    
+    .status-success {
+      background: #d4edda;
+      color: #155724;
+    }
+    
+    .status-error {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    
+    .status-pending {
+      background: #fff3cd;
+      color: #856404;
+    }
+    
+    .btn-test {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 5px;
+      transition: background 0.3s;
+    }
+    
+    .btn-test:hover {
+      background: #5568d3;
+    }
+    
+    .btn-test:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    
+    .console-output {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 15px;
+      border-radius: 5px;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      max-height: 400px;
+      overflow-y: auto;
+      margin-top: 10px;
+    }
+    
+    .console-line {
+      margin: 5px 0;
+      padding: 2px 0;
+    }
+    
+    .console-success { color: #4ec9b0; }
+    .console-error { color: #f48771; }
+    .console-warning { color: #dcdcaa; }
+    .console-info { color: #9cdcfe; }
+    
+    .floating-support-btn {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+      transition: transform 0.3s, box-shadow 0.3s;
+      z-index: 1000;
+    }
+    
+    .floating-support-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    }
+  </style>
+</head>
+<body>
+  <div class="test-container">
+    <div class="test-header">
+      <h1>🧪 Test de Corrección - Sistema de Tickets</h1>
+      <p>Prueba del sistema de creación de tickets del chatbot</p>
+    </div>
+
+    <div class="test-section">
+      <h3>📊 Estado del Sistema</h3>
+      <div id="systemStatus">
+        <p>Verificando sistemas...</p>
+      </div>
+    </div>
+
+    <div class="test-section">
+      <h3>🔧 Acciones de Prueba</h3>
+      <button class="btn-test" onclick="verificarSistemas()">🔍 Verificar Sistemas</button>
+      <button class="btn-test" onclick="abrirChat()">💬 Abrir Chat</button>
+      <button class="btn-test" onclick="simularCreacionTicket()">🎫 Simular Creación de Ticket</button>
+      <button class="btn-test" onclick="limpiarConsola()">🗑️ Limpiar Consola</button>
+    </div>
+
+    <div class="test-section">
+      <h3>📝 Consola de Depuración</h3>
+      <div class="console-output" id="consoleOutput">
+        <div class="console-line console-info">Esperando acciones de prueba...</div>
+      </div>
+    </div>
+
+    <div class="test-section">
+      <h3>📋 Instrucciones de Prueba</h3>
+      <ol>
+        <li>Haz clic en "Verificar Sistemas" para comprobar que todo esté cargado</li>
+        <li>Haz clic en "Abrir Chat" para abrir el chatbot</li>
+        <li>Escribe un mensaje en el chat (ej: "Tengo un problema técnico")</li>
+        <li>Haz clic en el botón "📝 Crear Ticket de Soporte" que aparece</li>
+        <li>Verifica en la consola que el ticket se crea exitosamente</li>
+        <li>Revisa Firebase Console para confirmar que el ticket está guardado</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- Botón flotante de soporte -->
+  <button class="floating-support-btn" id="floatingSupportBtn" aria-label="Abrir chat de soporte">
+    💬
+  </button>
+
+  <!-- Modal de chat de soporte -->
+  <div class="support-chat-modal" id="supportChatModal">
+    <div class="support-chat-header">
+      <div class="support-chat-header-info">
+        <div class="support-chat-avatar">🤖</div>
+        <div class="support-chat-title">
+          <h3>Soporte LaburitoYa</h3>
+          <div class="support-chat-status">
+            <span class="status-dot"></span>
+            <span>En línea</span>
+          </div>
+        </div>
+      </div>
+      <button class="support-chat-close" id="closeSupportChat">&times;</button>
+    </div>
+
+    <div class="support-quick-suggestions" id="quickSuggestions">
+      <h4>¿En qué puedo ayudarte?</h4>
+      <div class="suggestions-grid" id="suggestionsGrid">
+        <!-- Las sugerencias se cargarán dinámicamente -->
+      </div>
+    </div>
+
+    <div class="support-chat-messages" id="supportChatMessages">
+      <div class="welcome-message">
+        <h3>👋 ¡Hola!</h3>
+        <p>Soy tu asistente virtual. Estoy aquí para ayudarte con cualquier duda sobre LaburitoYa.</p>
+      </div>
+    </div>
+
+    <div class="support-chat-input">
+      <div class="support-input-wrapper">
+        <textarea 
+          id="supportMessageInput" 
+          class="support-input-field" 
+          placeholder="Escribe tu mensaje..."
+          rows="1"
+        ></textarea>
+      </div>
+      <button class="support-send-btn" id="supportSendBtn">
+        ➤
+      </button>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="auth.js"></script>
+  <script src="support-ai.js"></script>
+  <script src="support-tickets-simple.js"></script>
+  <script src="support-chat.js"></script>
+
+  <script>
+    // Interceptar console.log para mostrar en la página
+    const originalLog = console.log;
+    const originalError = console.error;
+    const originalWarn = console.warn;
+
+    function addToConsole(message, type = 'info') {
+      const consoleOutput = document.getElementById('consoleOutput');
+      const line = document.createElement('div');
+      line.className = `console-line console-${type}`;
+      
+      // Formatear el mensaje
+      let formattedMessage = message;
+      if (typeof message === 'object') {
+        formattedMessage = JSON.stringify(message, null, 2);
+      }
+      
+      const timestamp = new Date().toLocaleTimeString();
+      line.textContent = `[${timestamp}] ${formattedMessage}`;
+      
+      consoleOutput.appendChild(line);
+      consoleOutput.scrollTop = consoleOutput.scrollHeight;
+    }
+
+    console.log = function(...args) {
+      originalLog.apply(console, args);
+      addToConsole(args.join(' '), 'info');
+    };
+
+    console.error = function(...args) {
+      originalError.apply(console, args);
+      addToConsole(args.join(' '), 'error');
+    };
+
+    console.warn = function(...args) {
+      originalWarn.apply(console, args);
+      addToConsole(args.join(' '), 'warning');
+    };
+
+    // Funciones de prueba
+    function verificarSistemas() {
+      addToConsole('🔍 Iniciando verificación de sistemas...', 'info');
+      
+      const statusDiv = document.getElementById('systemStatus');
+      let html = '';
+
+      // Verificar auth
+      if (window.auth) {
+        html += '<span class="status-indicator status-success">✅ Sistema de autenticación cargado</span><br>';
+        const usuario = window.auth.obtenerUsuarioActual();
+        if (usuario) {
+          html += `<span class="status-indicator status-success">✅ Usuario: ${usuario.nombre}</span><br>`;
+        } else {
+          html += '<span class="status-indicator status-error">❌ No hay usuario autenticado</span><br>';
+        }
+      } else {
+        html += '<span class="status-indicator status-error">❌ Sistema de autenticación NO cargado</span><br>';
+      }
+
+      // Verificar supportAI
+      if (window.supportAI) {
+        html += '<span class="status-indicator status-success">✅ Sistema de IA cargado</span><br>';
+      } else {
+        html += '<span class="status-indicator status-error">❌ Sistema de IA NO cargado</span><br>';
+      }
+
+      // Verificar supportTickets
+      if (window.supportTickets) {
+        html += '<span class="status-indicator status-success">✅ Sistema de tickets cargado</span><br>';
+        
+        if (typeof window.supportTickets.estaListo === 'function') {
+          if (window.supportTickets.estaListo()) {
+            html += '<span class="status-indicator status-success">✅ Sistema de tickets LISTO</span><br>';
+          } else {
+            html += '<span class="status-indicator status-pending">⏳ Sistema de tickets cargando...</span><br>';
+          }
+        }
+        
+        if (typeof window.supportTickets.crearTicket === 'function') {
+          html += '<span class="status-indicator status-success">✅ Función crearTicket disponible</span><br>';
+        }
+      } else {
+        html += '<span class="status-indicator status-error">❌ Sistema de tickets NO cargado</span><br>';
+      }
+
+      statusDiv.innerHTML = html;
+      addToConsole('✅ Verificación completada', 'success');
+    }
+
+    function abrirChat() {
+      const modal = document.getElementById('supportChatModal');
+      if (modal) {
+        modal.classList.add('active');
+        addToConsole('💬 Chat abierto', 'success');
+      } else {
+        addToConsole('❌ No se pudo abrir el chat', 'error');
+      }
+    }
+
+    async function simularCreacionTicket() {
+      addToConsole('🎫 Simulando creación de ticket...', 'info');
+      
+      if (!window.supportTickets) {
+        addToConsole('❌ Sistema de tickets no disponible', 'error');
+        return;
+      }
+
+      const usuario = window.auth ? window.auth.obtenerUsuarioActual() : null;
+      if (!usuario) {
+        addToConsole('❌ Usuario no autenticado', 'error');
+        return;
+      }
+
+      try {
+        const ticketData = {
+          asunto: 'Ticket de prueba',
+          mensaje: 'Este es un ticket de prueba del sistema corregido',
+          categoria: 'test',
+          prioridad: 'media',
+          conversacion: [
+            { rol: 'usuario', mensaje: 'Mensaje de prueba', fecha: new Date().toISOString() }
+          ]
+        };
+
+        addToConsole('📤 Enviando ticket...', 'info');
+        const result = await window.supportTickets.crearTicket(ticketData);
+
+        if (result.success) {
+          addToConsole(`✅ Ticket creado exitosamente: ${result.ticketId}`, 'success');
+          alert(`✅ Ticket creado exitosamente!\n\nID: ${result.ticketId.substring(0, 8)}`);
+        } else {
+          addToConsole(`❌ Error al crear ticket: ${result.error}`, 'error');
+          alert(`❌ Error: ${result.error}`);
+        }
+      } catch (error) {
+        addToConsole(`❌ Excepción: ${error.message}`, 'error');
+        alert(`❌ Error: ${error.message}`);
+      }
+    }
+
+    function limpiarConsola() {
+      const consoleOutput = document.getElementById('consoleOutput');
+      consoleOutput.innerHTML = '<div class="console-line console-info">Consola limpiada</div>';
+    }
+
+    // Verificar sistemas al cargar
+    window.addEventListener('load', function() {
+      setTimeout(verificarSistemas, 1000);
+    });
+
+    // Escuchar evento de sistema listo
+    window.addEventListener('supportTicketsReady', function() {
+      addToConsole('🎉 Evento supportTicketsReady recibido', 'success');
+      verificarSistemas();
+    });
+  </script>
+</body>
+</html>

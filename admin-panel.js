@@ -177,6 +177,11 @@ function configurarEventListeners() {
     filterTickets.addEventListener('change', () => cargarSoporte());
   }
 
+  const filterPrioridad = document.getElementById('filterPrioridad');
+  if (filterPrioridad) {
+    filterPrioridad.addEventListener('change', () => cargarSoporte());
+  }
+
   const filterLogs = document.getElementById('filterLogs');
   if (filterLogs) {
     filterLogs.addEventListener('change', () => cargarLogs());
@@ -542,10 +547,36 @@ function previewAnuncioMedia(e) {
 async function guardarAnuncio(e) {
   e.preventDefault();
   
+  // Validar campos requeridos
+  const titulo = document.getElementById('anuncioTitulo').value.trim();
+  const contenido = document.getElementById('anuncioContenido').value.trim();
+  const tipo = document.getElementById('anuncioTipo').value;
+  
+  if (!titulo) {
+    mostrarNotificacion('❌ El título es requerido', 'error');
+    return;
+  }
+  
+  if (!contenido) {
+    mostrarNotificacion('❌ El contenido es requerido', 'error');
+    return;
+  }
+  
+  if (!tipo) {
+    mostrarNotificacion('❌ Debes seleccionar un tipo de anuncio', 'error');
+    return;
+  }
+
+  // Mostrar indicador de carga
+  const submitBtn = e.target.querySelector('button[type="submit"]');
+  const originalText = submitBtn.textContent;
+  submitBtn.disabled = true;
+  submitBtn.textContent = '⏳ Guardando...';
+  
   const anuncio = {
-    titulo: document.getElementById('anuncioTitulo').value,
-    contenido: document.getElementById('anuncioContenido').value,
-    tipo: document.getElementById('anuncioTipo').value,
+    titulo: titulo,
+    contenido: contenido,
+    tipo: tipo,
     destacado: document.getElementById('anuncioDestacado').checked
   };
 
@@ -554,11 +585,29 @@ async function guardarAnuncio(e) {
   if (mediaInput.files && mediaInput.files[0]) {
     try {
       const file = mediaInput.files[0];
+      
+      // Validar tamaño del archivo (10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        mostrarNotificacion('❌ El archivo es muy grande. Máximo 10MB', 'error');
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+        return;
+      }
+      
+      // Validar tipo de archivo
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'video/mp4', 'video/webm'];
+      if (!validTypes.includes(file.type)) {
+        mostrarNotificacion('❌ Formato de archivo no soportado', 'error');
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+        return;
+      }
+      
       const reader = new FileReader();
       
       const mediaData = await new Promise((resolve, reject) => {
         reader.onload = () => resolve(reader.result);
-        reader.onerror = reject;
+        reader.onerror = () => reject(new Error('Error al leer el archivo'));
         reader.readAsDataURL(file);
       });
 
@@ -569,34 +618,42 @@ async function guardarAnuncio(e) {
       };
     } catch (error) {
       console.error('Error al procesar media:', error);
-      mostrarNotificacion('❌ Error al procesar imagen/video', 'error');
+      mostrarNotificacion('❌ Error al procesar imagen/video: ' + error.message, 'error');
+      submitBtn.disabled = false;
+      submitBtn.textContent = originalText;
       return;
     }
   }
 
   try {
+    let result;
+    
     if (anuncioEditando) {
-      const result = await roles.editarAnuncio(anuncioEditando, anuncio);
+      result = await roles.editarAnuncio(anuncioEditando, anuncio);
       if (result.success) {
         mostrarNotificacion('✅ Anuncio actualizado correctamente', 'success');
         cerrarModalAnuncio();
         await cargarAnuncios();
       } else {
-        mostrarNotificacion('❌ ' + result.error, 'error');
+        mostrarNotificacion('❌ ' + (result.error || 'Error al actualizar anuncio'), 'error');
       }
     } else {
-      const result = await roles.crearAnuncio(anuncio);
+      result = await roles.crearAnuncio(anuncio);
       if (result.success) {
         mostrarNotificacion('✅ Anuncio creado correctamente', 'success');
         cerrarModalAnuncio();
         await cargarAnuncios();
       } else {
-        mostrarNotificacion('❌ ' + result.error, 'error');
+        mostrarNotificacion('❌ ' + (result.error || 'Error al crear anuncio'), 'error');
       }
     }
   } catch (error) {
     console.error('Error al guardar anuncio:', error);
-    mostrarNotificacion('❌ Error al guardar anuncio', 'error');
+    mostrarNotificacion('❌ Error al guardar anuncio: ' + error.message, 'error');
+  } finally {
+    // Restaurar botón
+    submitBtn.disabled = false;
+    submitBtn.textContent = originalText;
   }
 }
 
@@ -858,7 +915,289 @@ async function cargarEmpleos() {
 // ========== SOPORTE ==========
 async function cargarSoporte() {
   const container = document.getElementById('ticketsList');
-  container.innerHTML = '<p class="info-state">Sistema de soporte en desarrollo...</p>';
+  
+  try {
+    // Obtener filtros
+    const filterEstado = document.getElementById('filterTickets')?.value || 'todos';
+    const filterPrioridad = document.getElementById('filterPrioridad')?.value || 'todas';
+    
+    // Obtener todos los tickets
+    let tickets = await window.supportTickets.obtenerTickets();
+    
+    // Aplicar filtros
+    if (filterEstado !== 'todos') {
+      tickets = tickets.filter(t => t.estado === filterEstado);
+    }
+    
+    if (filterPrioridad !== 'todas') {
+      tickets = tickets.filter(t => t.prioridad === filterPrioridad);
+    }
+    
+    // Actualizar estadísticas
+    await actualizarEstadisticasTickets();
+    
+    if (tickets.length === 0) {
+      container.innerHTML = '<p class="empty-state">No hay tickets que mostrar</p>';
+      return;
+    }
+    
+    // Renderizar tickets
+    container.innerHTML = tickets.map(ticket => `
+      <div class="ticket-card" data-ticket-id="${ticket.id}">
+        <div class="ticket-header">
+          <div class="ticket-user">
+            <img src="${ticket.usuarioFoto || 'https://via.placeholder.com/40'}" alt="${ticket.usuarioNombre}" class="ticket-avatar" />
+            <div>
+              <h4>${ticket.usuarioNombre}</h4>
+              <span class="ticket-email">${ticket.usuarioEmail}</span>
+            </div>
+          </div>
+          <div class="ticket-badges">
+            <span class="ticket-status-badge ${ticket.estado}">${getEstadoTexto(ticket.estado)}</span>
+            <span class="ticket-priority-badge ${ticket.prioridad}">${getPrioridadTexto(ticket.prioridad)}</span>
+          </div>
+        </div>
+        
+        <div class="ticket-body">
+          <h3 class="ticket-subject">${ticket.asunto}</h3>
+          <p class="ticket-message">${ticket.mensaje.substring(0, 200)}${ticket.mensaje.length > 200 ? '...' : ''}</p>
+          <div class="ticket-meta">
+            <span>📅 ${formatearFecha(ticket.fechaCreacion)}</span>
+            ${ticket.asignadoNombre ? `<span>👤 Asignado a: ${ticket.asignadoNombre}</span>` : '<span>👤 Sin asignar</span>'}
+            ${ticket.respuestas && ticket.respuestas.length > 0 ? `<span>💬 ${ticket.respuestas.length} respuestas</span>` : ''}
+          </div>
+        </div>
+        
+        <div class="ticket-actions">
+          <button class="btn-action btn-primary" onclick="verTicket('${ticket.id}')">
+            👁️ Ver Detalles
+          </button>
+          ${ticket.estado === 'pendiente' ? `
+            <button class="btn-action btn-success" onclick="asignarmeTicket('${ticket.id}')">
+              ✋ Asignarme
+            </button>
+          ` : ''}
+          ${ticket.estado !== 'cerrado' && ticket.estado !== 'resuelto' ? `
+            <button class="btn-action btn-warning" onclick="cambiarEstadoTicket('${ticket.id}', 'resuelto')">
+              ✓ Marcar Resuelto
+            </button>
+          ` : ''}
+        </div>
+      </div>
+    `).join('');
+    
+  } catch (error) {
+    console.error('Error al cargar tickets:', error);
+    container.innerHTML = '<p class="error-state">Error al cargar tickets</p>';
+  }
+}
+
+async function actualizarEstadisticasTickets() {
+  try {
+    const stats = await window.supportTickets.obtenerEstadisticas();
+    
+    if (stats) {
+      document.getElementById('statTicketsTotal').textContent = stats.total;
+      document.getElementById('statTicketsPendientes').textContent = stats.pendientes;
+      document.getElementById('statTicketsEnProceso').textContent = stats.enProceso;
+      document.getElementById('statTicketsResueltos').textContent = stats.resueltos;
+    }
+  } catch (error) {
+    console.error('Error al actualizar estadísticas:', error);
+  }
+}
+
+async function verTicket(ticketId) {
+  try {
+    const ticket = await window.supportTickets.obtenerTicket(ticketId);
+    
+    if (!ticket) {
+      alert('Ticket no encontrado');
+      return;
+    }
+    
+    // Crear modal para ver ticket
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.style.display = 'flex';
+    modal.innerHTML = `
+      <div class="modal-content" style="max-width: 800px; max-height: 90vh; overflow-y: auto;">
+        <div class="modal-header">
+          <h3>Ticket #${ticketId.substring(0, 8)}</h3>
+          <button class="modal-close" onclick="this.closest('.modal').remove()">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="ticket-detail-header">
+            <div class="ticket-user-info">
+              <img src="${ticket.usuarioFoto || 'https://via.placeholder.com/60'}" alt="${ticket.usuarioNombre}" style="width: 60px; height: 60px; border-radius: 50%;" />
+              <div>
+                <h4>${ticket.usuarioNombre}</h4>
+                <p>${ticket.usuarioEmail}</p>
+              </div>
+            </div>
+            <div>
+              <span class="ticket-status-badge ${ticket.estado}">${getEstadoTexto(ticket.estado)}</span>
+              <span class="ticket-priority-badge ${ticket.prioridad}">${getPrioridadTexto(ticket.prioridad)}</span>
+            </div>
+          </div>
+          
+          <div style="margin: 20px 0;">
+            <h4>Asunto:</h4>
+            <p>${ticket.asunto}</p>
+          </div>
+          
+          <div style="margin: 20px 0;">
+            <h4>Mensaje:</h4>
+            <p style="white-space: pre-wrap;">${ticket.mensaje}</p>
+          </div>
+          
+          ${ticket.conversacion && ticket.conversacion.length > 0 ? `
+            <div style="margin: 20px 0;">
+              <h4>Conversación del Chat:</h4>
+              <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; max-height: 300px; overflow-y: auto;">
+                ${ticket.conversacion.map(msg => `
+                  <div style="margin-bottom: 10px; padding: 10px; background: ${msg.rol === 'usuario' ? '#e3f2fd' : 'white'}; border-radius: 6px;">
+                    <strong>${msg.rol === 'usuario' ? 'Usuario' : 'Asistente'}:</strong>
+                    <p style="margin: 5px 0 0 0;">${msg.mensaje}</p>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          ` : ''}
+          
+          ${ticket.respuestas && ticket.respuestas.length > 0 ? `
+            <div style="margin: 20px 0;">
+              <h4>Respuestas del Soporte:</h4>
+              ${ticket.respuestas.map(resp => `
+                <div style="margin-bottom: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                  <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                    <img src="${resp.autorFoto || 'https://via.placeholder.com/32'}" alt="${resp.autor}" style="width: 32px; height: 32px; border-radius: 50%;" />
+                    <div>
+                      <strong>${resp.autor}</strong>
+                      <span style="font-size: 12px; color: #666; margin-left: 10px;">${formatearFecha(resp.fecha)}</span>
+                    </div>
+                  </div>
+                  <p style="margin: 0;">${resp.mensaje}</p>
+                </div>
+              `).join('')}
+            </div>
+          ` : ''}
+          
+          <div style="margin: 20px 0;">
+            <h4>Responder:</h4>
+            <textarea id="respuestaTicket" style="width: 100%; min-height: 100px; padding: 10px; border: 1px solid #ddd; border-radius: 8px;" placeholder="Escribe tu respuesta..."></textarea>
+          </div>
+          
+          <div style="margin-top: 10px; font-size: 12px; color: #666;">
+            <p>Creado: ${formatearFecha(ticket.fechaCreacion)}</p>
+            ${ticket.asignadoNombre ? `<p>Asignado a: ${ticket.asignadoNombre}</p>` : ''}
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-secondary" onclick="this.closest('.modal').remove()">Cerrar</button>
+          <button class="btn-primary" onclick="enviarRespuestaTicket('${ticketId}')">Enviar Respuesta</button>
+          ${ticket.estado !== 'resuelto' && ticket.estado !== 'cerrado' ? `
+            <button class="btn-success" onclick="cambiarEstadoTicket('${ticketId}', 'resuelto'); this.closest('.modal').remove();">Marcar como Resuelto</button>
+          ` : ''}
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+  } catch (error) {
+    console.error('Error al ver ticket:', error);
+    alert('Error al cargar el ticket');
+  }
+}
+
+async function enviarRespuestaTicket(ticketId) {
+  const textarea = document.getElementById('respuestaTicket');
+  const mensaje = textarea.value.trim();
+  
+  if (!mensaje) {
+    alert('Por favor escribe una respuesta');
+    return;
+  }
+  
+  try {
+    const result = await window.supportTickets.agregarRespuesta(ticketId, mensaje, false);
+    
+    if (result.success) {
+      mostrarNotificacion('✅ Respuesta enviada correctamente', 'success');
+      textarea.value = '';
+      
+      // Recargar el ticket
+      setTimeout(() => {
+        document.querySelector('.modal').remove();
+        verTicket(ticketId);
+      }, 500);
+    } else {
+      mostrarNotificacion('❌ Error al enviar respuesta', 'error');
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    mostrarNotificacion('❌ Error al enviar respuesta', 'error');
+  }
+}
+
+async function asignarmeTicket(ticketId) {
+  const usuarioActual = window.auth ? window.auth.obtenerUsuarioActual() : null;
+  
+  if (!usuarioActual) {
+    alert('Error: Usuario no autenticado');
+    return;
+  }
+  
+  try {
+    const result = await window.supportTickets.asignarTicket(ticketId, usuarioActual.id);
+    
+    if (result.success) {
+      mostrarNotificacion('✅ Ticket asignado correctamente', 'success');
+      await cargarSoporte();
+    } else {
+      mostrarNotificacion('❌ Error al asignar ticket', 'error');
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    mostrarNotificacion('❌ Error al asignar ticket', 'error');
+  }
+}
+
+async function cambiarEstadoTicket(ticketId, nuevoEstado) {
+  try {
+    const result = await window.supportTickets.cambiarEstado(ticketId, nuevoEstado);
+    
+    if (result.success) {
+      mostrarNotificacion(`✅ Ticket marcado como ${getEstadoTexto(nuevoEstado)}`, 'success');
+      await cargarSoporte();
+    } else {
+      mostrarNotificacion('❌ Error al cambiar estado', 'error');
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    mostrarNotificacion('❌ Error al cambiar estado', 'error');
+  }
+}
+
+function getEstadoTexto(estado) {
+  const estados = {
+    'pendiente': '⏳ Pendiente',
+    'en_proceso': '🔄 En Proceso',
+    'resuelto': '✓ Resuelto',
+    'cerrado': '🔒 Cerrado'
+  };
+  return estados[estado] || estado;
+}
+
+function getPrioridadTexto(prioridad) {
+  const prioridades = {
+    'baja': '🟢 Baja',
+    'media': '🟡 Media',
+    'alta': '🟠 Alta',
+    'urgente': '🔴 Urgente'
+  };
+  return prioridades[prioridad] || prioridad;
 }
 
 // ========== ANALYTICS ==========
@@ -1147,5 +1486,9 @@ window.eliminarAnuncioConfirm = eliminarAnuncioConfirm;
 window.toggleDestacado = toggleDestacado;
 window.eliminarPostAdmin = eliminarPostAdmin;
 window.cerrarModalAnuncio = cerrarModalAnuncio;
+window.verTicket = verTicket;
+window.enviarRespuestaTicket = enviarRespuestaTicket;
+window.asignarmeTicket = asignarmeTicket;
+window.cambiarEstadoTicket = cambiarEstadoTicket;
 
 console.log('✅ Panel de administración cargado correctamente');
