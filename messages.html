@@ -205,7 +205,8 @@
             <span class="recording-dot"></span>
             <span class="recording-text">Grabando audio...</span>
             <span class="recording-time" id="recordingTime">0:00</span>
-            <button class="btn-cancel-recording" id="btnCancelRecording">✕</button>
+            <button class="btn-send-recording" id="btnSendRecording" title="Enviar audio">📤</button>
+            <button class="btn-cancel-recording" id="btnCancelRecording" title="Cancelar">✕</button>
           </div>
         </div>
       </div>
@@ -462,6 +463,7 @@
       const btnAudioMessage = document.getElementById('btnAudioMessage');
       const audioRecordingIndicator = document.getElementById('audioRecordingIndicator');
       const recordingTime = document.getElementById('recordingTime');
+      const btnSendRecording = document.getElementById('btnSendRecording');
       const btnCancelRecording = document.getElementById('btnCancelRecording');
       const audioIcon = document.getElementById('audioIcon');
       const messageInput = document.getElementById('messageInput');
@@ -480,14 +482,6 @@
                 audioChunks.push(event.data);
               };
               
-              mediaRecorder.onstop = async () => {
-                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                await enviarAudio(audioBlob);
-                
-                // Detener el stream
-                stream.getTracks().forEach(track => track.stop());
-              };
-              
               mediaRecorder.start();
               recordingStartTime = Date.now();
               
@@ -495,7 +489,6 @@
               audioRecordingIndicator.style.display = 'flex';
               messageInput.style.display = 'none';
               btnSendMessage.style.display = 'none';
-              audioIcon.textContent = '⏹️';
               
               // Actualizar tiempo de grabación
               recordingInterval = setInterval(() => {
@@ -509,16 +502,32 @@
               console.error('Error al acceder al micrófono:', error);
               alert('No se pudo acceder al micrófono. Por favor verifica los permisos.');
             }
-          } else {
-            // Detener grabación
+          }
+        });
+      }
+      
+      // Botón para enviar audio grabado
+      if (btnSendRecording) {
+        btnSendRecording.addEventListener('click', async function() {
+          if (mediaRecorder && mediaRecorder.state === 'recording') {
+            // Detener grabación y enviar
             mediaRecorder.stop();
             clearInterval(recordingInterval);
             
-            // Ocultar indicador
-            audioRecordingIndicator.style.display = 'none';
-            messageInput.style.display = 'flex';
-            btnSendMessage.style.display = 'flex';
-            audioIcon.textContent = '🎤';
+            mediaRecorder.onstop = async () => {
+              const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+              await enviarAudio(audioBlob);
+              
+              // Detener el stream
+              if (mediaRecorder.stream) {
+                mediaRecorder.stream.getTracks().forEach(track => track.stop());
+              }
+              
+              // Ocultar indicador
+              audioRecordingIndicator.style.display = 'none';
+              messageInput.style.display = 'flex';
+              btnSendMessage.style.display = 'flex';
+            };
           }
         });
       }
