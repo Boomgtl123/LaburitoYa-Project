@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>Mi Perfil - LaburitoYa</title>
   <link rel="stylesheet" href="home.css" />
   <link rel="stylesheet" href="home-responsive-additions.css" />
@@ -143,9 +143,8 @@
 
       <!-- Información del perfil -->
       <div class="profile-instagram-info">
-        <!-- Línea 1: Username y botones -->
+        <!-- Línea 1: Botones de acción -->
         <div class="profile-instagram-top-row">
-          <h1 class="profile-instagram-username" id="profileUsername">@cargando</h1>
           <div class="profile-instagram-actions">
             <button class="profile-btn profile-btn-secondary" id="btnEditProfile">
               <span class="profile-btn-icon">✏️</span>
@@ -184,8 +183,9 @@
         <div class="profile-instagram-details">
           <h2 class="profile-full-name" id="profileFullName">
             Nombre Completo
-            <span class="verified-badge" id="profileVerifiedBadge" style="display: none;">✓</span>
+            <img src="verificado.png" alt="Verificado" class="verified-badge" id="profileVerifiedBadge" style="display: none;" />
           </h2>
+          <div class="profile-instagram-username" id="profileUsername">@cargando</div>
           <p class="profile-bio" id="profileBio">Bio del usuario...</p>
           <div class="profile-contact-row">
             <span class="profile-contact-item" id="profileType">

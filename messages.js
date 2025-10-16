@@ -158,7 +158,7 @@ function cargarConversaciones() {
             div.innerHTML = `
               <img src="${obtenerAvatar(usuario, 48)}" alt="${usuario.nombre}" class="conversation-avatar" />
               <div class="conversation-info">
-                <p class="conversation-name">${usuario.nombre}${usuario.verificado ? ' <span class="verified-badge">✓</span>' : ''}</p>
+                <p class="conversation-name">${auth.renderNombreConBadge(usuario.nombre, usuario)}</p>
                 <p class="conversation-last-message">${textoMensaje}</p>
               </div>
               <span class="conversation-time">${tiempo}</span>
@@ -215,7 +215,7 @@ function abrirConversacion(userId, usuario) {
   const chatUserStatus = document.getElementById('chatUserStatus');
   
   if (chatAvatar) chatAvatar.src = obtenerAvatar(usuario, 40);
-  if (chatUserName) chatUserName.innerHTML = usuario.nombre + (usuario.verificado ? ' <span class="verified-badge">✓</span>' : '');
+  if (chatUserName) chatUserName.innerHTML = auth.renderNombreConBadge(usuario.nombre, usuario);
   if (chatUserStatus) chatUserStatus.textContent = usuario.perfil || 'Usuario';
   
   // Actualizar conversaciones activas

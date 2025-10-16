@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Completo - LaburitoYa</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 32px;
+      text-align: center;
+    }
+
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 16px;
+      text-align: center;
+    }
+
+    .test-section {
+      margin-bottom: 30px;
+      padding: 25px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border-left: 4px solid #667eea;
+    }
+
+    .test-section h2 {
+      color: #667eea;
+      margin-bottom: 15px;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .test-item {
+      padding: 15px;
+      background: white;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border: 1px solid #e0e0e0;
+    }
+
+    .test-item-content {
+      flex: 1;
+    }
+
+    .test-item h3 {
+      font-size: 16px;
+      color: #333;
+      margin-bottom: 5px;
+    }
+
+    .test-item p {
+      font-size: 13px;
+      color: #666;
+      margin: 0;
+    }
+
+    .test-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .btn-test {
+      background: #667eea;
+      color: white;
+    }
+
+    .btn-test:hover {
+      background: #5568d3;
+    }
+
+    .btn-pass {
+      background: #28a745;
+      color: white;
+    }
+
+    .btn-pass:hover {
+      background: #218838;
+    }
+
+    .btn-fail {
+      background: #dc3545;
+      color: white;
+    }
+
+    .btn-fail:hover {
+      background: #c82333;
+    }
+
+    .status {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-left: 10px;
+    }
+
+    .status.pending {
+      background: #ffc107;
+      color: #856404;
+    }
+
+    .status.pass {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .status.fail {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .result-box {
+      margin-top: 15px;
+      padding: 15px;
+      border-radius: 6px;
+      font-size: 14px;
+      display: none;
+    }
+
+    .result-box.show {
+      display: block;
+    }
+
+    .result-box.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .result-box.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .result-box.info {
+      background: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+    }
+
+    .summary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 25px;
+      border-radius: 8px;
+      text-align: center;
+      margin-top: 30px;
+    }
+
+    .summary h2 {
+      margin-bottom: 15px;
+      font-size: 24px;
+    }
+
+    .summary-stats {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin-top: 20px;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 36px;
+      font-weight: bold;
+      display: block;
+    }
+
+    .stat-label {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .instructions {
+      background: #fff3cd;
+      border: 1px solid #ffeaa7;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+    }
+
+    .instructions h3 {
+      color: #856404;
+      margin-bottom: 10px;
+      font-size: 18px;
+    }
+
+    .instructions ol {
+      margin-left: 20px;
+      color: #856404;
+    }
+
+    .instructions li {
+      margin-bottom: 8px;
+      line-height: 1.5;
+    }
+
+    iframe {
+      width: 100%;
+      height: 600px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      margin-top: 15px;
+    }
+
+    .device-selector {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+
+    .device-btn {
+      padding: 8px 16px;
+      background: white;
+      border: 2px solid #667eea;
+      color: #667eea;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .device-btn:hover {
+      background: #667eea;
+      color: white;
+    }
+
+    .device-btn.active {
+      background: #667eea;
+      color: white;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 20px;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+
+      .test-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .test-actions {
+        width: 100%;
+      }
+
+      .test-actions button {
+        flex: 1;
+      }
+
+      .summary-stats {
+        flex-direction: column;
+        gap: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧪 Test Completo de LaburitoYa</h1>
+    <p class="subtitle">Verificación de todas las funcionalidades críticas</p>
+
+    <div class="instructions">
+      <h3>📋 Instrucciones</h3>
+      <ol>
+        <li>Haz clic en "Probar" para cada test</li>
+        <li>Sigue las instrucciones que aparecen</li>
+        <li>Marca como ✅ PASS si funciona correctamente</li>
+        <li>Marca como ❌ FAIL si hay algún problema</li>
+        <li>Al final verás un resumen completo</li>
+      </ol>
+    </div>
+
+    <!-- Test 1: Login -->
+    <div class="test-section">
+      <h2>🔐 Test 1: Login y Autenticación</h2>
+      
+      <div class="test-item" data-test="login">
+        <div class="test-item-content">
+          <h3>1.1 Iniciar Sesión <span class="status pending">Pendiente</span></h3>
+          <p>Verificar que el login funciona correctamente</p>
+        </div>
+        <div class="test-actions">
+          <button class="btn-test" onclick="runTest('login')">Probar</button>
+          <button class="btn-pass" onclick="markTest('login', 'pass')">✅ PASS</button>
+          <button class="btn-fail" onclick="markTest('login', 'fail')">❌ FAIL</button>
+        </div>
+      </div>
+      <div id="result-login" class="result-box"></div>
+    </div>
+
+    <!-- Test 2: Mensajes Móvil -->
+    <div class="test-section">
+      <h2>📱 Test 2: Mensajes en Móvil</h2>
+      
+      <div class="test-item" data-test="mobile-chat-visible">
+        <div class="test-item-content">
+          <h3>2.1 Chat Visible en Móvil <span class="status pending">Pendiente</span></h3>
+          <p>Verificar que el chat se muestra correctamente en móvil</p>
+        </div>
+        <div class="test-actions">
+          <button class="btn-test" onclick="runTest('mobile-chat-visible')">Probar</button>
+          <button class="btn-pass" onclick="markTest('mobile-chat-visible', 'pass')">✅ PASS</button>
+          <button class="btn-fail" onclick="markTest('mobile-chat-visible', 'fail')">❌ FAIL</button>
+        </div>
+      </div>
+      <div id="result-mobile-chat-visible" class="result-box"></div>
+
+      <div class="test-item" data-test="mobile-chat-write">
+        <div class="test-item-content">
+          <h3>2.2 Escribir Mensajes en Móvil <span class="status pending">Pendiente</span></h3>
+          <p>Verificar que se puede escribir y enviar mensajes</p>
+        </div>
+        <div class="test-actions">
+          <button class="btn-test" onclick="runTest('mobile-chat-write')">Probar</button>
+          <button class="btn-pass" onclick="markTest('mobile-chat-write', 'pass')">✅ PASS</button>
+          <button class="btn-fail" onclick="markTest('mobile-chat-write', 'fail')">❌ FAIL</button>
+        </div>
+      </div>
+      <div id="result-mobile-chat-write" class="result-box"></div>
+
+      <div class="test-item" data-test="mobile-chat-back">
+        <div class="test-item-content">
+          <h3>2.3 Botón Volver en Móvil <span class="status pending">Pendiente</span></h3>
+          <p>Verificar que el botón de volver funciona</p>
+        </div>
+        <div class="test-actions">
+          <button class="btn-test" onclick="runTest('mobile-chat-back')">Probar</button>
+          <button class="btn-pass" onclick="markTest('mobile-chat-back', 'pass')">✅ PASS</button>
+          <button class="btn-fail" onclick="markTest('mobile-chat-back', 'fail')">❌ FAIL</button>
+        </div>
+      </div>
+      <div id="result-mobile-chat-back" class="result-box"></div>
+    </div>
+
+    <!-- Test 3: Notificaciones -->
+    <div class="test-section">
+      <h2>🔔 Test 3: Notificaciones de Mensajes</h2>
+      
+      <div class="test-item" data-test="notif-mark-read">
+        <div class="test-item-content">
+          <h3>3.1 Marcar como Leídas <span class="status pending">Pendiente</span></h3>
+          <p>Verificar que las notificaciones se marcan como leídas al abrir chat</p>
+        </div>
+        <div class="test-actions">
+          <button class="btn-test" onclick="runTest('notif-mark-read')">Probar</button>
+          <button class="btn-pass" onclick="markTest('notif-mark-read', 'pass')">✅ PASS</button>
+          <button class="btn-fail" onclick="markTest('notif-mark-read', 'fail')">❌ FAIL</button>
+        </div>
+      </div>
+      <div id="result-notif-mark-read" class="result-box"></div>
+
+      <div class="test-item" data-test="notif-no-duplicates">
+        <div class="test-item-content">
+          <h3>3.2 Sin Duplicados <span class="status pending">Pendiente</span></h3>
+          <p>Verificar que no aparecen notificaciones duplicadas</p>
+        </div>
+        <div class="test-actions">
+          <button class="btn-test" onclick="runTest('notif-no-duplicates')">Probar</button>
+          <button class="btn-pass" onclick="markTest('notif-no-duplicates', 'pass')">✅ PASS</button>
+          <button class="btn-fail" onclick="markTest('notif-no-duplicates', 'fail')">❌ FAIL</button>
+        </div>
+      </div>
+      <div id="result-notif-no-duplicates" class="result-box"></div>
+
+      <div class="test-item" data-test="notif-counter">
+        <div class="test-item-content">
+          <h3>3.3 Contador de Notificaciones <span class="status pending">Pendiente</span></h3>
+          <p>Verificar que el contador se actualiza correctamente</p>
+        </div>
+        <div class="test-actions">
+          <button class="btn-test" onclick="runTest('notif-counter')">Probar</button>
+          <button class="btn-pass" onclick="markTest('notif-counter', 'pass')">✅ PASS</button>
+          <button class="btn-fail" onclick="markTest('notif-counter', 'fail')">❌ FAIL</button>
+        </div>
+      </div>
+      <div id="result-notif-counter" class="result-box"></div>
+    </div>
+
+    <!-- Test 4: Responsive -->
+    <div class="test-section">
+      <h2>📐 Test 4: Diseño Responsive</h2>
+      
+      <div class="test-item" data-test="responsive-mobile">
+        <div class="test-item-content">
+          <h3>4.1 Vista Móvil (< 768px) <span class="status pending">Pendiente</span></h3>
+          <p>Verificar que todo funciona en móvil</p>
+        </div>
+        <div class="test-actions">
+          <button class="btn-test" onclick="runTest('responsive-mobile')">Probar</button>
+          <button class="btn-pass" onclick="markTest('responsive-mobile', 'pass')">✅ PASS</button>
+          <button class="btn-fail" onclick="markTest('responsive-mobile', 'fail')">❌ FAIL</button>
+        </div>
+      </div>
+      <div id="result-responsive-mobile" class="result-box"></div>
+
+      <div class="test-item" data-test="responsive-tablet">
+        <div class="test-item-content">
+          <h3>4.2 Vista Tablet (768px - 1024px) <span class="status pending">Pendiente</span></h3>
+          <p>Verificar que todo funciona en tablet</p>
+        </div>
+        <div class="test-actions">
+          <button class="btn-test" onclick="runTest('responsive-tablet')">Probar</button>
+          <button class="btn-pass" onclick="markTest('responsive-tablet', 'pass')">✅ PASS</button>
+          <button class="btn-fail" onclick="markTest('responsive-tablet', 'fail')">❌ FAIL</button>
+        </div>
+      </div>
+      <div id="result-responsive-tablet" class="result-box"></div>
+
+      <div class="test-item" data-test="responsive-desktop">
+        <div class="test-item-content">
+          <h3>4.3 Vista Desktop (> 1024px) <span class="status pending">Pendiente</span></h3>
+          <p>Verificar que todo funciona en desktop</p>
+        </div>
+        <div class="test-actions">
+          <button class="btn-test" onclick="runTest('responsive-desktop', 'pass')">Probar</button>
+          <button class="btn-pass" onclick="markTest('responsive-desktop', 'pass')">✅ PASS</button>
+          <button class="btn-fail" onclick="markTest('responsive-desktop', 'fail')">❌ FAIL</button>
+        </div>
+      </div>
+      <div id="result-responsive-desktop" class="result-box"></div>
+    </div>
+
+    <!-- Resumen -->
+    <div class="summary">
+      <h2>📊 Resumen de Tests</h2>
+      <div class="summary-stats">
+        <div class="stat">
+          <span class="stat-number" id="total-tests">0</span>
+          <span class="stat-label">Total</span>
+        </div>
+        <div class="stat">
+          <span class="stat-number" id="passed-tests">0</span>
+          <span class="stat-label">✅ Pasados</span>
+        </div>
+        <div class="stat">
+          <span class="stat-number" id="failed-tests">0</span>
+          <span class="stat-label">❌ Fallidos</span>
+        </div>
+        <div class="stat">
+          <span class="stat-number" id="pending-tests">10</span>
+          <span class="stat-label">⏳ Pendientes</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const tests = {
+      'login': {
+        instructions: `
+          <strong>Pasos:</strong><br>
+          1. Abre login.html en una nueva pestaña<br>
+          2. Ingresa tus credenciales<br>
+          3. Verifica que inicia sesión correctamente<br>
+          4. Verifica que redirige a home.html<br><br>
+          <a href="login.html" target="_blank" style="color: #0a66c2; font-weight: 600;">➡️ Abrir Login</a>
+        `,
+        type: 'info'
+      },
+      'mobile-chat-visible': {
+        instructions: `
+          <strong>Pasos:</strong><br>
+          1. Abre messages.html en una nueva pestaña<br>
+          2. Abre las herramientas de desarrollador (F12)<br>
+          3. Activa el modo responsive (Ctrl+Shift+M o Cmd+Shift+M)<br>
+          4. Selecciona un dispositivo móvil (iPhone, Galaxy, etc.)<br>
+          5. Haz clic en una conversación<br>
+          6. Verifica que el chat se muestra correctamente<br>
+          7. Verifica que puedes ver el área de escritura<br><br>
+          <a href="messages.html" target="_blank" style="color: #0a66c2; font-weight: 600;">➡️ Abrir Mensajes</a>
+        `,
+        type: 'info'
+      },
+      'mobile-chat-write': {
+        instructions: `
+          <strong>Pasos:</strong><br>
+          1. En modo móvil (messages.html)<br>
+          2. Abre una conversación<br>
+          3. Haz clic en el campo de texto<br>
+          4. Escribe un mensaje de prueba<br>
+          5. Haz clic en enviar<br>
+          6. Verifica que el mensaje se envía correctamente<br><br>
+          <a href="messages.html" target="_blank" style="color: #0a66c2; font-weight: 600;">➡️ Abrir Mensajes</a>
+        `,
+        type: 'info'
+      },
+      'mobile-chat-back': {
+        instructions: `
+          <strong>Pasos:</strong><br>
+          1. En modo móvil (messages.html)<br>
+          2. Abre una conversación<br>
+          3. Busca el botón de volver (←) en el header<br>
+          4. Haz clic en el botón<br>
+          5. Verifica que vuelve a la lista de conversaciones<br><br>
+          <a href="messages.html" target="_blank" style="color: #0a66c2; font-weight: 600;">➡️ Abrir Mensajes</a>
+        `,
+        type: 'info'
+      },
+      'notif-mark-read': {
+        instructions: `
+          <strong>Pasos:</strong><br>
+          1. Asegúrate de tener notificaciones de mensajes sin leer<br>
+          2. Abre messages.html<br>
+          3. Observa el contador de notificaciones (badge rojo)<br>
+          4. Abre la conversación que tiene mensajes sin leer<br>
+          5. Espera 2-3 segundos<br>
+          6. Verifica que el contador disminuye<br>
+          7. Abre la consola (F12) y busca: "📝 [MESSAGES] Marcando notificación como leída"<br><br>
+          <a href="messages.html" target="_blank" style="color: #0a66c2; font-weight: 600;">➡️ Abrir Mensajes</a>
+        `,
+        type: 'info'
+      },
+      'notif-no-duplicates': {
+        instructions: `
+          <strong>Pasos:</strong><br>
+          1. Abre messages.html<br>
+          2. Abre una conversación<br>
+          3. Cierra la conversación<br>
+          4. Vuelve a abrir la misma conversación<br>
+          5. Verifica que NO aparecen notificaciones duplicadas<br>
+          6. Verifica que el contador no aumenta incorrectamente<br><br>
+          <a href="messages.html" target="_blank" style="color: #0a66c2; font-weight: 600;">➡️ Abrir Mensajes</a>
+        `,
+        type: 'info'
+      },
+      'notif-counter': {
+        instructions: `
+          <strong>Pasos:</strong><br>
+          1. Abre home.html<br>
+          2. Observa el contador de notificaciones en el menú<br>
+          3. Abre messages.html en otra pestaña<br>
+          4. Lee algunos mensajes<br>
+          5. Vuelve a home.html<br>
+          6. Verifica que el contador se actualiza correctamente<br><br>
+          <a href="home.html" target="_blank" style="color: #0a66c2; font-weight: 600;">➡️ Abrir Home</a>
+        `,
+        type: 'info'
+      },
+      'responsive-mobile': {
+        instructions: `
+          <strong>Pasos:</strong><br>
+          1. Abre home.html<br>
+          2. Activa modo responsive (F12 → Ctrl+Shift+M)<br>
+          3. Selecciona iPhone o Galaxy<br>
+          4. Verifica que el menú se adapta correctamente<br>
+          5. Verifica que las publicaciones se ven bien<br>
+          6. Prueba navegar a messages.html<br>
+          7. Verifica que todo es accesible<br><br>
+          <a href="home.html" target="_blank" style="color: #0a66c2; font-weight: 600;">➡️ Abrir Home</a>
+        `,
+        type: 'info'
+      },
+      'responsive-tablet': {
+        instructions: `
+          <strong>Pasos:</strong><br>
+          1. Abre home.html<br>
+          2. Activa modo responsive (F12 → Ctrl+Shift+M)<br>
+          3. Selecciona iPad o tablet<br>
+          4. Verifica que el diseño se adapta correctamente<br>
+          5. Verifica que no hay elementos cortados<br>
+          6. Prueba todas las páginas principales<br><br>
+          <a href="home.html" target="_blank" style="color: #0a66c2; font-weight: 600;">➡️ Abrir Home</a>
+        `,
+        type: 'info'
+      },
+      'responsive-desktop': {
+        instructions: `
+          <strong>Pasos:</strong><br>
+          1. Abre home.html en pantalla completa<br>
+          2. Verifica que el diseño se ve bien en desktop<br>
+          3. Verifica que no hay elementos demasiado anchos<br>
+          4. Prueba todas las funcionalidades<br>
+          5. Verifica que todo es accesible<br><br>
+          <a href="home.html" target="_blank" style="color: #0a66c2; font-weight: 600;">➡️ Abrir Home</a>
+        `,
+        type: 'info'
+      }
+    };
+
+    let testResults = {};
+
+    function runTest(testId) {
+      const test = tests[testId];
+      const resultBox = document.getElementById(`result-${testId}`);
+      
+      resultBox.className = `result-box ${test.type} show`;
+      resultBox.innerHTML = test.instructions;
+    }
+
+    function markTest(testId, result) {
+      testResults[testId] = result;
+      
+      const testItem = document.querySelector(`[data-test="${testId}"]`);
+      const statusSpan = testItem.querySelector('.status');
+      
+      statusSpan.className = `status ${result}`;
+      statusSpan.textContent = result === 'pass' ? '✅ PASS' : '❌ FAIL';
+      
+      updateSummary();
+    }
+
+    function updateSummary() {
+      const total = Object.keys(tests).length;
+      const passed = Object.values(testResults).filter(r => r === 'pass').length;
+      const failed = Object.values(testResults).filter(r => r === 'fail').length;
+      const pending = total - passed - failed;
+      
+      document.getElementById('total-tests').textContent = total;
+      document.getElementById('passed-tests').textContent = passed;
+      document.getElementById('failed-tests').textContent = failed;
+      document.getElementById('pending-tests').textContent = pending;
+    }
+
+    // Inicializar
+    updateSummary();
+  </script>
+</body>
+</html>

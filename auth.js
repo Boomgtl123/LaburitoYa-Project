@@ -208,7 +208,7 @@ function inicializarNavbar() {
 function renderNombreConBadge(nombre, usuario) {
   try {
     const mostrarBadge = estaVerificado(usuario) || esCEO(usuario);
-    return `${nombre}${mostrarBadge ? ' <span class="verified-badge">✓</span>' : ''}`;
+    return `${nombre}${mostrarBadge ? ' <img src="verificado.png" alt="Verificado" class="verified-badge" />' : ''}`;
   } catch (e) {
     return nombre;
   }

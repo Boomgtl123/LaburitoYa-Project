@@ -51,9 +51,70 @@ body {
 
 /* ========== VERIFIED BADGE (GLOBAL FOR APP PAGES USING home.css) ========== */
 .verified-badge {
-  color: #0a66c2 !important;
-  font-weight: bold;
-  margin-left: 4px;
+  display: inline-block;
+  width: 0.75em;
+  height: 0.75em;
+  vertical-align: middle;
+  filter: drop-shadow(0 0 2px rgba(0, 149, 246, 0.5));
+  animation: glow-pulse 2s ease-in-out infinite;
+  margin-left: 0.25rem;
+  cursor: help;
+  position: relative;
+  transition: transform 0.2s ease;
+}
+
+.verified-badge:hover {
+  transform: scale(1.15);
+}
+
+/* Tooltip para el badge */
+.verified-badge::after {
+  content: 'Perfil verificado';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-8px);
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  z-index: 1000;
+  letter-spacing: 0;
+}
+
+.verified-badge::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-2px);
+  border: 5px solid transparent;
+  border-top-color: rgba(0, 0, 0, 0.9);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 1000;
+}
+
+.verified-badge:hover::after,
+.verified-badge:hover::before {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-4px);
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 2px rgba(0, 149, 246, 0.5));
+  }
+  50% {
+    filter: drop-shadow(0 0 4px rgba(0, 149, 246, 0.8)) drop-shadow(0 0 8px rgba(0, 149, 246, 0.4));
+  }
 }
 
 /* ========== NAVBAR ========== */

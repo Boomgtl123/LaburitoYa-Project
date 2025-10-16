@@ -96,15 +96,15 @@ function cargarDatosPerfil() {
     navAvatar.src = usuarioActual.foto || DEFAULT_AVATAR;
   }
   
-  // Username (generar si no existe)
-  const username = usuarioPerfil.username || generarUsername(usuarioPerfil.nombre);
-  document.getElementById('profileUsername').textContent = `@${username}`;
-  
-  // Nombre completo
+  // Nombre completo (primero)
   const profileFullName = document.getElementById('profileFullName');
   if (profileFullName) {
     profileFullName.innerHTML = auth.renderNombreConBadge(usuarioPerfil.nombre, usuarioPerfil);
   }
+  
+  // Username (debajo, más pequeño)
+  const username = usuarioPerfil.username || generarUsername(usuarioPerfil.nombre);
+  document.getElementById('profileUsername').textContent = `@${username}`;
   
   // Bio
   const profileBio = document.getElementById('profileBio');

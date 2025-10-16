@@ -122,22 +122,22 @@
   width: 100%;
 }
 
-/* Línea 1: Username y botones */
+/* Línea 1: Botones de acción */
 .profile-instagram-top-row {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;
   width: 100%;
 }
 
 .profile-instagram-username {
-  font-size: 2rem;
-  font-weight: 600;
-  color: var(--profile-text-primary);
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--profile-text-secondary);
   margin: 0;
   line-height: 1.2;
-  letter-spacing: -0.5px;
+  letter-spacing: 0;
 }
 
 .profile-instagram-actions {
@@ -244,13 +244,13 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
+  gap: 0.5rem;
   width: 100%;
   max-width: 600px;
 }
 
 .profile-full-name {
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: var(--profile-text-primary);
   margin: 0;
@@ -258,6 +258,7 @@
   align-items: center;
   gap: 0.5rem;
   letter-spacing: -0.3px;
+  line-height: 1.2;
 }
 
 .profile-bio {
@@ -266,9 +267,77 @@
   line-height: 1.6;
   white-space: pre-wrap;
   word-wrap: break-word;
-  margin: 0;
+  margin: 0.5rem 0 0 0;
   text-align: center;
   max-width: 500px;
+}
+
+/* Badge de verificación con imagen y efecto de resplandor */
+.verified-badge {
+  display: inline-block;
+  width: 0.75em;
+  height: 0.75em;
+  vertical-align: middle;
+  filter: drop-shadow(0 0 2px rgba(0, 149, 246, 0.5));
+  animation: glow-pulse 2s ease-in-out infinite;
+  margin-left: 0.25rem;
+  cursor: help;
+  position: relative;
+  transition: transform 0.2s ease;
+}
+
+.verified-badge:hover {
+  transform: scale(1.15);
+}
+
+/* Tooltip para el badge */
+.verified-badge::after {
+  content: 'Perfil verificado';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-8px);
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  z-index: 1000;
+  letter-spacing: 0;
+}
+
+.verified-badge::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-2px);
+  border: 5px solid transparent;
+  border-top-color: rgba(0, 0, 0, 0.9);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 1000;
+}
+
+.verified-badge:hover::after,
+.verified-badge:hover::before {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-4px);
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 2px rgba(0, 149, 246, 0.5));
+  }
+  50% {
+    filter: drop-shadow(0 0 4px rgba(0, 149, 246, 0.8)) drop-shadow(0 0 8px rgba(0, 149, 246, 0.4));
+  }
 }
 
 .profile-contact-row {
@@ -1193,7 +1262,7 @@
   }
   
   .profile-instagram-username {
-    font-size: 1.25rem;
+    font-size: 0.875rem;
   }
   
   .profile-instagram-top-row {
@@ -1226,7 +1295,7 @@
   }
   
   .profile-full-name {
-    font-size: 0.875rem;
+    font-size: 1.125rem;
   }
   
   .profile-bio {
@@ -1254,6 +1323,16 @@
   .profile-post-overlay {
     display: none;
   }
+  
+  .verified-badge {
+    font-size: 0.85em;
+  }
+  
+  /* Tooltip más pequeño en móvil */
+  .verified-badge::after {
+    font-size: 11px;
+    padding: 5px 10px;
+  }
 }
 
 /* Móviles muy pequeños */
@@ -1279,7 +1358,7 @@
   }
   
   .profile-instagram-username {
-    font-size: 1.125rem;
+    font-size: 0.8125rem;
   }
   
   .profile-instagram-stats {
@@ -1289,5 +1368,13 @@
   .profile-btn {
     font-size: 0.75rem;
     padding: 0.4rem 0.625rem;
+  }
+  
+  .profile-full-name {
+    font-size: 1rem;
+  }
+  
+  .verified-badge {
+    font-size: 0.8em;
   }
 }

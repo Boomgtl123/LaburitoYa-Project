@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diagnóstico de Login - LaburitoYa</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 28px;
+    }
+
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+
+    .section {
+      margin-bottom: 30px;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border-left: 4px solid #667eea;
+    }
+
+    .section h2 {
+      color: #667eea;
+      margin-bottom: 15px;
+      font-size: 18px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      color: #333;
+      font-weight: 500;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+      transition: border-color 0.3s;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    button {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: background 0.3s;
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+
+    button:hover {
+      background: #5568d3;
+    }
+
+    button.secondary {
+      background: #6c757d;
+    }
+
+    button.secondary:hover {
+      background: #5a6268;
+    }
+
+    button.success {
+      background: #28a745;
+    }
+
+    button.success:hover {
+      background: #218838;
+    }
+
+    .result {
+      margin-top: 15px;
+      padding: 15px;
+      border-radius: 6px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .result.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .result.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .result.info {
+      background: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+    }
+
+    .user-list {
+      max-height: 300px;
+      overflow-y: auto;
+      margin-top: 15px;
+    }
+
+    .user-item {
+      padding: 12px;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      margin-bottom: 10px;
+    }
+
+    .user-item strong {
+      color: #667eea;
+    }
+
+    .console-log {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 15px;
+      border-radius: 6px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      max-height: 400px;
+      overflow-y: auto;
+      margin-top: 15px;
+    }
+
+    .console-log div {
+      margin-bottom: 5px;
+      padding: 3px 0;
+    }
+
+    .log-success { color: #4ec9b0; }
+    .log-error { color: #f48771; }
+    .log-warning { color: #dcdcaa; }
+    .log-info { color: #9cdcfe; }
+
+    .spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #667eea;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      margin-right: 10px;
+      vertical-align: middle;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .loading {
+      display: none;
+      align-items: center;
+      margin-top: 15px;
+    }
+
+    .loading.active {
+      display: flex;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔍 Diagnóstico de Login</h1>
+    <p class="subtitle">Herramienta para diagnosticar problemas de inicio de sesión</p>
+
+    <!-- Sección 1: Verificar Conexión -->
+    <div class="section">
+      <h2>1️⃣ Verificar Conexión a Firebase</h2>
+      <button onclick="verificarConexion()">🌐 Verificar Conexión</button>
+      <div id="resultConexion"></div>
+    </div>
+
+    <!-- Sección 2: Listar Usuarios -->
+    <div class="section">
+      <h2>2️⃣ Listar Usuarios en Base de Datos</h2>
+      <button onclick="listarUsuarios()">👥 Listar Todos los Usuarios</button>
+      <div id="resultUsuarios"></div>
+    </div>
+
+    <!-- Sección 3: Probar Login -->
+    <div class="section">
+      <h2>3️⃣ Probar Inicio de Sesión</h2>
+      <form id="testLoginForm">
+        <div class="form-group">
+          <label>Correo Electrónico:</label>
+          <input type="email" id="testCorreo" placeholder="ejemplo@correo.com" required>
+        </div>
+        <div class="form-group">
+          <label>Contraseña:</label>
+          <input type="password" id="testContrasena" placeholder="Tu contraseña" required>
+        </div>
+        <button type="submit">🔐 Probar Login</button>
+        <button type="button" class="secondary" onclick="limpiarFormulario()">🗑️ Limpiar</button>
+      </form>
+      <div id="resultLogin"></div>
+    </div>
+
+    <!-- Sección 4: Verificar Usuario Específico -->
+    <div class="section">
+      <h2>4️⃣ Buscar Usuario por Correo</h2>
+      <div class="form-group">
+        <label>Correo a Buscar:</label>
+        <input type="email" id="buscarCorreo" placeholder="ejemplo@correo.com">
+      </div>
+      <button onclick="buscarUsuario()">🔍 Buscar Usuario</button>
+      <div id="resultBusqueda"></div>
+    </div>
+
+    <!-- Sección 5: Consola de Logs -->
+    <div class="section">
+      <h2>5️⃣ Consola de Logs</h2>
+      <button onclick="limpiarConsola()">🗑️ Limpiar Consola</button>
+      <div id="consoleLog" class="console-log"></div>
+    </div>
+
+    <!-- Sección 6: Ir a Login Real -->
+    <div class="section">
+      <h2>6️⃣ Acciones</h2>
+      <button class="success" onclick="window.location.href='login.html'">➡️ Ir a Página de Login</button>
+      <button class="secondary" onclick="limpiarLocalStorage()">🗑️ Limpiar LocalStorage</button>
+    </div>
+  </div>
+
+  <script>
+    const firebaseURL = 'https://laburitoya-6e55d-default-rtdb.firebaseio.com';
+    
+    function log(message, type = 'info') {
+      const consoleLog = document.getElementById('consoleLog');
+      const timestamp = new Date().toLocaleTimeString();
+      const className = `log-${type}`;
+      const emoji = {
+        success: '✅',
+        error: '❌',
+        warning: '⚠️',
+        info: 'ℹ️'
+      }[type] || 'ℹ️';
+      
+      const logEntry = document.createElement('div');
+      logEntry.className = className;
+      logEntry.textContent = `[${timestamp}] ${emoji} ${message}`;
+      consoleLog.appendChild(logEntry);
+      consoleLog.scrollTop = consoleLog.scrollHeight;
+      
+      console.log(`[${type.toUpperCase()}]`, message);
+    }
+
+    function limpiarConsola() {
+      document.getElementById('consoleLog').innerHTML = '';
+      log('Consola limpiada', 'info');
+    }
+
+    async function verificarConexion() {
+      const resultDiv = document.getElementById('resultConexion');
+      resultDiv.innerHTML = '<div class="loading active"><div class="spinner"></div><span>Verificando conexión...</span></div>';
+      log('Verificando conexión a Firebase...', 'info');
+
+      try {
+        const response = await fetch(`${firebaseURL}/.json`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          resultDiv.innerHTML = `
+            <div class="result success">
+              <strong>✅ Conexión Exitosa</strong><br>
+              Estado: ${response.status} ${response.statusText}<br>
+              Base de datos accesible: Sí<br>
+              Datos disponibles: ${data ? 'Sí' : 'No'}
+            </div>
+          `;
+          log('Conexión a Firebase exitosa', 'success');
+        } else {
+          throw new Error(`HTTP ${response.status}`);
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `
+          <div class="result error">
+            <strong>❌ Error de Conexión</strong><br>
+            ${error.message}<br>
+            Verifica tu conexión a internet
+          </div>
+        `;
+        log(`Error de conexión: ${error.message}`, 'error');
+      }
+    }
+
+    async function listarUsuarios() {
+      const resultDiv = document.getElementById('resultUsuarios');
+      resultDiv.innerHTML = '<div class="loading active"><div class="spinner"></div><span>Cargando usuarios...</span></div>';
+      log('Obteniendo lista de usuarios...', 'info');
+
+      try {
+        const response = await fetch(`${firebaseURL}/usuarios.json`);
+        const usuarios = await response.json();
+
+        if (!usuarios) {
+          resultDiv.innerHTML = `
+            <div class="result error">
+              <strong>❌ No hay usuarios registrados</strong><br>
+              La base de datos está vacía
+            </div>
+          `;
+          log('No se encontraron usuarios en la base de datos', 'warning');
+          return;
+        }
+
+        const numUsuarios = Object.keys(usuarios).length;
+        log(`Se encontraron ${numUsuarios} usuarios`, 'success');
+
+        let html = `
+          <div class="result success">
+            <strong>✅ ${numUsuarios} Usuario(s) Encontrado(s)</strong>
+          </div>
+          <div class="user-list">
+        `;
+
+        for (const id in usuarios) {
+          const user = usuarios[id];
+          html += `
+            <div class="user-item">
+              <strong>ID:</strong> ${id}<br>
+              <strong>Nombre:</strong> ${user.nombre || 'N/A'}<br>
+              <strong>Correo:</strong> ${user.correo || 'N/A'}<br>
+              <strong>Contraseña:</strong> ${user.contrasena ? '••••••••' : 'N/A'}<br>
+              <strong>Verificado:</strong> ${user.verificado ? '✓ Sí' : '✗ No'}
+            </div>
+          `;
+          log(`Usuario encontrado: ${user.nombre} (${user.correo})`, 'info');
+        }
+
+        html += '</div>';
+        resultDiv.innerHTML = html;
+
+      } catch (error) {
+        resultDiv.innerHTML = `
+          <div class="result error">
+            <strong>❌ Error al cargar usuarios</strong><br>
+            ${error.message}
+          </div>
+        `;
+        log(`Error al cargar usuarios: ${error.message}`, 'error');
+      }
+    }
+
+    async function buscarUsuario() {
+      const correo = document.getElementById('buscarCorreo').value.trim();
+      const resultDiv = document.getElementById('resultBusqueda');
+
+      if (!correo) {
+        resultDiv.innerHTML = `
+          <div class="result error">
+            <strong>❌ Error</strong><br>
+            Por favor ingresa un correo electrónico
+          </div>
+        `;
+        return;
+      }
+
+      resultDiv.innerHTML = '<div class="loading active"><div class="spinner"></div><span>Buscando usuario...</span></div>';
+      log(`Buscando usuario con correo: ${correo}`, 'info');
+
+      try {
+        const response = await fetch(`${firebaseURL}/usuarios.json`);
+        const usuarios = await response.json();
+
+        if (!usuarios) {
+          resultDiv.innerHTML = `
+            <div class="result error">
+              <strong>❌ No hay usuarios registrados</strong>
+            </div>
+          `;
+          log('No hay usuarios en la base de datos', 'warning');
+          return;
+        }
+
+        let usuarioEncontrado = null;
+        let userId = null;
+
+        for (const id in usuarios) {
+          if (usuarios[id].correo === correo) {
+            usuarioEncontrado = usuarios[id];
+            userId = id;
+            break;
+          }
+        }
+
+        if (usuarioEncontrado) {
+          resultDiv.innerHTML = `
+            <div class="result success">
+              <strong>✅ Usuario Encontrado</strong><br><br>
+              <strong>ID:</strong> ${userId}<br>
+              <strong>Nombre:</strong> ${usuarioEncontrado.nombre}<br>
+              <strong>Correo:</strong> ${usuarioEncontrado.correo}<br>
+              <strong>Contraseña (encriptada):</strong> ${usuarioEncontrado.contrasena}<br>
+              <strong>Perfil:</strong> ${usuarioEncontrado.perfil || 'N/A'}<br>
+              <strong>Verificado:</strong> ${usuarioEncontrado.verificado ? '✓ Sí' : '✗ No'}<br>
+              <strong>Fecha Registro:</strong> ${usuarioEncontrado.fechaRegistro || 'N/A'}
+            </div>
+          `;
+          log(`Usuario encontrado: ${usuarioEncontrado.nombre}`, 'success');
+        } else {
+          resultDiv.innerHTML = `
+            <div class="result error">
+              <strong>❌ Usuario No Encontrado</strong><br>
+              No existe ningún usuario con el correo: ${correo}
+            </div>
+          `;
+          log(`No se encontró usuario con correo: ${correo}`, 'warning');
+        }
+
+      } catch (error) {
+        resultDiv.innerHTML = `
+          <div class="result error">
+            <strong>❌ Error al buscar usuario</strong><br>
+            ${error.message}
+          </div>
+        `;
+        log(`Error al buscar usuario: ${error.message}`, 'error');
+      }
+    }
+
+    document.getElementById('testLoginForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const correo = document.getElementById('testCorreo').value.trim();
+      const contrasena = document.getElementById('testContrasena').value;
+      const resultDiv = document.getElementById('resultLogin');
+
+      if (!correo || !contrasena) {
+        resultDiv.innerHTML = `
+          <div class="result error">
+            <strong>❌ Error</strong><br>
+            Por favor completa todos los campos
+          </div>
+        `;
+        return;
+      }
+
+      resultDiv.innerHTML = '<div class="loading active"><div class="spinner"></div><span>Probando login...</span></div>';
+      log(`Intentando login con correo: ${correo}`, 'info');
+
+      try {
+        const response = await fetch(`${firebaseURL}/usuarios.json`);
+        const usuarios = await response.json();
+
+        if (!usuarios) {
+          resultDiv.innerHTML = `
+            <div class="result error">
+              <strong>❌ No hay usuarios registrados</strong>
+            </div>
+          `;
+          log('No hay usuarios en la base de datos', 'error');
+          return;
+        }
+
+        let usuarioEncontrado = null;
+        let userId = null;
+
+        log('Buscando coincidencia de credenciales...', 'info');
+
+        for (const id in usuarios) {
+          log(`Verificando usuario: ${usuarios[id].correo}`, 'info');
+          
+          if (usuarios[id].correo === correo) {
+            log(`✓ Correo coincide: ${correo}`, 'success');
+            
+            if (usuarios[id].contrasena === contrasena) {
+              log(`✓ Contraseña coincide`, 'success');
+              usuarioEncontrado = usuarios[id];
+              userId = id;
+              break;
+            } else {
+              log(`✗ Contraseña NO coincide`, 'error');
+              log(`  Contraseña ingresada: ${contrasena}`, 'info');
+              log(`  Contraseña en BD: ${usuarios[id].contrasena}`, 'info');
+            }
+          }
+        }
+
+        if (usuarioEncontrado) {
+          const usuarioCompleto = {
+            id: userId,
+            ...usuarioEncontrado
+          };
+
+          resultDiv.innerHTML = `
+            <div class="result success">
+              <strong>✅ Login Exitoso</strong><br><br>
+              <strong>Usuario:</strong> ${usuarioEncontrado.nombre}<br>
+              <strong>Correo:</strong> ${usuarioEncontrado.correo}<br>
+              <strong>ID:</strong> ${userId}<br><br>
+              <strong>Datos guardados en localStorage:</strong><br>
+              <pre style="background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto;">${JSON.stringify(usuarioCompleto, null, 2)}</pre>
+            </div>
+          `;
+          
+          localStorage.setItem('usuarioActual', JSON.stringify(usuarioCompleto));
+          log('Login exitoso - Usuario guardado en localStorage', 'success');
+          
+        } else {
+          resultDiv.innerHTML = `
+            <div class="result error">
+              <strong>❌ Login Fallido</strong><br>
+              Correo o contraseña incorrectos<br><br>
+              <strong>Verifica:</strong><br>
+              • El correo esté escrito correctamente<br>
+              • La contraseña sea exactamente igual (mayúsculas/minúsculas)<br>
+              • No haya espacios al inicio o final<br><br>
+              <em>Revisa la consola de logs para más detalles</em>
+            </div>
+          `;
+          log('Login fallido - Credenciales incorrectas', 'error');
+        }
+
+      } catch (error) {
+        resultDiv.innerHTML = `
+          <div class="result error">
+            <strong>❌ Error al probar login</strong><br>
+            ${error.message}
+          </div>
+        `;
+        log(`Error al probar login: ${error.message}`, 'error');
+      }
+    });
+
+    function limpiarFormulario() {
+      document.getElementById('testCorreo').value = '';
+      document.getElementById('testContrasena').value = '';
+      document.getElementById('resultLogin').innerHTML = '';
+      log('Formulario limpiado', 'info');
+    }
+
+    function limpiarLocalStorage() {
+      if (confirm('¿Estás seguro de que deseas limpiar el localStorage? Esto cerrará tu sesión.')) {
+        localStorage.clear();
+        alert('✅ LocalStorage limpiado correctamente');
+        log('LocalStorage limpiado', 'success');
+      }
+    }
+
+    // Log inicial
+    log('Panel de diagnóstico de login iniciado', 'success');
+    log('Firebase URL: ' + firebaseURL, 'info');
+  </script>
+</body>
+</html>
