@@ -186,9 +186,18 @@ function abrirConversacion(userId, usuario) {
   // Actualizar UI
   const chatEmpty = document.getElementById('chatEmpty');
   const chatActive = document.getElementById('chatActive');
+  const chatArea = document.querySelector('.chat-area');
+  const conversationsSidebar = document.querySelector('.conversations-sidebar');
   
   if (chatEmpty) chatEmpty.style.display = 'none';
   if (chatActive) chatActive.style.display = 'flex';
+  
+  // En móvil, mostrar chat y ocultar sidebar
+  if (window.innerWidth <= 768) {
+    if (chatArea) chatArea.classList.add('mobile-show');
+    if (conversationsSidebar) conversationsSidebar.classList.add('mobile-hide');
+    console.log('📱 [MESSAGES] Modo móvil activado');
+  }
   
   // Actualizar header
   const chatAvatar = document.getElementById('chatAvatar');
