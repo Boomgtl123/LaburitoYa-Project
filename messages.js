@@ -30,6 +30,13 @@ window.addEventListener('DOMContentLoaded', function() {
   window.cargarConversaciones = cargarConversaciones;
   window.usuarioActual = usuarioActual;
   
+  // Cargar avatar del usuario en el navbar
+  const navAvatar = document.getElementById('navAvatar');
+  if (navAvatar && usuarioActual) {
+    navAvatar.src = obtenerAvatar(usuarioActual, 40);
+    console.log('✅ [MESSAGES] Avatar navbar cargado');
+  }
+  
   // Configurar event listeners
   configurarEventListeners();
   
@@ -147,7 +154,7 @@ function cargarConversaciones() {
             if (conversacionActiva === userId) div.classList.add('active');
             
             div.innerHTML = `
-              <img src="${usuario.foto || 'https://via.placeholder.com/48'}" alt="${usuario.nombre}" class="conversation-avatar" />
+              <img src="${obtenerAvatar(usuario, 48)}" alt="${usuario.nombre}" class="conversation-avatar" />
               <div class="conversation-info">
                 <p class="conversation-name">${usuario.nombre}${usuario.verificado ? ' <span class="verified-badge">✓</span>' : ''}</p>
                 <p class="conversation-last-message">${textoMensaje}</p>
@@ -204,7 +211,7 @@ function abrirConversacion(userId, usuario) {
   const chatUserName = document.getElementById('chatUserName');
   const chatUserStatus = document.getElementById('chatUserStatus');
   
-  if (chatAvatar) chatAvatar.src = usuario.foto || 'https://via.placeholder.com/40';
+  if (chatAvatar) chatAvatar.src = obtenerAvatar(usuario, 40);
   if (chatUserName) chatUserName.innerHTML = usuario.nombre + (usuario.verificado ? ' <span class="verified-badge">✓</span>' : '');
   if (chatUserStatus) chatUserStatus.textContent = usuario.perfil || 'Usuario';
   
@@ -255,11 +262,11 @@ function cargarMensajes(userId) {
         const esEnviado = mensaje.de === usuarioActual.id;
         div.className = `message-item ${esEnviado ? 'sent' : 'received'}`;
         
-        const avatar = esEnviado ? usuarioActual.foto : 'https://via.placeholder.com/32';
+        const avatar = esEnviado ? (usuarioActual.foto || generarAvatarPlaceholder(usuarioActual.nombre, 32)) : avatarGenerico(32);
         const tiempo = new Date(mensaje.fecha).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
         
         div.innerHTML = `
-          <img src="${avatar || 'https://via.placeholder.com/32'}" alt="Avatar" class="message-avatar" />
+          <img src="${avatar}" alt="Avatar" class="message-avatar" />
           <div class="message-content">
             <div class="message-bubble">${mensaje.mensaje}</div>
             <span class="message-time">${tiempo}</span>

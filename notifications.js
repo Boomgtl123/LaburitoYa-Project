@@ -187,7 +187,7 @@ async function crearNotificacion(tipo, para, mensaje, postId = null) {
     tipo,
     de: usuarioActual.id,
     deNombre: usuarioActual.nombre,
-    deFoto: usuarioActual.foto || 'https://via.placeholder.com/32',
+    deFoto: usuarioActual.foto || generarAvatarPlaceholder(usuarioActual.nombre, 32),
     para,
     mensaje,
     postId,
