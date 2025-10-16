@@ -421,33 +421,57 @@ async function cargarAnuncios() {
 
     const anuncios = Object.entries(data).map(([id, anuncio]) => ({ id, ...anuncio }));
     
-    container.innerHTML = anuncios.map(anuncio => `
-      <div class="anuncio-card ${anuncio.activo ? '' : 'inactive'}">
-        <div class="anuncio-header">
-          <span class="anuncio-tipo ${anuncio.tipo}">${getTipoAnuncioIcon(anuncio.tipo)} ${anuncio.tipo}</span>
-          <span class="anuncio-estado ${anuncio.activo ? 'activo' : 'inactivo'}">
-            ${anuncio.activo ? '● Activo' : '○ Inactivo'}
-          </span>
+    container.innerHTML = anuncios.map(anuncio => {
+      // Generar preview de media si existe
+      let mediaPreview = '';
+      if (anuncio.media) {
+        const isVideo = anuncio.media.type && anuncio.media.type.startsWith('video/');
+        if (isVideo) {
+          mediaPreview = `
+            <div style="margin: 10px 0;">
+              <video controls style="width: 100%; max-height: 150px; border-radius: 8px; object-fit: cover;">
+                <source src="${anuncio.media.data}" type="${anuncio.media.type}">
+              </video>
+            </div>
+          `;
+        } else {
+          mediaPreview = `
+            <div style="margin: 10px 0;">
+              <img src="${anuncio.media.data}" alt="${anuncio.titulo}" style="width: 100%; max-height: 150px; border-radius: 8px; object-fit: cover;" />
+            </div>
+          `;
+        }
+      }
+
+      return `
+        <div class="anuncio-card ${anuncio.activo ? '' : 'inactive'}">
+          <div class="anuncio-header">
+            <span class="anuncio-tipo ${anuncio.tipo}">${getTipoAnuncioIcon(anuncio.tipo)} ${anuncio.tipo}</span>
+            <span class="anuncio-estado ${anuncio.activo ? 'activo' : 'inactivo'}">
+              ${anuncio.activo ? '● Activo' : '○ Inactivo'}
+            </span>
+          </div>
+          <h3>${anuncio.titulo}</h3>
+          <p>${anuncio.contenido}</p>
+          ${mediaPreview}
+          <div class="anuncio-footer">
+            <span class="anuncio-autor">Por: ${anuncio.creadoPorNombre}</span>
+            <span class="anuncio-fecha">${formatearFecha(anuncio.fechaCreacion)}</span>
+          </div>
+          <div class="anuncio-actions">
+            <button class="btn-action btn-primary" onclick="editarAnuncio('${anuncio.id}')">
+              ✏️ Editar
+            </button>
+            <button class="btn-action btn-${anuncio.activo ? 'warning' : 'success'}" onclick="toggleAnuncio('${anuncio.id}', ${anuncio.activo})">
+              ${anuncio.activo ? '⏸ Desactivar' : '▶ Activar'}
+            </button>
+            <button class="btn-action btn-danger" onclick="eliminarAnuncioConfirm('${anuncio.id}')">
+              🗑️ Eliminar
+            </button>
+          </div>
         </div>
-        <h3>${anuncio.titulo}</h3>
-        <p>${anuncio.contenido}</p>
-        <div class="anuncio-footer">
-          <span class="anuncio-autor">Por: ${anuncio.creadoPorNombre}</span>
-          <span class="anuncio-fecha">${formatearFecha(anuncio.fechaCreacion)}</span>
-        </div>
-        <div class="anuncio-actions">
-          <button class="btn-action btn-primary" onclick="editarAnuncio('${anuncio.id}')">
-            ✏️ Editar
-          </button>
-          <button class="btn-action btn-${anuncio.activo ? 'warning' : 'success'}" onclick="toggleAnuncio('${anuncio.id}', ${anuncio.activo})">
-            ${anuncio.activo ? '⏸ Desactivar' : '▶ Activar'}
-          </button>
-          <button class="btn-action btn-danger" onclick="eliminarAnuncioConfirm('${anuncio.id}')">
-            🗑️ Eliminar
-          </button>
-        </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
 
   } catch (error) {
     console.error('Error al cargar anuncios:', error);
@@ -459,12 +483,60 @@ function abrirModalAnuncio() {
   anuncioEditando = null;
   document.getElementById('modalAnuncioTitle').textContent = 'Crear Anuncio';
   document.getElementById('formAnuncio').reset();
+  document.getElementById('previewAnuncioMedia').innerHTML = '';
   document.getElementById('modalAnuncio').style.display = 'flex';
+  
+  // Event listener para preview de media
+  const inputMedia = document.getElementById('anuncioMedia');
+  inputMedia.addEventListener('change', previewAnuncioMedia);
 }
 
 function cerrarModalAnuncio() {
   document.getElementById('modalAnuncio').style.display = 'none';
   anuncioEditando = null;
+  document.getElementById('previewAnuncioMedia').innerHTML = '';
+}
+
+function previewAnuncioMedia(e) {
+  const file = e.target.files[0];
+  const preview = document.getElementById('previewAnuncioMedia');
+  
+  if (!file) {
+    preview.innerHTML = '';
+    return;
+  }
+
+  // Validar tamaño (10MB máximo)
+  if (file.size > 10 * 1024 * 1024) {
+    mostrarNotificacion('❌ El archivo es muy grande. Máximo 10MB', 'error');
+    e.target.value = '';
+    preview.innerHTML = '';
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(event) {
+    const isVideo = file.type.startsWith('video/');
+    
+    if (isVideo) {
+      preview.innerHTML = `
+        <video controls style="max-width: 100%; max-height: 200px; border-radius: 8px;">
+          <source src="${event.target.result}" type="${file.type}">
+        </video>
+        <button type="button" onclick="document.getElementById('anuncioMedia').value=''; document.getElementById('previewAnuncioMedia').innerHTML='';" style="margin-top: 5px; padding: 5px 10px; background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer;">
+          Eliminar video
+        </button>
+      `;
+    } else {
+      preview.innerHTML = `
+        <img src="${event.target.result}" style="max-width: 100%; max-height: 200px; border-radius: 8px; object-fit: contain;" />
+        <button type="button" onclick="document.getElementById('anuncioMedia').value=''; document.getElementById('previewAnuncioMedia').innerHTML='';" style="margin-top: 5px; padding: 5px 10px; background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer;">
+          Eliminar imagen
+        </button>
+      `;
+    }
+  };
+  reader.readAsDataURL(file);
 }
 
 async function guardarAnuncio(e) {
@@ -476,6 +548,31 @@ async function guardarAnuncio(e) {
     tipo: document.getElementById('anuncioTipo').value,
     destacado: document.getElementById('anuncioDestacado').checked
   };
+
+  // Procesar imagen/video si existe
+  const mediaInput = document.getElementById('anuncioMedia');
+  if (mediaInput.files && mediaInput.files[0]) {
+    try {
+      const file = mediaInput.files[0];
+      const reader = new FileReader();
+      
+      const mediaData = await new Promise((resolve, reject) => {
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+
+      anuncio.media = {
+        data: mediaData,
+        type: file.type,
+        name: file.name
+      };
+    } catch (error) {
+      console.error('Error al procesar media:', error);
+      mostrarNotificacion('❌ Error al procesar imagen/video', 'error');
+      return;
+    }
+  }
 
   try {
     if (anuncioEditando) {
@@ -515,7 +612,31 @@ async function editarAnuncio(anuncioId) {
       document.getElementById('anuncioContenido').value = anuncio.contenido;
       document.getElementById('anuncioTipo').value = anuncio.tipo;
       document.getElementById('anuncioDestacado').checked = anuncio.destacado || false;
+      
+      // Mostrar preview de media si existe
+      const preview = document.getElementById('previewAnuncioMedia');
+      if (anuncio.media) {
+        const isVideo = anuncio.media.type.startsWith('video/');
+        if (isVideo) {
+          preview.innerHTML = `
+            <video controls style="max-width: 100%; max-height: 200px; border-radius: 8px;">
+              <source src="${anuncio.media.data}" type="${anuncio.media.type}">
+            </video>
+            <p style="font-size: 12px; color: #666; margin-top: 5px;">Video actual (puedes subir uno nuevo para reemplazarlo)</p>
+          `;
+        } else {
+          preview.innerHTML = `
+            <img src="${anuncio.media.data}" style="max-width: 100%; max-height: 200px; border-radius: 8px; object-fit: contain;" />
+            <p style="font-size: 12px; color: #666; margin-top: 5px;">Imagen actual (puedes subir una nueva para reemplazarla)</p>
+          `;
+        }
+      }
+      
       document.getElementById('modalAnuncio').style.display = 'flex';
+      
+      // Event listener para preview de media
+      const inputMedia = document.getElementById('anuncioMedia');
+      inputMedia.addEventListener('change', previewAnuncioMedia);
     }
   } catch (error) {
     console.error('Error al cargar anuncio:', error);

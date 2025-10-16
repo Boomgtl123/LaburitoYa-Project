@@ -1262,6 +1262,28 @@ function crearElementoAnuncio(anuncio) {
   const icono = tipoIcons[anuncio.tipo] || 'ℹ️';
   const color = tipoColors[anuncio.tipo] || '#2196F3';
 
+  // Generar HTML para media si existe
+  let mediaHTML = '';
+  if (anuncio.media) {
+    const isVideo = anuncio.media.type && anuncio.media.type.startsWith('video/');
+    if (isVideo) {
+      mediaHTML = `
+        <div style="margin-top: 15px;">
+          <video controls style="width: 100%; max-height: 400px; border-radius: 8px; object-fit: contain;">
+            <source src="${anuncio.media.data}" type="${anuncio.media.type}">
+            Tu navegador no soporta videos.
+          </video>
+        </div>
+      `;
+    } else {
+      mediaHTML = `
+        <div style="margin-top: 15px;">
+          <img src="${anuncio.media.data}" alt="${anuncio.titulo}" style="width: 100%; max-height: 400px; border-radius: 8px; object-fit: contain; cursor: pointer;" onclick="abrirModalImagen('${anuncio.media.data}', 0, ['${anuncio.media.data}'])" />
+        </div>
+      `;
+    }
+  }
+
   div.innerHTML = `
     <div class="anuncio-header" style="background: ${color}20; padding: 15px; border-radius: 8px 8px 0 0; border-left: 4px solid ${color};">
       <div style="display: flex; align-items: center; gap: 10px;">
@@ -1278,6 +1300,7 @@ function crearElementoAnuncio(anuncio) {
     </div>
     <div class="post-content" style="padding: 20px;">
       <p style="font-size: 15px; line-height: 1.6; color: #333;">${anuncio.contenido}</p>
+      ${mediaHTML}
       ${anuncio.destacado ? '<span style="display: inline-block; margin-top: 10px; padding: 4px 12px; background: #FFD70020; color: #FFD700; border-radius: 12px; font-size: 12px; font-weight: 600;">✨ Destacado</span>' : ''}
     </div>
     <div class="post-footer" style="padding: 15px 20px; background: #f5f5f5; border-radius: 0 0 8px 8px; font-size: 12px; color: #666;">
