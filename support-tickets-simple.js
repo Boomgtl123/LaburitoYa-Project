@@ -293,23 +293,25 @@ async function enviarMensajeDirectoTicket(destinatarioId, remitente, mensaje, ti
     console.log('📨 Verificación: remitente !== destinatario:', remitente.id !== destinatarioId);
     
     // Crear mensaje con referencia al ticket
+    // USAR ESTRUCTURA PLANA (de/para) como los mensajes normales
     const nuevoMensaje = {
-      remitente: remitente.id,
-      remitenteNombre: remitente.nombre,
-      remitenteFoto: remitente.foto || null,
-      destinatario: destinatarioId,
+      de: remitente.id,
+      para: destinatarioId,
       mensaje: `📋 **Respuesta a tu ticket de soporte**\n\n**Ticket:** ${asuntoTicket}\n**ID:** #${ticketId.substring(0, 8)}\n\n${mensaje}`,
       fecha: new Date().toISOString(),
       leido: false,
-      ticketId: ticketId // Referencia al ticket
+      ticketId: ticketId, // Referencia al ticket
+      // Agregar también datos del remitente para compatibilidad
+      remitenteNombre: remitente.nombre,
+      remitenteFoto: remitente.foto || null
     };
 
     console.log('📨 Mensaje a enviar:', nuevoMensaje);
-    console.log('📨 URL completa:', `${FIREBASE_URL}/mensajes/${conversacionId}.json`);
+    console.log('📨 URL completa:', `${FIREBASE_URL}/mensajes.json`);
 
-    // Guardar mensaje en Firebase
+    // Guardar mensaje en Firebase (estructura plana)
     console.log('📨 Enviando mensaje a Firebase...');
-    const mensajeResponse = await fetch(`${FIREBASE_URL}/mensajes/${conversacionId}.json`, {
+    const mensajeResponse = await fetch(`${FIREBASE_URL}/mensajes.json`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(nuevoMensaje)
