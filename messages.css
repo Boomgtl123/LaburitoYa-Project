@@ -695,6 +695,7 @@
   .messages-container {
     grid-template-columns: 1fr;
     height: calc(100vh - 52px);
+    position: relative;
   }
 
   /* Sidebar de conversaciones en móvil */
@@ -702,6 +703,12 @@
     display: flex;
     width: 100%;
     border-right: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
   }
 
   .conversations-sidebar.mobile-hide {
@@ -710,22 +717,26 @@
 
   /* Chat activo en móvil - CORREGIDO */
   .chat-area {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2;
     display: none;
   }
   
   .chat-area.mobile-show {
     display: flex !important;
-    position: fixed;
-    top: 52px;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 1000;
-    background-color: #ffffff;
   }
   
   .chat-active {
     display: flex !important;
+    height: 100%;
+  }
+  
+  .chat-empty {
+    display: none !important;
   }
 
   /* Ajustes de mensajes en móvil */

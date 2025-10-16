@@ -204,6 +204,9 @@ function abrirConversacion(userId, usuario) {
     item.classList.remove('active');
   });
   
+  // Marcar notificaciones de mensajes como leídas
+  marcarNotificacionesMensajesComoLeidas(userId);
+  
   // Cargar mensajes
   cargarMensajes(userId);
 }
@@ -367,6 +370,48 @@ function mostrarError(titulo, mensaje, redirectUrl) {
         </button>
       </div>
     `;
+  }
+}
+
+// ========== MARCAR NOTIFICACIONES DE MENSAJES COMO LEÍDAS ==========
+async function marcarNotificacionesMensajesComoLeidas(userId) {
+  try {
+    const response = await fetch("https://laburitoya-6e55d-default-rtdb.firebaseio.com/notificaciones.json");
+    const data = await response.json();
+    
+    if (!data) return;
+    
+    const updates = {};
+    
+    for (const id in data) {
+      const notif = data[id];
+      // Marcar como leída si es una notificación de mensaje del usuario con el que estamos chateando
+      if (notif.tipo === 'mensaje' && 
+          notif.para === usuarioActual.id && 
+          notif.de === userId && 
+          !notif.leida) {
+        updates[`/notificaciones/${id}/leida`] = true;
+        console.log('📝 [MESSAGES] Marcando notificación como leída:', id);
+      }
+    }
+    
+    if (Object.keys(updates).length > 0) {
+      await fetch("https://laburitoya-6e55d-default-rtdb.firebaseio.com/.json", {
+        method: "PATCH",
+        body: JSON.stringify(updates)
+      });
+      
+      console.log('✅ [MESSAGES] Notificaciones marcadas como leídas:', Object.keys(updates).length);
+      
+      // Recargar notificaciones para actualizar el contador
+      setTimeout(() => {
+        if (window.notifications && window.notifications.inicializarNotificaciones) {
+          window.notifications.inicializarNotificaciones();
+        }
+      }, 500);
+    }
+  } catch (error) {
+    console.error('❌ [MESSAGES] Error al marcar notificaciones como leídas:', error);
   }
 }
 
