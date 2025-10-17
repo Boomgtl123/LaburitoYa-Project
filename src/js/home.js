@@ -3,6 +3,8 @@ let postsVisibles = 10;
 const POSTS_POR_PAGINA = 10;
 let todosLosPosts = [];
 let usuarioActual = null;
+let cargandoMasPosts = false;
+let todosLosPostsCargados = false;
 
 // Avatar placeholder como SVG inline (evita errores de red)
 const DEFAULT_AVATAR = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Crect fill="%23e0e0e0" width="100" height="100"/%3E%3Ctext fill="%23999" x="50%25" y="50%25" text-anchor="middle" dy=".3em" font-family="Arial" font-size="40"%3E👤%3C/text%3E%3C/svg%3E';
@@ -45,6 +47,9 @@ function inicializarPagina() {
   }
   
   configurarEventListeners();
+  
+  // Configurar Infinite Scroll
+  configurarInfiniteScroll();
 }
 
 // ========== ACTUALIZAR DATOS DEL USUARIO EN LA INTERFAZ ==========
@@ -141,9 +146,12 @@ function configurarEventListeners() {
     });
   }
   
+  // Botón de cargar más ya no es necesario con infinite scroll
+  // pero lo dejamos por compatibilidad
   const btnLoadMore = document.getElementById('btnLoadMore');
   if (btnLoadMore) {
     btnLoadMore.addEventListener('click', cargarMasPosts);
+    btnLoadMore.style.display = 'none'; // Ocultar por defecto
   }
   
   // Dropdown de +INFO
@@ -371,6 +379,10 @@ async function cargarPosts() {
     }
 
     todosLosPosts = posts;
+    
+    // Resetear estado de carga infinita
+    todosLosPostsCargados = false;
+    postsVisibles = Math.min(POSTS_POR_PAGINA, posts.length);
 
     // Obtener anuncios activos si el sistema de roles está disponible
     let anunciosActivos = [];
@@ -434,101 +446,27 @@ async function cargarPosts() {
       return;
     }
     
-    const postsAMostrar = posts.slice(0, postsVisibles);
-    
+    // Limpiar lista de posts
     postList.innerHTML = '';
     
-    // Insertar posts con anuncios intercalados
-    postsAMostrar.forEach((post, index) => {
-      const postElement = crearElementoPost(post);
-      postList.appendChild(postElement);
-
-      // Insertar anuncio cada 5 posts
-      if (anunciosActivos.length > 0 && (index + 1) % 5 === 0) {
-        const anuncioIndex = Math.floor(index / 5) % anunciosActivos.length;
-        const anuncioElement = crearElementoAnuncio(anunciosActivos[anuncioIndex]);
-        postList.appendChild(anuncioElement);
-      }
-      
-      // Inicializar estado del carrusel si tiene múltiples fotos
-      if (post.fotos && post.fotos.length > 1) {
-        window.carouselStates[post.id] = { 
-          currentIndex: 0, 
-          totalFotos: post.fotos.length 
-        };
-      }
-    });
-    
-    // Agregar event listeners a los botones del carrusel
-    document.querySelectorAll('.carousel-btn').forEach(btn => {
-      btn.addEventListener('click', function(e) {
-        e.preventDefault();
-        const postId = this.getAttribute('data-post-id');
-        const direction = parseInt(this.getAttribute('data-direction'));
-        navegarCarrusel(postId, direction);
-      });
-    });
-    
-    // Agregar event listeners para imágenes del carrusel
-    document.querySelectorAll('.carousel-image').forEach(img => {
-      img.addEventListener('click', function() {
-        const postId = this.getAttribute('data-post-id');
-        const index = parseInt(this.getAttribute('data-index'));
-        const post = todosLosPosts.find(p => p.id === postId);
-        if (post && post.fotos) {
-          abrirModalImagen(this.src, index, post.fotos);
-        }
-      });
-    });
-    
-    // Agregar event listeners para imágenes individuales
-    document.querySelectorAll('.post-image-single').forEach(img => {
-      img.addEventListener('click', function() {
-        const postId = this.getAttribute('data-post-id');
-        const post = todosLosPosts.find(p => p.id === postId);
-        if (post && post.fotos) {
-          abrirModalImagen(this.src, 0, post.fotos);
-        }
-      });
-    });
-    
-    // Agregar event listeners para hover (pausar/reanudar auto-rotación)
-    document.querySelectorAll('.post-carousel').forEach(carousel => {
-      const postId = carousel.getAttribute('data-post-id');
-      
-      carousel.addEventListener('mouseenter', function() {
-        pausarAutoRotacionHover(postId);
-      });
-      
-      carousel.addEventListener('mouseleave', function() {
-        reanudarAutoRotacionHover(postId);
-      });
-      
-      // Iniciar auto-rotación para este carrusel
-      setTimeout(() => {
-        iniciarAutoRotacion(postId);
-      }, 100);
-    });
-    
-    // Agregar event listeners para botones de seguir
-    if (window.followers) {
-      actualizarBotonesSeguir();
+    // Ocultar mensaje final si existe
+    const mensajeFinal = document.getElementById('endOfPostsMessage');
+    if (mensajeFinal) {
+      mensajeFinal.style.display = 'none';
     }
     
-    if (window.hashtags) {
-      window.hashtags.agregarEventListenersHashtags();
+    // Renderizar posts iniciales
+    await renderizarNuevosPosts(0, postsVisibles);
+    
+    // Verificar si ya se cargaron todos los posts
+    if (postsVisibles >= posts.length) {
+      todosLosPostsCargados = true;
+      mostrarMensajeFinal();
     }
     
+    // Ocultar botón de "Cargar más" (ya no se usa con infinite scroll)
     if (loadMoreContainer) {
-      if (posts.length > postsVisibles) {
-        loadMoreContainer.style.display = 'block';
-        const btnLoadMore = document.getElementById('btnLoadMore');
-        if (btnLoadMore) {
-          btnLoadMore.textContent = `Ver más publicaciones (${posts.length - postsVisibles} restantes)`;
-        }
-      } else {
-        loadMoreContainer.style.display = 'none';
-      }
+      loadMoreContainer.style.display = 'none';
     }
     
   } catch (err) {
@@ -544,10 +482,246 @@ async function cargarPosts() {
   }
 }
 
+// ========== CONFIGURAR INFINITE SCROLL ==========
+function configurarInfiniteScroll() {
+  let scrollTimeout;
+  
+  window.addEventListener('scroll', () => {
+    // Debounce para evitar múltiples llamadas
+    clearTimeout(scrollTimeout);
+    
+    scrollTimeout = setTimeout(() => {
+      // Verificar si estamos cerca del final de la página
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+      
+      // Si estamos a 300px del final y no estamos cargando
+      if (scrollTop + windowHeight >= documentHeight - 300) {
+        if (!cargandoMasPosts && !todosLosPostsCargados) {
+          cargarMasPosts();
+        }
+      }
+    }, 100);
+  });
+}
+
 // ========== CARGAR MÁS POSTS ==========
-function cargarMasPosts() {
+async function cargarMasPosts() {
+  if (cargandoMasPosts || todosLosPostsCargados) return;
+  
+  cargandoMasPosts = true;
+  
+  // Mostrar indicador de carga
+  mostrarIndicadorCargaMas();
+  
+  // Simular delay mínimo para UX
+  await new Promise(resolve => setTimeout(resolve, 500));
+  
+  const postsAnteriores = postsVisibles;
   postsVisibles += POSTS_POR_PAGINA;
-  cargarPosts();
+  
+  // Verificar si hay más posts
+  if (postsVisibles >= todosLosPosts.length) {
+    postsVisibles = todosLosPosts.length;
+    todosLosPostsCargados = true;
+  }
+  
+  // Renderizar solo los nuevos posts
+  await renderizarNuevosPosts(postsAnteriores, postsVisibles);
+  
+  ocultarIndicadorCargaMas();
+  
+  // Mostrar mensaje si ya no hay más posts
+  if (todosLosPostsCargados) {
+    mostrarMensajeFinal();
+  }
+  
+  cargandoMasPosts = false;
+}
+
+// ========== MOSTRAR INDICADOR DE CARGA ==========
+function mostrarIndicadorCargaMas() {
+  let indicador = document.getElementById('loadingMoreIndicator');
+  
+  if (!indicador) {
+    indicador = document.createElement('div');
+    indicador.id = 'loadingMoreIndicator';
+    indicador.style.cssText = `
+      text-align: center;
+      padding: 30px;
+      color: #666;
+      font-size: 14px;
+    `;
+    indicador.innerHTML = `
+      <div class="spinner" style="display: inline-block; width: 30px; height: 30px; border: 3px solid #f3f3f3; border-top: 3px solid #0a66c2; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+      <p style="margin-top: 10px;">Cargando más publicaciones...</p>
+    `;
+    
+    const postList = document.getElementById('postList');
+    if (postList && postList.parentNode) {
+      postList.parentNode.insertBefore(indicador, postList.nextSibling);
+    }
+  }
+  
+  indicador.style.display = 'block';
+}
+
+// ========== OCULTAR INDICADOR DE CARGA ==========
+function ocultarIndicadorCargaMas() {
+  const indicador = document.getElementById('loadingMoreIndicator');
+  if (indicador) {
+    indicador.style.display = 'none';
+  }
+}
+
+// ========== MOSTRAR MENSAJE FINAL ==========
+function mostrarMensajeFinal() {
+  let mensajeFinal = document.getElementById('endOfPostsMessage');
+  
+  if (!mensajeFinal) {
+    mensajeFinal = document.createElement('div');
+    mensajeFinal.id = 'endOfPostsMessage';
+    mensajeFinal.style.cssText = `
+      text-align: center;
+      padding: 40px 20px;
+      color: #999;
+      font-size: 15px;
+      background: linear-gradient(to bottom, transparent, #f5f5f5);
+      border-radius: 12px;
+      margin: 20px 0;
+    `;
+    mensajeFinal.innerHTML = `
+      <div style="font-size: 48px; margin-bottom: 15px;">✨</div>
+      <p style="font-weight: 600; margin-bottom: 8px;">Has visto todo</p>
+      <p style="font-size: 13px; color: #aaa;">Descansa un momento o crea una nueva publicación</p>
+    `;
+    
+    const postList = document.getElementById('postList');
+    if (postList && postList.parentNode) {
+      postList.parentNode.insertBefore(mensajeFinal, postList.nextSibling);
+    }
+  }
+  
+  mensajeFinal.style.display = 'block';
+}
+
+// ========== RENDERIZAR NUEVOS POSTS ==========
+async function renderizarNuevosPosts(desde, hasta) {
+  const postList = document.getElementById('postList');
+  if (!postList) return;
+  
+  // Obtener anuncios activos
+  let anunciosActivos = [];
+  if (window.roles) {
+    try {
+      anunciosActivos = await window.roles.obtenerAnunciosActivos();
+    } catch (error) {
+      console.error('Error al cargar anuncios:', error);
+    }
+  }
+  
+  const postsAMostrar = todosLosPosts.slice(desde, hasta);
+  
+  postsAMostrar.forEach((post, index) => {
+    const postElement = crearElementoPost(post);
+    postList.appendChild(postElement);
+    
+    // Insertar anuncio cada 5 posts
+    const indiceGlobal = desde + index;
+    if (anunciosActivos.length > 0 && (indiceGlobal + 1) % 5 === 0) {
+      const anuncioIndex = Math.floor(indiceGlobal / 5) % anunciosActivos.length;
+      const anuncioElement = crearElementoAnuncio(anunciosActivos[anuncioIndex]);
+      postList.appendChild(anuncioElement);
+    }
+    
+    // Inicializar estado del carrusel si tiene múltiples fotos
+    if (post.fotos && post.fotos.length > 1) {
+      window.carouselStates[post.id] = { 
+        currentIndex: 0, 
+        totalFotos: post.fotos.length 
+      };
+    }
+  });
+  
+  // Agregar event listeners a los nuevos elementos
+  agregarEventListenersNuevosPosts();
+}
+
+// ========== AGREGAR EVENT LISTENERS A NUEVOS POSTS ==========
+function agregarEventListenersNuevosPosts() {
+  // Event listeners para botones del carrusel
+  document.querySelectorAll('.carousel-btn').forEach(btn => {
+    if (!btn.hasAttribute('data-listener-added')) {
+      btn.setAttribute('data-listener-added', 'true');
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const postId = this.getAttribute('data-post-id');
+        const direction = parseInt(this.getAttribute('data-direction'));
+        navegarCarrusel(postId, direction);
+      });
+    }
+  });
+  
+  // Event listeners para imágenes del carrusel
+  document.querySelectorAll('.carousel-image').forEach(img => {
+    if (!img.hasAttribute('data-listener-added')) {
+      img.setAttribute('data-listener-added', 'true');
+      img.addEventListener('click', function() {
+        const postId = this.getAttribute('data-post-id');
+        const index = parseInt(this.getAttribute('data-index'));
+        const post = todosLosPosts.find(p => p.id === postId);
+        if (post && post.fotos) {
+          abrirModalImagen(this.src, index, post.fotos);
+        }
+      });
+    }
+  });
+  
+  // Event listeners para imágenes individuales
+  document.querySelectorAll('.post-image-single').forEach(img => {
+    if (!img.hasAttribute('data-listener-added')) {
+      img.setAttribute('data-listener-added', 'true');
+      img.addEventListener('click', function() {
+        const postId = this.getAttribute('data-post-id');
+        const post = todosLosPosts.find(p => p.id === postId);
+        if (post && post.fotos) {
+          abrirModalImagen(this.src, 0, post.fotos);
+        }
+      });
+    }
+  });
+  
+  // Event listeners para hover en carruseles
+  document.querySelectorAll('.post-carousel').forEach(carousel => {
+    if (!carousel.hasAttribute('data-listener-added')) {
+      carousel.setAttribute('data-listener-added', 'true');
+      const postId = carousel.getAttribute('data-post-id');
+      
+      carousel.addEventListener('mouseenter', function() {
+        pausarAutoRotacionHover(postId);
+      });
+      
+      carousel.addEventListener('mouseleave', function() {
+        reanudarAutoRotacionHover(postId);
+      });
+      
+      // Iniciar auto-rotación
+      setTimeout(() => {
+        iniciarAutoRotacion(postId);
+      }, 100);
+    }
+  });
+  
+  // Actualizar botones de seguir
+  if (window.followers) {
+    actualizarBotonesSeguir();
+  }
+  
+  // Event listeners para hashtags
+  if (window.hashtags) {
+    window.hashtags.agregarEventListenersHashtags();
+  }
 }
 
 // ========== CREAR ELEMENTO DE POST ==========
