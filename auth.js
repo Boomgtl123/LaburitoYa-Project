@@ -4,7 +4,10 @@
 
 // Verificar si el usuario es CEO
 function esCEO(usuario) {
-  return usuario && usuario.correo === 'laburitoya@gmail.com';
+  // El correo del CEO se obtiene de variables de entorno
+  // Para mayor seguridad, también se puede verificar un campo 'rol' en la base de datos
+  const ADMIN_EMAIL = window.ENV?.ADMIN_EMAIL || 'laburitoya@gmail.com';
+  return usuario && (usuario.correo === ADMIN_EMAIL || usuario.rol === 'CEO' || usuario.esAdmin === true);
 }
 
 // Verificar si el usuario está verificado

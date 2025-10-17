@@ -94,6 +94,56 @@ LaburitoYa/
 
 ---
 
+## 🔒 Configuración de Seguridad
+
+### ⚠️ IMPORTANTE: Antes de Empezar
+
+Este proyecto contiene información sensible que **NO debe ser compartida públicamente**. Por favor, sigue estos pasos:
+
+### 1. Configuración Inicial
+
+```bash
+# 1. Clonar el repositorio
+git clone https://github.com/tu-usuario/LaburitoYa.git
+cd LaburitoYa
+
+# 2. Crear archivo de configuración
+cp .env.example .env
+cp config.example.js config.js
+
+# 3. Editar .env con tus credenciales de Firebase
+# 4. Editar config.js con tus credenciales de Firebase
+```
+
+### 2. Obtener Credenciales de Firebase
+
+1. Ve a [Firebase Console](https://console.firebase.google.com)
+2. Crea un nuevo proyecto o selecciona uno existente
+3. Ve a **Configuración del proyecto** → **General**
+4. Copia tus credenciales y pégalas en `.env` y `config.js`
+
+### 3. Configurar Reglas de Seguridad
+
+1. En Firebase Console, ve a **Realtime Database** → **Reglas**
+2. Copia las reglas del archivo `SECURITY.md`
+3. Haz clic en **Publicar**
+
+### 📚 Documentación de Seguridad
+
+- **[SECURITY.md](SECURITY.md)** - Guía completa de seguridad
+- **[CONFIGURACION_SEGURIDAD.md](CONFIGURACION_SEGURIDAD.md)** - Guía rápida de configuración
+
+### ⚠️ Archivos que NO se suben a GitHub
+
+Los siguientes archivos están protegidos por `.gitignore`:
+- `.env` - Variables de entorno
+- `config.js` - Configuración con credenciales
+- Archivos de backup y logs
+
+**NUNCA subas estos archivos a GitHub o los compartas públicamente.**
+
+---
+
 ## 🚀 Cómo Usar
 
 ### 1. Registro
@@ -157,12 +207,42 @@ La búsqueda es dinámica y busca en:
 
 ### No se cargan las publicaciones
 
-1. Verifica que Firebase esté configurado (ver arriba)
-2. Abre la consola del navegador (F12)
-3. Busca errores en rojo
-4. Usa `test-firebase-simple.html` para diagnosticar
+1. Verifica que Firebase esté configurado correctamente
+2. Verifica que `.env` y `config.js` tengan las credenciales correctas
+3. Abre la consola del navegador (F12)
+4. Busca errores en rojo
+5. Usa `test-firebase-simple.html` para diagnosticar
+6. Revisa las reglas de seguridad en Firebase Console
 
+### Error de autenticación
 
+1. Verifica que las reglas de Firebase permitan lectura/escritura
+2. Limpia la caché del navegador (Ctrl + Shift + R)
+3. Verifica que el usuario esté correctamente logueado
+
+### Archivos sensibles en Git
+
+Si accidentalmente subiste archivos con credenciales:
+1. Lee la sección "Limpiar Historial de Git" en `CONFIGURACION_SEGURIDAD.md`
+2. Regenera tus credenciales en Firebase Console
+3. Actualiza tus archivos `.env` y `config.js` locales
+
+---
+
+## 🔐 Seguridad
+
+Este proyecto implementa las siguientes medidas de seguridad:
+
+- ✅ Variables de entorno para credenciales
+- ✅ `.gitignore` para proteger archivos sensibles
+- ✅ Documentación completa de seguridad
+- ✅ Plantillas de configuración para nuevos desarrolladores
+- ⚠️ **Recomendado**: Implementar Firebase Authentication
+- ⚠️ **Recomendado**: Encriptar contraseñas con bcrypt
+
+Para más información, consulta [SECURITY.md](SECURITY.md)
+
+---
 
 ## 📄 Licencia
 
