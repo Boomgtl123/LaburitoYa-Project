@@ -11,7 +11,7 @@ let subscriptionsChart = null;
 let revenueChart = null;
 
 // ========== INICIALIZACIÓN ==========
-document.addEventListener('DOMContentLoaded', () => {
+function iniciarPanel() {
     console.log('🔄 Inicializando panel de administración de suscripciones...');
     console.log('🔍 Verificando Firebase Auth...');
 
@@ -134,7 +134,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Iniciar el proceso
     inicializarCuandoFirebaseEsteListo();
-});
+}
+
+// Ejecutar inmediatamente si el DOM ya está listo, o esperar al evento
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', iniciarPanel);
+} else {
+    // DOM ya está listo, ejecutar inmediatamente
+    iniciarPanel();
+}
 
 // ========== VERIFICAR PERMISOS ==========
 async function checkAdminPermissions(userId) {
