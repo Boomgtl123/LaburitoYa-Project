@@ -251,8 +251,84 @@
     </div>
 
     <!-- Scripts -->
-    <script src="../../config/config.js"></script>
-    <script src="../js/subscription-admin.js"></script>
+    <!-- Cargar Firebase primero -->
+    <script>
+        console.log('🔄 Verificando carga de Firebase desde HTML...');
+        if (typeof firebase === 'undefined') {
+            console.error('❌ Firebase no se cargó correctamente desde CDN');
+        } else {
+            console.log('✅ Firebase cargado desde CDN');
+        }
+    </script>
+    
+    <!-- Inicializar Firebase directamente en el HTML -->
+    <script>
+        console.log('🔄 Inicializando Firebase directamente...');
+        
+        const FIREBASE_CONFIG = {
+            apiKey: "AIzaSyDw90EVMJNkAugKVporrEl-g6s85tRXNu0",
+            authDomain: "laburitoya-6e55d.firebaseapp.com",
+            databaseURL: "https://laburitoya-6e55d-default-rtdb.firebaseio.com",
+            projectId: "laburitoya-6e55d",
+            storageBucket: "laburitoya-6e55d.firebasestorage.app",
+            messagingSenderId: "149328760217",
+            appId: "1:149328760217:web:c455e05ad7905a8c8f9708",
+            measurementId: "G-N80YWQCNXR"
+        };
+        
+        try {
+            if (typeof firebase !== 'undefined') {
+                if (!firebase.apps || firebase.apps.length === 0) {
+                    window.firebaseApp = firebase.initializeApp(FIREBASE_CONFIG);
+                    window.firebaseInitialized = true;
+                    window.FIREBASE_CONFIG = FIREBASE_CONFIG;
+                    console.log('✅ Firebase inicializado correctamente');
+                    console.log('📦 App name:', window.firebaseApp.name);
+                    console.log('🔗 Database URL:', FIREBASE_CONFIG.databaseURL);
+                } else {
+                    window.firebaseApp = firebase.apps[0];
+                    window.firebaseInitialized = true;
+                    window.FIREBASE_CONFIG = FIREBASE_CONFIG;
+                    console.log('✅ Firebase ya estaba inicializado');
+                }
+            } else {
+                console.error('❌ Firebase no está disponible');
+                window.firebaseInitialized = false;
+            }
+        } catch (error) {
+            console.error('❌ Error al inicializar Firebase:', error);
+            window.firebaseInitialized = false;
+        }
+    </script>
+    
+    <!-- Cargar script principal después de que Firebase esté listo -->
+    <script>
+        console.log('🔄 Esperando inicialización completa de Firebase...');
+        
+        function waitForFirebaseAndLoadScript() {
+            if (window.firebaseInitialized === true) {
+                console.log('✅ Firebase inicializado, cargando script principal...');
+                const script = document.createElement('script');
+                script.src = '../js/subscription-admin.js';
+                script.onload = function() {
+                    console.log('✅ Script principal cargado');
+                };
+                script.onerror = function() {
+                    console.error('❌ Error al cargar script principal');
+                };
+                document.body.appendChild(script);
+            } else if (window.firebaseInitialized === false) {
+                console.error('❌ Firebase falló al inicializar');
+                alert('Error: No se pudo inicializar Firebase. Por favor, recarga la página.');
+            } else {
+                console.log('⏳ Esperando inicialización de Firebase...');
+                setTimeout(waitForFirebaseAndLoadScript, 100);
+            }
+        }
+        
+        // Iniciar la espera
+        waitForFirebaseAndLoadScript();
+    </script>
 
     <style>
         /* Estilos adicionales específicos del admin */

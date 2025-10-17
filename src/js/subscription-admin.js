@@ -17,13 +17,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Esperar a que Firebase esté completamente inicializado
     const inicializarCuandoFirebaseEsteListo = async () => {
-        if (typeof firebase === 'undefined' || !firebase.auth) {
+        // Verificar que Firebase esté cargado y inicializado
+        if (typeof firebase === 'undefined') {
+            console.log('⏳ Esperando a que Firebase se cargue...');
+            setTimeout(inicializarCuandoFirebaseEsteListo, 100);
+            return;
+        }
+
+        // Verificar que la app esté inicializada
+        if (!window.firebaseInitialized || !firebase.apps || firebase.apps.length === 0) {
             console.log('⏳ Esperando a que Firebase se inicialice...');
             setTimeout(inicializarCuandoFirebaseEsteListo, 100);
             return;
         }
 
-        console.log('✅ Firebase detectado, iniciando autenticación...');
+        // Verificar que los servicios necesarios estén disponibles
+        if (!firebase.auth || !firebase.database) {
+            console.log('⏳ Esperando a que los servicios de Firebase estén disponibles...');
+            setTimeout(inicializarCuandoFirebaseEsteListo, 100);
+            return;
+        }
+
+        console.log('✅ Firebase detectado y completamente inicializado');
+        console.log('📦 Firebase App:', firebase.app().name);
+        console.log('🔗 Database URL:', firebase.app().options.databaseURL);
 
         // Primero verificar si hay sesión en localStorage
         const usuarioLocal = localStorage.getItem('usuarioActual');
@@ -125,6 +142,18 @@ async function checkAdminPermissions(userId) {
         console.log('🔍 Consultando datos del usuario en Firebase...');
         console.log('📍 Ruta:', `usuarios/${userId}`);
         
+        // Verificar que Firebase esté disponible antes de usarlo
+        if (!firebase || !firebase.database) {
+            console.error('❌ Firebase database no está disponible');
+            throw new Error('Firebase database no está disponible');
+        }
+
+        // Verificar que la app esté inicializada
+        if (!firebase.apps || firebase.apps.length === 0) {
+            console.error('❌ Firebase no está inicializado');
+            throw new Error('Firebase no está inicializado');
+        }
+
         const userRef = firebase.database().ref(`usuarios/${userId}`);
         const userSnapshot = await userRef.once('value');
         
@@ -238,14 +267,39 @@ async function initializeAdminPanel() {
 // ========== CARGAR INFO DEL ADMIN ==========
 async function loadAdminInfo() {
     try {
+        // Verificar Firebase
+        if (!firebase || !firebase.database || !firebase.apps || firebase.apps.length === 0) {
+            console.error('❌ Firebase no está disponible para cargar info del admin');
+            // Usar datos de localStorage como fallback
+            const usuarioLocal = localStorage.getItem('usuarioActual');
+            if (usuarioLocal) {
+                const userData = JSON.parse(usuarioLocal);
+                document.getElementById('adminName').textContent = userData.nombre || userData.correo;
+                console.log('✅ Info del admin cargada desde localStorage');
+            }
+            return;
+        }
+
         const userSnapshot = await firebase.database().ref(`usuarios/${currentUser.uid}`).once('value');
         const user = userSnapshot.val();
 
         if (user) {
             document.getElementById('adminName').textContent = user.nombre || user.correo;
+            console.log('✅ Info del admin cargada desde Firebase');
         }
     } catch (error) {
         console.error('❌ Error al cargar info del admin:', error);
+        // Fallback a localStorage
+        try {
+            const usuarioLocal = localStorage.getItem('usuarioActual');
+            if (usuarioLocal) {
+                const userData = JSON.parse(usuarioLocal);
+                document.getElementById('adminName').textContent = userData.nombre || userData.correo;
+                console.log('✅ Info del admin cargada desde localStorage (fallback)');
+            }
+        } catch (fallbackError) {
+            console.error('❌ Error en fallback:', fallbackError);
+        }
     }
 }
 
@@ -254,6 +308,11 @@ async function loadMetrics() {
     try {
         console.log('📊 Cargando métricas...');
         showLoading('Cargando métricas...');
+
+        // Verificar Firebase
+        if (!firebase || !firebase.database || !firebase.apps || firebase.apps.length === 0) {
+            throw new Error('Firebase no está disponible');
+        }
 
         // Obtener todas las suscripciones
         const subscriptionsSnapshot = await firebase.database().ref('subscriptions').once('value');
@@ -421,6 +480,11 @@ async function loadSubscribers() {
     try {
         console.log('👥 Cargando suscriptores...');
         showLoading('Cargando suscriptores...');
+
+        // Verificar Firebase
+        if (!firebase || !firebase.database || !firebase.apps || firebase.apps.length === 0) {
+            throw new Error('Firebase no está disponible');
+        }
 
         // Obtener suscripciones
         const subscriptionsSnapshot = await firebase.database().ref('subscriptions').once('value');
