@@ -123,15 +123,48 @@ document.addEventListener('DOMContentLoaded', () => {
 async function checkAdminPermissions(userId) {
     try {
         console.log('🔍 Consultando datos del usuario en Firebase...');
-        const userSnapshot = await firebase.database().ref(`usuarios/${userId}`).once('value');
-        const user = userSnapshot.val();
-
-        if (!user) {
+        console.log('📍 Ruta:', `usuarios/${userId}`);
+        
+        const userRef = firebase.database().ref(`usuarios/${userId}`);
+        const userSnapshot = await userRef.once('value');
+        
+        console.log('📦 Snapshot recibido:', userSnapshot.exists());
+        
+        if (!userSnapshot.exists()) {
             console.error('❌ Usuario no encontrado en la base de datos');
+            console.log('💡 Intentando con datos de localStorage...');
+            
+            // Fallback: usar datos de localStorage
+            const usuarioLocal = localStorage.getItem('usuarioActual');
+            if (usuarioLocal) {
+                const userData = JSON.parse(usuarioLocal);
+                console.log('📋 Datos desde localStorage:', userData);
+                
+                // Verificar permisos desde localStorage
+                const isCEO = userData.correo === 'laburitoya@gmail.com';
+                const hasSubscriptionRole = userData.rol === 'SUSCRIPCIONES' || userData.rol === 'CEO';
+                const isAdmin = userData.esAdmin === true;
+                
+                const hasPermission = isCEO || hasSubscriptionRole || isAdmin;
+                
+                console.log('🔐 Verificación de permisos (localStorage):', {
+                    correo: userData.correo,
+                    rol: userData.rol,
+                    esAdmin: userData.esAdmin,
+                    isCEO,
+                    hasSubscriptionRole,
+                    isAdmin,
+                    hasPermission
+                });
+                
+                return hasPermission;
+            }
+            
             return false;
         }
 
-        console.log('📋 Datos del usuario:', {
+        const user = userSnapshot.val();
+        console.log('📋 Datos del usuario desde Firebase:', {
             correo: user.correo,
             rol: user.rol,
             esAdmin: user.esAdmin
@@ -154,6 +187,26 @@ async function checkAdminPermissions(userId) {
         return hasPermission;
     } catch (error) {
         console.error('❌ Error al verificar permisos:', error);
+        console.error('📄 Detalles del error:', error.message, error.code);
+        
+        // Fallback: intentar con localStorage
+        console.log('💡 Intentando verificación con localStorage como fallback...');
+        try {
+            const usuarioLocal = localStorage.getItem('usuarioActual');
+            if (usuarioLocal) {
+                const userData = JSON.parse(usuarioLocal);
+                const isCEO = userData.correo === 'laburitoya@gmail.com';
+                const hasSubscriptionRole = userData.rol === 'SUSCRIPCIONES' || userData.rol === 'CEO';
+                const isAdmin = userData.esAdmin === true;
+                const hasPermission = isCEO || hasSubscriptionRole || isAdmin;
+                
+                console.log('✅ Permisos verificados desde localStorage:', hasPermission);
+                return hasPermission;
+            }
+        } catch (fallbackError) {
+            console.error('❌ Error en fallback:', fallbackError);
+        }
+        
         return false;
     }
 }
