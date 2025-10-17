@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¡Suscripción Exitosa! - LaburitoYa</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/subscription.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+</head>
+<body>
+    <div class="result-page success-page">
+        <div class="result-container">
+            <div class="result-icon success-icon">
+                <svg width="100" height="100" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="45" fill="#00C853" opacity="0.2"/>
+                    <path d="M30 50 L45 65 L70 35" stroke="#00C853" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            
+            <h1 class="result-title">¡Bienvenido a Premium! 💎</h1>
+            
+            <p class="result-message">
+                Tu suscripción se ha activado exitosamente. Ya puedes disfrutar de todos los beneficios Premium.
+            </p>
+
+            <div class="benefits-summary">
+                <h3>Beneficios Activados:</h3>
+                <ul class="benefits-list">
+                    <li>✅ Nombre en verde destacado</li>
+                    <li>✅ Badge verificado en tu perfil</li>
+                    <li>✅ Prioridad en resultados de búsqueda</li>
+                    <li>✅ Contacto directo sin restricciones</li>
+                    <li>✅ Estadísticas de perfil</li>
+                    <li>✅ Alertas de nuevos trabajos</li>
+                    <li>✅ Soporte prioritario</li>
+                    <li>✅ Sin publicidad</li>
+                </ul>
+            </div>
+
+            <div class="subscription-details">
+                <div class="detail-item">
+                    <span class="detail-label">Plan:</span>
+                    <span class="detail-value">Premium</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Monto:</span>
+                    <span class="detail-value">$2,000 ARS/mes</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Renovación:</span>
+                    <span class="detail-value">Automática mensual</span>
+                </div>
+            </div>
+
+            <div class="result-actions">
+                <a href="profile.html" class="btn-primary">
+                    Ver mi Perfil Premium
+                </a>
+                <a href="home.html" class="btn-secondary">
+                    Ir al Inicio
+                </a>
+            </div>
+
+            <div class="result-note">
+                <p>
+                    <strong>Nota:</strong> Recibirás un correo de confirmación con los detalles de tu suscripción.
+                    Puedes gestionar tu suscripción desde tu perfil en cualquier momento.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../config/config.js"></script>
+    <script>
+        // Verificar autenticación
+        firebase.auth().onAuthStateChanged(async (user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Registrar evento de conversión
+            try {
+                const logRef = firebase.database().ref('subscriptionLogs').push();
+                await logRef.set({
+                    type: 'subscription_success_page_view',
+                    userId: user.uid,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP,
+                    userAgent: navigator.userAgent
+                });
+            } catch (error) {
+                console.error('Error al registrar evento:', error);
+            }
+        });
+
+        // Confetti animation (opcional)
+        function createConfetti() {
+            const colors = ['#00C853', '#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1'];
+            const confettiCount = 50;
+
+            for (let i = 0; i < confettiCount; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDelay = Math.random() * 3 + 's';
+                    document.body.appendChild(confetti);
+
+                    setTimeout(() => confetti.remove(), 4000);
+                }, i * 30);
+            }
+        }
+
+        // Ejecutar confetti al cargar
+        window.addEventListener('load', createConfetti);
+    </script>
+
+    <style>
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            top: -10px;
+            z-index: 9999;
+            animation: confetti-fall 3s linear forwards;
+        }
+
+        @keyframes confetti-fall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</body>
+</html>

@@ -382,7 +382,7 @@ async function cargarPosts() {
       }
     }
     
-    // Construir caché de usuarios (autores y comentaristas) para mostrar badge verificado/CEO
+    // Construir caché de usuarios (autores y comentaristas) para mostrar badge verificado/CEO/Premium
     try {
       const userIdsSet = new Set();
       posts.forEach(p => {
@@ -393,16 +393,34 @@ async function cargarPosts() {
       });
       window._usuariosPosts = window._usuariosPosts || {};
       const ids = Array.from(userIdsSet);
+      
+      console.log('🔍 Cargando datos de', ids.length, 'usuarios para badges...');
+      
       await Promise.all(ids.map(async (uid) => {
         try {
           const data = await auth.obtenerUsuarioPorId(uid);
           if (data) {
-            window._usuariosPosts[uid] = { id: uid, ...data };
+            // Verificar estado Premium para cada usuario
+            let isPremium = false;
+            try {
+              isPremium = await auth.esPremium(uid);
+              console.log('👤 Usuario', data.nombre, '- Premium:', isPremium);
+            } catch (e) {
+              console.log('⚠️ No se pudo verificar Premium para', uid);
+            }
+            
+            window._usuariosPosts[uid] = { 
+              id: uid, 
+              ...data,
+              isPremium: isPremium
+            };
           }
         } catch (e) {
           console.error('Error al cachear usuario', uid, e);
         }
       }));
+      
+      console.log('✅ Caché de usuarios construido con', Object.keys(window._usuariosPosts).length, 'usuarios');
     } catch (e) {
       console.error('Error construyendo caché de usuarios para badges:', e);
     }

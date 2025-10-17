@@ -1,0 +1,118 @@
+{
+  "premium": {
+    "id": "premium",
+    "name": "Premium",
+    "displayName": "Plan Premium",
+    "description": "Acceso completo a todas las funcionalidades Premium de LaburitoYa",
+    "price": 2000,
+    "currency": "ARS",
+    "interval": "monthly",
+    "intervalCount": 1,
+    "trialDays": 0,
+    "active": true,
+    "features": [
+      {
+        "id": "green_name",
+        "name": "Nombre en Verde",
+        "description": "Tu nombre aparecerá en color verde distintivo",
+        "icon": "🟢"
+      },
+      {
+        "id": "verified_badge",
+        "name": "Perfil Verificado",
+        "description": "Badge de verificación en tu perfil",
+        "icon": "✓"
+      },
+      {
+        "id": "priority_search",
+        "name": "Prioridad en Búsquedas",
+        "description": "Aparece primero en los resultados de búsqueda",
+        "icon": "⭐"
+      },
+      {
+        "id": "direct_contact",
+        "name": "Contacto Directo",
+        "description": "Sin restricciones de contacto",
+        "icon": "📞"
+      },
+      {
+        "id": "profile_stats",
+        "name": "Estadísticas de Perfil",
+        "description": "Vistas, interacciones y métricas detalladas",
+        "icon": "📊"
+      },
+      {
+        "id": "job_alerts",
+        "name": "Alertas de Trabajos",
+        "description": "Notificaciones prioritarias de nuevas oportunidades",
+        "icon": "🔔"
+      },
+      {
+        "id": "priority_support",
+        "name": "Soporte Prioritario",
+        "description": "Respuesta rápida del equipo de soporte",
+        "icon": "💬"
+      },
+      {
+        "id": "no_ads",
+        "name": "Sin Anuncios",
+        "description": "Experiencia sin publicidad",
+        "icon": "🚫"
+      }
+    ],
+    "metadata": {
+      "popular": true,
+      "recommended": true,
+      "color": "#9B59B6",
+      "badge": "Más Popular"
+    },
+    "createdAt": "2025-01-17T00:00:00.000Z",
+    "updatedAt": "2025-01-17T00:00:00.000Z"
+  },
+  "free": {
+    "id": "free",
+    "name": "Free",
+    "displayName": "Plan Gratuito",
+    "description": "Acceso básico a LaburitoYa",
+    "price": 0,
+    "currency": "ARS",
+    "interval": "monthly",
+    "intervalCount": 1,
+    "trialDays": 0,
+    "active": true,
+    "features": [
+      {
+        "id": "basic_profile",
+        "name": "Perfil Básico",
+        "description": "Crea y gestiona tu perfil",
+        "icon": "👤"
+      },
+      {
+        "id": "post_jobs",
+        "name": "Publicar Trabajos",
+        "description": "Publica ofertas de trabajo gratis",
+        "icon": "📝"
+      },
+      {
+        "id": "search",
+        "name": "Búsqueda",
+        "description": "Busca trabajadores y empleos",
+        "icon": "🔍"
+      },
+      {
+        "id": "messages",
+        "name": "Mensajes",
+        "description": "Comunícate con otros usuarios",
+        "icon": "💬"
+      }
+    ],
+    "metadata": {
+      "popular": false,
+      "recommended": false,
+      "color": "#95A5A6",
+      "badge": null
+    },
+    "createdAt": "2025-01-17T00:00:00.000Z",
+    "updatedAt": "2025-01-17T00:00:00.000Z"
+  }
+}

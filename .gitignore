@@ -11,6 +11,10 @@
 config.js
 config/config.js
 /config/config.js
+config/mercadopago.js
+/config/mercadopago.js
+.firebaserc
+firebase.json
 
 # Archivos de sistema
 .DS_Store

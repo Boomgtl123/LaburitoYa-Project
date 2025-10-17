@@ -90,6 +90,19 @@ function inicializarChatSoporte() {
     }
   });
 
+  // Toggle de sugerencias colapsables
+  const suggestionsHeader = document.getElementById('suggestionsHeader');
+  const quickSuggestions = document.getElementById('quickSuggestions');
+  
+  if (suggestionsHeader && quickSuggestions) {
+    suggestionsHeader.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      quickSuggestions.classList.toggle('collapsed');
+      console.log('🔄 Toggle sugerencias:', quickSuggestions.classList.contains('collapsed') ? 'colapsado' : 'expandido');
+    });
+  }
+
   // Verificar tickets pendientes
   verificarTicketsPendientes();
 

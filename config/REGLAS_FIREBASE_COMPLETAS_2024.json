@@ -90,6 +90,25 @@
     "configuracion": {
       ".read": true,
       ".write": true
+    },
+    "subscriptions": {
+      ".read": true,
+      ".write": true,
+      "$userId": {
+        ".indexOn": ["status", "createdAt", "updatedAt", "planId"]
+      }
+    },
+    "premiumUsers": {
+      ".read": true,
+      ".write": true,
+      "$userId": {
+        ".indexOn": ["isPremium", "activatedAt", "expiresAt"]
+      }
+    },
+    "subscriptionLogs": {
+      ".read": true,
+      ".write": true,
+      ".indexOn": ["type", "timestamp", "userId", "adminId"]
     }
   }
 }

@@ -60,6 +60,7 @@
   z-index: 9999;
   overflow: hidden;
   animation: slideUp 0.3s ease;
+  touch-action: none; /* Prevenir scroll del body */
 }
 
 .support-chat-modal.active {
@@ -157,16 +158,55 @@
 
 /* ========== SUGERENCIAS RÁPIDAS ========== */
 .support-quick-suggestions {
-  padding: 15px;
   background: #f8f9fa;
   border-bottom: 1px solid #e0e0e0;
 }
 
-.support-quick-suggestions h4 {
-  margin: 0 0 10px 0;
+.suggestions-header {
+  padding: 12px 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: background 0.2s;
+  user-select: none;
+}
+
+.suggestions-header:hover {
+  background: #e9ecef;
+}
+
+.suggestions-header h4 {
+  margin: 0;
   font-size: 13px;
   color: #666;
   font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.suggestions-toggle {
+  font-size: 18px;
+  color: #667eea;
+  transition: transform 0.3s;
+  font-weight: 300;
+}
+
+.support-quick-suggestions.collapsed .suggestions-toggle {
+  transform: rotate(-90deg);
+}
+
+.suggestions-content {
+  max-height: 500px;
+  overflow: hidden;
+  transition: max-height 0.3s ease, padding 0.3s ease;
+  padding: 0 15px 15px;
+}
+
+.support-quick-suggestions.collapsed .suggestions-content {
+  max-height: 0;
+  padding: 0 15px;
 }
 
 .suggestions-grid {
@@ -198,8 +238,11 @@
 .support-chat-messages {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 20px;
   background: #f8f9fa;
+  overscroll-behavior: contain; /* Prevenir scroll del body */
+  -webkit-overflow-scrolling: touch; /* Smooth scroll en iOS */
 }
 
 .support-message {
@@ -441,21 +484,21 @@
 /* ========== RESPONSIVE ========== */
 @media (max-width: 768px) {
   .support-chat-modal {
-    bottom: 0;
-    right: 0;
-    left: 0;
-    width: 100%;
-    height: 100vh;
-    max-height: 100vh;
-    border-radius: 0;
+    bottom: 20px;
+    right: 10px;
+    left: 10px;
+    width: calc(100% - 20px);
+    height: calc(100vh - 100px);
+    max-height: 650px;
+    border-radius: 16px;
   }
 
   .floating-support-btn {
-    bottom: 20px;
-    right: 20px;
-    width: 56px;
-    height: 56px;
-    font-size: 24px;
+    bottom: 15px;
+    right: 15px;
+    width: 50px;
+    height: 50px;
+    font-size: 22px;
     z-index: 9998;
   }
 
@@ -464,7 +507,8 @@
   }
 
   .support-chat-messages {
-    padding: 15px;
+    padding: 12px;
+    overscroll-behavior: contain;
   }
 
   .message-bubble {
@@ -472,7 +516,7 @@
   }
 
   .support-chat-input {
-    padding: 12px;
+    padding: 10px;
   }
 
   .support-input-field {
@@ -481,35 +525,119 @@
 }
 
 @media (max-width: 480px) {
+  .support-chat-modal {
+    bottom: 20px;
+    right: 5px;
+    left: 5px;
+    width: calc(100% - 10px);
+    height: calc(100vh - 90px);
+    max-height: 600px;
+    border-radius: 12px;
+  }
+
+  .floating-support-btn {
+    bottom: 10px;
+    right: 10px;
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
+  }
+
   .support-chat-header {
-    padding: 15px;
+    padding: 12px;
+  }
+
+  .support-chat-avatar {
+    width: 35px;
+    height: 35px;
+    font-size: 18px;
   }
 
   .support-chat-title h3 {
-    font-size: 14px;
+    font-size: 13px;
   }
 
   .support-chat-status {
+    font-size: 10px;
+  }
+
+  .suggestions-header {
+    padding: 10px 12px;
+  }
+
+  .suggestions-header h4 {
     font-size: 11px;
+  }
+
+  .suggestions-content {
+    padding: 0 12px 12px;
+  }
+
+  .support-quick-suggestions.collapsed .suggestions-content {
+    padding: 0 12px;
   }
 
   .suggestion-btn {
-    font-size: 11px;
-    padding: 6px 10px;
+    font-size: 10px;
+    padding: 6px 8px;
+  }
+
+  .support-chat-messages {
+    padding: 10px;
+  }
+
+  .message-avatar {
+    width: 28px;
+    height: 28px;
   }
 
   .message-bubble {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .message-time {
+    font-size: 10px;
+  }
+
+  .support-chat-input {
+    padding: 8px;
+  }
+
+  .support-input-field {
     padding: 10px 14px;
     font-size: 14px;
   }
 
+  .support-send-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+  }
+
   .create-ticket-prompt {
-    padding: 12px;
+    padding: 10px;
+  }
+
+  .create-ticket-prompt p {
+    font-size: 11px;
   }
 
   .btn-create-ticket {
-    padding: 8px 16px;
-    font-size: 13px;
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .welcome-message {
+    padding: 15px;
+  }
+
+  .welcome-message h3 {
+    font-size: 15px;
+  }
+
+  .welcome-message p {
+    font-size: 12px;
   }
 }
 

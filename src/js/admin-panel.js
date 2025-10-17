@@ -357,7 +357,7 @@ async function cargarUsuarios() {
           <td>
             <div class="user-cell">
               <img src="${usuario.foto || DEFAULT_AVATAR}" alt="${usuario.nombre}" class="table-avatar" />
-              <span>${usuario.nombre}${verificado || esCEO ? ' <img src="verificado.png" class="verified-badge" />' : ''}</span>
+              <span>${usuario.nombre}${verificado || esCEO ? ' <img src="../../assets/images/verificado.png" class="verified-badge" />' : ''}</span>
             </div>
           </td>
           <td>${usuario.correo}</td>

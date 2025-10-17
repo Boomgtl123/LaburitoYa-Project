@@ -1092,3 +1092,217 @@ body {
     transform: translateX(20px);
   }
 }
+
+/* ========== ESTILOS ESPECÍFICOS PARA PANEL DE SUSCRIPCIONES ========== */
+
+/* Loading Overlay */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.loading-spinner {
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-spinner p {
+  margin: 0;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Modal Large */
+.modal-large {
+  max-width: 800px;
+}
+
+/* Container */
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Tickets List */
+.tickets-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.ticket-card {
+  background: var(--card-bg);
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  border-left: 4px solid var(--border-color);
+  transition: all 0.2s;
+}
+
+.ticket-card:hover {
+  box-shadow: var(--shadow-hover);
+  transform: translateX(4px);
+}
+
+.ticket-card.pendiente {
+  border-left-color: var(--warning-color);
+}
+
+.ticket-card.en_proceso {
+  border-left-color: var(--info-color);
+}
+
+.ticket-card.resuelto {
+  border-left-color: var(--success-color);
+}
+
+.ticket-card.cerrado {
+  border-left-color: var(--secondary-color);
+}
+
+.ticket-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  margin-bottom: 15px;
+}
+
+.ticket-id {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-family: 'Courier New', monospace;
+}
+
+.ticket-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 5px 0;
+}
+
+.ticket-user {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.ticket-body {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 15px;
+}
+
+.ticket-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 15px;
+  border-top: 1px solid var(--border-color);
+}
+
+.ticket-meta {
+  display: flex;
+  gap: 15px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.ticket-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Empleos Grid */
+.empleos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px;
+}
+
+.empleo-card {
+  background: var(--card-bg);
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  transition: all 0.2s;
+}
+
+.empleo-card:hover {
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-2px);
+}
+
+.empleo-card.destacado {
+  border: 2px solid var(--warning-color);
+}
+
+.empleo-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  margin-bottom: 15px;
+}
+
+.empleo-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.empleo-company {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.empleo-body {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 15px;
+}
+
+.empleo-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 15px;
+  border-top: 1px solid var(--border-color);
+}
+
+.empleo-meta {
+  display: flex;
+  gap: 15px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.empleo-actions {
+  display: flex;
+  gap: 8px;
+}

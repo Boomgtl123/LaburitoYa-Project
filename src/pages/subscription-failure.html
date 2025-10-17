@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error en el Pago - LaburitoYa</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/subscription.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+</head>
+<body>
+    <div class="result-page failure-page">
+        <div class="result-container">
+            <div class="result-icon failure-icon">
+                <svg width="100" height="100" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="45" fill="#FF5252" opacity="0.2"/>
+                    <path d="M35 35 L65 65 M65 35 L35 65" stroke="#FF5252" stroke-width="6" stroke-linecap="round"/>
+                </svg>
+            </div>
+            
+            <h1 class="result-title">Hubo un problema con el pago</h1>
+            
+            <p class="result-message">
+                No pudimos procesar tu pago. Esto puede deberse a varios motivos.
+            </p>
+
+            <div class="error-reasons">
+                <h3>Posibles causas:</h3>
+                <ul class="reasons-list">
+                    <li>❌ Fondos insuficientes en la tarjeta</li>
+                    <li>❌ Datos de la tarjeta incorrectos</li>
+                    <li>❌ La tarjeta fue rechazada por el banco</li>
+                    <li>❌ Límite de compra excedido</li>
+                    <li>❌ Problema temporal con el procesador de pagos</li>
+                </ul>
+            </div>
+
+            <div class="help-section">
+                <h3>¿Qué puedes hacer?</h3>
+                <div class="help-options">
+                    <div class="help-option">
+                        <span class="help-icon">💳</span>
+                        <div class="help-content">
+                            <h4>Verificar tu método de pago</h4>
+                            <p>Asegúrate de que los datos de tu tarjeta sean correctos y que tenga fondos disponibles.</p>
+                        </div>
+                    </div>
+                    <div class="help-option">
+                        <span class="help-icon">🔄</span>
+                        <div class="help-content">
+                            <h4>Intentar con otro método</h4>
+                            <p>Prueba con una tarjeta diferente o elige otro método de pago disponible.</p>
+                        </div>
+                    </div>
+                    <div class="help-option">
+                        <span class="help-icon">📞</span>
+                        <div class="help-content">
+                            <h4>Contactar a tu banco</h4>
+                            <p>Si el problema persiste, comunícate con tu banco para verificar que no haya restricciones.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="result-actions">
+                <a href="subscription.html" class="btn-primary">
+                    Intentar Nuevamente
+                </a>
+                <a href="home.html" class="btn-secondary">
+                    Volver al Inicio
+                </a>
+            </div>
+
+            <div class="support-section">
+                <p>
+                    <strong>¿Necesitas ayuda?</strong><br>
+                    Nuestro equipo de soporte está disponible para asistirte.
+                </p>
+                <a href="mailto:laburitoya@gmail.com" class="support-link">
+                    Contactar Soporte
+                </a>
+            </div>
+
+            <div class="result-note">
+                <p>
+                    <strong>Nota:</strong> No se realizó ningún cargo a tu cuenta. 
+                    Puedes intentar nuevamente cuando lo desees.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../config/config.js"></script>
+    <script>
+        // Verificar autenticación
+        firebase.auth().onAuthStateChanged(async (user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Obtener parámetros de la URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const paymentId = urlParams.get('payment_id');
+            const status = urlParams.get('status');
+            const statusDetail = urlParams.get('status_detail');
+
+            // Registrar evento de fallo
+            try {
+                const logRef = firebase.database().ref('subscriptionLogs').push();
+                await logRef.set({
+                    type: 'subscription_failure_page_view',
+                    userId: user.uid,
+                    paymentId: paymentId || 'unknown',
+                    status: status || 'unknown',
+                    statusDetail: statusDetail || 'unknown',
+                    timestamp: firebase.database.ServerValue.TIMESTAMP,
+                    userAgent: navigator.userAgent
+                });
+            } catch (error) {
+                console.error('Error al registrar evento:', error);
+            }
+
+            // Mostrar detalles específicos si están disponibles
+            if (statusDetail) {
+                const detailsDiv = document.createElement('div');
+                detailsDiv.className = 'error-details';
+                detailsDiv.innerHTML = `
+                    <p><strong>Detalles del error:</strong> ${getStatusDetailMessage(statusDetail)}</p>
+                `;
+                document.querySelector('.result-message').after(detailsDiv);
+            }
+        });
+
+        function getStatusDetailMessage(statusDetail) {
+            const messages = {
+                'cc_rejected_insufficient_amount': 'Fondos insuficientes',
+                'cc_rejected_bad_filled_card_number': 'Número de tarjeta incorrecto',
+                'cc_rejected_bad_filled_date': 'Fecha de vencimiento incorrecta',
+                'cc_rejected_bad_filled_security_code': 'Código de seguridad incorrecto',
+                'cc_rejected_call_for_authorize': 'Debes autorizar el pago con tu banco',
+                'cc_rejected_card_disabled': 'Tarjeta deshabilitada',
+                'cc_rejected_duplicated_payment': 'Pago duplicado',
+                'cc_rejected_high_risk': 'Pago rechazado por seguridad',
+                'cc_rejected_max_attempts': 'Máximo de intentos alcanzado'
+            };
+            return messages[statusDetail] || statusDetail;
+        }
+    </script>
+</body>
+</html>

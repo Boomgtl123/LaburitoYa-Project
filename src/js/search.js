@@ -177,6 +177,29 @@ async function buscarUsuarios(query) {
       }
     }
     
+    // Verificar estado Premium de cada usuario
+    const premiumResponse = await fetch("https://laburitoya-6e55d-default-rtdb.firebaseio.com/premiumUsers.json");
+    const premiumData = await premiumResponse.json();
+    
+    // Agregar información Premium a los resultados
+    resultados.forEach(usuario => {
+      if (premiumData && premiumData[usuario.id]) {
+        usuario.isPremium = premiumData[usuario.id].isPremium === true;
+      } else {
+        usuario.isPremium = false;
+      }
+    });
+    
+    // PRIORIDAD: Ordenar usuarios Premium primero
+    resultados.sort((a, b) => {
+      // Premium primero
+      if (a.isPremium && !b.isPremium) return -1;
+      if (!a.isPremium && b.isPremium) return 1;
+      
+      // Si ambos son Premium o ambos no lo son, ordenar alfabéticamente
+      return (a.nombre || '').localeCompare(b.nombre || '');
+    });
+    
     // Limitar a 5 resultados
     return resultados.slice(0, 5);
     
@@ -245,10 +268,20 @@ function crearItemUsuario(usuario) {
   const div = document.createElement('div');
   div.className = 'search-result-item';
   
+  // Agregar clase especial si es Premium
+  if (usuario.isPremium) {
+    div.classList.add('premium-result');
+  }
+  
+  // Badge Premium
+  const premiumBadge = usuario.isPremium 
+    ? '<span class="premium-badge-small" style="background: linear-gradient(135deg, #00C853 0%, #00E676 100%); color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 600; margin-left: 8px;">💎 Premium</span>'
+    : '';
+  
   div.innerHTML = `
     <img src="${usuario.foto || 'https://via.placeholder.com/40'}" alt="${usuario.nombre}" class="search-result-avatar" />
     <div class="search-result-info">
-      <p class="search-result-name">${auth.renderNombreConBadge(usuario.nombre, usuario)}</p>
+      <p class="search-result-name">${auth.renderNombreConBadge(usuario.nombre, usuario)}${premiumBadge}</p>
       <p class="search-result-subtitle">
         ${usuario.username ? `@${usuario.username} • ` : ''}${usuario.perfil || 'Usuario'}
       </p>

@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suscripción Premium - LaburitoYa</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/subscription.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-functions-compat.js"></script>
+    <script src="https://sdk.mercadopago.com/js/v2"></script>
+</head>
+<body>
+    <!-- Header Minimalista -->
+    <header class="subscription-header">
+        <div class="header-content">
+            <a href="home.html" class="back-button">
+                <span>←</span> Volver
+            </a>
+            <img src="../../assets/images/LOGO PNG.png" alt="LaburitoYa" class="logo">
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title">
+                Impulsa tu carrera con <span class="premium-text">Premium</span>
+            </h1>
+            <p class="hero-subtitle">
+                Destaca entre miles de profesionales y multiplica tus oportunidades
+            </p>
+        </div>
+    </section>
+
+    <!-- Current Status (if subscribed) -->
+    <div id="currentStatusSection" class="current-status-section" style="display: none;">
+        <div class="container">
+            <div class="status-card">
+                <div class="status-header">
+                    <span class="status-icon">💎</span>
+                    <h3>Tu Suscripción Premium</h3>
+                </div>
+                <div class="status-body">
+                    <div class="status-info">
+                        <div class="info-item">
+                            <span class="info-label">Estado</span>
+                            <span id="subscriptionStatus" class="info-value status-active">Activa</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Próximo pago</span>
+                            <span id="nextBillingDate" class="info-value">--</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Monto</span>
+                            <span id="subscriptionAmount" class="info-value">$2,000 ARS/mes</span>
+                        </div>
+                    </div>
+                    <button id="cancelSubscriptionBtn" class="btn-cancel">
+                        Cancelar Suscripción
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Plans Section -->
+    <section class="plans-section">
+        <div class="container">
+            <h2 class="section-title">Elige tu plan</h2>
+            
+            <div class="plans-grid">
+                <!-- Plan Gratuito -->
+                <div class="plan-card plan-free">
+                    <div class="plan-header">
+                        <h3 class="plan-name">Gratuito</h3>
+                        <div class="plan-price">
+                            <span class="price-amount">$0</span>
+                            <span class="price-period">siempre</span>
+                        </div>
+                    </div>
+                    <div class="plan-body">
+                        <ul class="plan-features">
+                            <li class="feature-item">
+                                <span class="feature-icon">✓</span>
+                                <span>Publicar trabajos ilimitados</span>
+                            </li>
+                            <li class="feature-item">
+                                <span class="feature-icon">✓</span>
+                                <span>Perfil básico</span>
+                            </li>
+                            <li class="feature-item">
+                                <span class="feature-icon">✓</span>
+                                <span>Búsqueda de profesionales</span>
+                            </li>
+                            <li class="feature-item">
+                                <span class="feature-icon">✓</span>
+                                <span>Mensajería básica</span>
+                            </li>
+                            <li class="feature-item feature-disabled">
+                                <span class="feature-icon">✗</span>
+                                <span>Perfil destacado</span>
+                            </li>
+                            <li class="feature-item feature-disabled">
+                                <span class="feature-icon">✗</span>
+                                <span>Badge verificado</span>
+                            </li>
+                            <li class="feature-item feature-disabled">
+                                <span class="feature-icon">✗</span>
+                                <span>Prioridad en búsquedas</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="plan-footer">
+                        <button class="btn-plan btn-plan-free" disabled>
+                            Plan Actual
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Plan Premium -->
+                <div class="plan-card plan-premium">
+                    <div class="plan-badge">Más Popular</div>
+                    <div class="plan-header">
+                        <h3 class="plan-name">Premium</h3>
+                        <div class="plan-price">
+                            <span class="price-amount">$2,000</span>
+                            <span class="price-period">ARS/mes</span>
+                        </div>
+                    </div>
+                    <div class="plan-body">
+                        <ul class="plan-features">
+                            <li class="feature-item">
+                                <span class="feature-icon premium-icon">✓</span>
+                                <span>Todo lo del plan gratuito</span>
+                            </li>
+                            <li class="feature-item">
+                                <span class="feature-icon premium-icon">✓</span>
+                                <span><strong>Nombre en VERDE</strong> - Destaca visualmente</span>
+                            </li>
+                            <li class="feature-item">
+                                <span class="feature-icon premium-icon">✓</span>
+                                <span><strong>Badge Verificado</strong> - Más confianza</span>
+                            </li>
+                            <li class="feature-item">
+                                <span class="feature-icon premium-icon">✓</span>
+                                <span><strong>Prioridad en búsquedas</strong> - Aparece primero</span>
+                            </li>
+                            <li class="feature-item">
+                                <span class="feature-icon premium-icon">✓</span>
+                                <span><strong>Contacto directo</strong> - Sin restricciones</span>
+                            </li>
+                            <li class="feature-item">
+                                <span class="feature-icon premium-icon">✓</span>
+                                <span><strong>Estadísticas</strong> - Vistas e interacciones</span>
+                            </li>
+                            <li class="feature-item">
+                                <span class="feature-icon premium-icon">✓</span>
+                                <span><strong>Alertas prioritarias</strong> - Nuevos trabajos</span>
+                            </li>
+                            <li class="feature-item">
+                                <span class="feature-icon premium-icon">✓</span>
+                                <span><strong>Soporte prioritario</strong> - Respuesta rápida</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="plan-footer">
+                        <button id="subscribePremiumBtn" class="btn-plan btn-plan-premium">
+                            <span class="btn-icon">💎</span>
+                            Suscribirse Ahora
+                        </button>
+                        <p class="plan-note">Cancela cuando quieras</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Benefits Section -->
+    <section class="benefits-section">
+        <div class="container">
+            <h2 class="section-title">¿Por qué Premium?</h2>
+            
+            <div class="benefits-grid">
+                <div class="benefit-card">
+                    <span class="benefit-icon">🎯</span>
+                    <h3 class="benefit-title">Más Visibilidad</h3>
+                    <p class="benefit-description">
+                        Aparece primero en búsquedas con tu nombre destacado en verde
+                    </p>
+                </div>
+
+                <div class="benefit-card">
+                    <span class="benefit-icon">✅</span>
+                    <h3 class="benefit-title">Más Confianza</h3>
+                    <p class="benefit-description">
+                        Badge verificado que aumenta tu credibilidad profesional
+                    </p>
+                </div>
+
+                <div class="benefit-card">
+                    <span class="benefit-icon">📊</span>
+                    <h3 class="benefit-title">Más Control</h3>
+                    <p class="benefit-description">
+                        Estadísticas detalladas de tu perfil y rendimiento
+                    </p>
+                </div>
+
+                <div class="benefit-card">
+                    <span class="benefit-icon">🔔</span>
+                    <h3 class="benefit-title">Más Oportunidades</h3>
+                    <p class="benefit-description">
+                        Alertas prioritarias de trabajos en tu área
+                    </p>
+                </div>
+
+                <div class="benefit-card">
+                    <span class="benefit-icon">💬</span>
+                    <h3 class="benefit-title">Más Conexiones</h3>
+                    <p class="benefit-description">
+                        Contacto directo sin restricciones con clientes
+                    </p>
+                </div>
+
+                <div class="benefit-card">
+                    <span class="benefit-icon">⚡</span>
+                    <h3 class="benefit-title">Soporte Premium</h3>
+                    <p class="benefit-description">
+                        Atención prioritaria y respuesta rápida
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq-section">
+        <div class="container">
+            <h2 class="section-title">Preguntas Frecuentes</h2>
+            
+            <div class="faq-list">
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>¿Cómo funciona la suscripción?</h3>
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>La suscripción Premium es mensual y se renueva automáticamente. Puedes cancelarla en cualquier momento desde tu perfil.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>¿Qué métodos de pago aceptan?</h3>
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Aceptamos todos los métodos de pago de Mercado Pago: tarjetas de crédito, débito, efectivo y más.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>¿Puedo cancelar en cualquier momento?</h3>
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Sí, puedes cancelar cuando quieras. Seguirás teniendo acceso Premium hasta el final del período pagado.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>¿Los beneficios son inmediatos?</h3>
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Sí, una vez confirmado el pago, todos los beneficios Premium se activan automáticamente.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>¿Hay período de prueba?</h3>
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Actualmente no ofrecemos período de prueba, pero puedes cancelar en cualquier momento.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="subscription-footer">
+        <div class="container">
+            <p>&copy; 2025 LaburitoYa. Todos los derechos reservados.</p>
+            <div class="footer-links">
+                <a href="politicas.html">Términos y Condiciones</a>
+                <a href="politicas.html">Política de Privacidad</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Procesando...</p>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación de Cancelación -->
+    <div id="cancelModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>¿Cancelar suscripción?</h3>
+                <button class="modal-close" onclick="closeCancelModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro de que deseas cancelar tu suscripción Premium?</p>
+                <p class="modal-warning">Perderás todos los beneficios Premium al finalizar el período actual.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeCancelModal()">Mantener Premium</button>
+                <button class="btn-danger" onclick="confirmCancelSubscription()">Sí, cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../../config/config.js"></script>
+    <script src="../js/subscriptions.js"></script>
+    <script src="../js/mercadopago-client.js"></script>
+    
+    <script>
+        // FAQ Toggle
+        document.querySelectorAll('.faq-question').forEach(question => {
+            question.addEventListener('click', () => {
+                const faqItem = question.parentElement;
+                const isActive = faqItem.classList.contains('active');
+                
+                // Cerrar todos los FAQs
+                document.querySelectorAll('.faq-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                
+                // Abrir el clickeado si no estaba activo
+                if (!isActive) {
+                    faqItem.classList.add('active');
+                }
+            });
+        });
+
+        // Modal functions
+        function closeCancelModal() {
+            document.getElementById('cancelModal').style.display = 'none';
+        }
+
+        function confirmCancelSubscription() {
+            closeCancelModal();
+            if (window.cancelSubscription) {
+                window.cancelSubscription();
+            }
+        }
+    </script>
+</body>
+</html>

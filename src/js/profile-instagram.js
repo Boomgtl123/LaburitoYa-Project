@@ -50,9 +50,30 @@ function inicializarPerfil() {
   configurarEventListeners();
   inicializarSelectorBanner();
   
+  // Verificar estado Premium
+  setTimeout(() => {
+    checkPremiumStatus();
+  }, 500);
+  
   // Inicializar notificaciones si está disponible
   if (window.notifications) {
     window.notifications.inicializarNotificaciones();
+  }
+  
+  // Event listeners para botones Premium
+  const btnGetPremium = document.getElementById('btnGetPremium');
+  const btnManagePremium = document.getElementById('btnManagePremium');
+
+  if (btnGetPremium) {
+    btnGetPremium.addEventListener('click', () => {
+      window.location.href = 'subscription.html';
+    });
+  }
+
+  if (btnManagePremium) {
+    btnManagePremium.addEventListener('click', () => {
+      window.location.href = 'subscription.html';
+    });
   }
 }
 
@@ -945,3 +966,66 @@ window.profileInstagram = {
 };
 
 console.log('✅ profile-instagram.js cargado correctamente');
+
+// ========== FUNCIONALIDAD PREMIUM ==========
+async function checkPremiumStatus() {
+  if (!usuarioActual) return;
+
+  const btnGetPremium = document.getElementById('btnGetPremium');
+  const btnManagePremium = document.getElementById('btnManagePremium');
+  const profileFullName = document.getElementById('profileFullName');
+
+  try {
+    console.log('🔍 Verificando estado Premium para usuario:', usuarioActual.id);
+    
+    // Verificar si el usuario tiene Premium
+    const premiumRef = firebase.database().ref(`premiumUsers/${usuarioActual.id}`);
+    const snapshot = await premiumRef.once('value');
+    const premiumData = snapshot.val();
+
+    console.log('📊 Datos Premium:', premiumData);
+
+    if (premiumData && premiumData.isPremium) {
+      console.log('✅ Usuario tiene Premium activo');
+      
+      // Actualizar sesión con estado Premium
+      usuarioActual.isPremium = true;
+      auth.actualizarSesion({ isPremium: true });
+      
+      // Usuario tiene Premium activo
+      if (btnGetPremium) btnGetPremium.style.display = 'none';
+      if (btnManagePremium) btnManagePremium.style.display = 'inline-flex';
+      
+      // Agregar badge Premium al nombre
+      if (profileFullName) {
+        // Limpiar contenido anterior
+        const nombreTexto = usuarioActual.nombre;
+        
+        // Aplicar estilo Premium al nombre
+        profileFullName.innerHTML = `
+          <span style="color: #00C853; font-weight: 600;">${nombreTexto}</span>
+          ${auth.estaVerificado(usuarioActual) ? '<img src="../../assets/images/verificado.png" alt="Verificado" class="verified-badge" />' : ''}
+          <span class="premium-badge" style="background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.85rem; font-weight: 600; margin-left: 10px;">💎 Premium</span>
+        `;
+      }
+    } else {
+      console.log('⚠️ Usuario NO tiene Premium');
+      
+      // Usuario NO tiene Premium
+      if (btnGetPremium) btnGetPremium.style.display = 'inline-flex';
+      if (btnManagePremium) btnManagePremium.style.display = 'none';
+      
+      // Asegurar que el nombre se muestre correctamente sin Premium
+      if (profileFullName) {
+        profileFullName.innerHTML = auth.renderNombreConBadge(usuarioActual.nombre, usuarioActual);
+      }
+    }
+  } catch (error) {
+    console.error('❌ Error al verificar estado Premium:', error);
+    // En caso de error, mostrar botón de obtener Premium
+    if (btnGetPremium) btnGetPremium.style.display = 'inline-flex';
+    if (btnManagePremium) btnManagePremium.style.display = 'none';
+  }
+}
+
+console.log('✅ Funcionalidad Premium cargada');

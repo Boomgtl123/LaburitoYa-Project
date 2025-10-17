@@ -116,6 +116,23 @@ const ROLES = {
     ],
     color: '#A8D8EA',
     icono: '🔍'
+  },
+  SUSCRIPCIONES: {
+    nombre: 'Gestor de Suscripciones',
+    descripcion: 'Gestionar planes, pagos y usuarios Premium',
+    permisos: [
+      'gestionar_planes',
+      'ver_suscriptores',
+      'ver_metricas_suscripciones',
+      'gestionar_pagos',
+      'ver_logs_suscripciones',
+      'asignar_premium_manual',
+      'cancelar_suscripciones',
+      'ver_reportes_ingresos',
+      'gestionar_webhooks'
+    ],
+    color: '#9B59B6',
+    icono: '💎'
   }
 };
 

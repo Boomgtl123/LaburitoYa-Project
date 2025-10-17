@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pago Pendiente - LaburitoYa</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/subscription.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+</head>
+<body>
+    <div class="result-page pending-page">
+        <div class="result-container">
+            <div class="result-icon pending-icon">
+                <svg width="100" height="100" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="45" fill="#FFA726" opacity="0.2"/>
+                    <circle cx="50" cy="50" r="35" stroke="#FFA726" stroke-width="4" fill="none"/>
+                    <path d="M50 25 L50 50 L65 50" stroke="#FFA726" stroke-width="4" stroke-linecap="round"/>
+                </svg>
+            </div>
+            
+            <h1 class="result-title">Pago en Proceso ⏳</h1>
+            
+            <p class="result-message">
+                Tu pago está siendo procesado. Esto puede tomar algunos minutos.
+            </p>
+
+            <div class="pending-info">
+                <h3>¿Qué significa esto?</h3>
+                <p>
+                    Algunos métodos de pago requieren tiempo adicional para ser confirmados. 
+                    Esto es completamente normal y no afecta tu suscripción.
+                </p>
+            </div>
+
+            <div class="status-timeline">
+                <div class="timeline-item completed">
+                    <div class="timeline-icon">✓</div>
+                    <div class="timeline-content">
+                        <h4>Solicitud Recibida</h4>
+                        <p>Tu solicitud de suscripción fue recibida correctamente</p>
+                    </div>
+                </div>
+                <div class="timeline-item active">
+                    <div class="timeline-icon">⏳</div>
+                    <div class="timeline-content">
+                        <h4>Procesando Pago</h4>
+                        <p>Estamos verificando tu pago con el procesador</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-icon">💎</div>
+                    <div class="timeline-content">
+                        <h4>Activación Premium</h4>
+                        <p>Una vez confirmado, activaremos tu cuenta Premium</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="next-steps">
+                <h3>Próximos pasos:</h3>
+                <ul class="steps-list">
+                    <li>
+                        <span class="step-icon">📧</span>
+                        <span>Te enviaremos un correo cuando se confirme el pago</span>
+                    </li>
+                    <li>
+                        <span class="step-icon">🔔</span>
+                        <span>Recibirás una notificación en la plataforma</span>
+                    </li>
+                    <li>
+                        <span class="step-icon">💎</span>
+                        <span>Tus beneficios Premium se activarán automáticamente</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="payment-methods-info">
+                <h3>Tiempos de procesamiento según método de pago:</h3>
+                <div class="methods-grid">
+                    <div class="method-item">
+                        <span class="method-icon">💳</span>
+                        <div class="method-info">
+                            <strong>Tarjeta de Crédito/Débito</strong>
+                            <p>Inmediato a 24 horas</p>
+                        </div>
+                    </div>
+                    <div class="method-item">
+                        <span class="method-icon">🏪</span>
+                        <div class="method-info">
+                            <strong>Efectivo (Rapipago, Pago Fácil)</strong>
+                            <p>1 a 3 días hábiles</p>
+                        </div>
+                    </div>
+                    <div class="method-item">
+                        <span class="method-icon">🏦</span>
+                        <div class="method-info">
+                            <strong>Transferencia Bancaria</strong>
+                            <p>1 a 2 días hábiles</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="result-actions">
+                <button id="checkStatusBtn" class="btn-primary">
+                    <span class="btn-icon">🔄</span>
+                    Verificar Estado
+                </button>
+                <a href="home.html" class="btn-secondary">
+                    Volver al Inicio
+                </a>
+            </div>
+
+            <div class="support-section">
+                <p>
+                    <strong>¿Tienes dudas?</strong><br>
+                    Puedes verificar el estado de tu pago en cualquier momento desde tu perfil.
+                </p>
+                <a href="profile.html" class="support-link">
+                    Ir a Mi Perfil
+                </a>
+            </div>
+
+            <div class="result-note">
+                <p>
+                    <strong>Nota:</strong> Si el pago no se confirma en 72 horas, 
+                    se cancelará automáticamente y no se realizará ningún cargo.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../config/config.js"></script>
+    <script>
+        let checkInterval;
+
+        // Verificar autenticación
+        firebase.auth().onAuthStateChanged(async (user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Obtener parámetros de la URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const paymentId = urlParams.get('payment_id');
+            const collectionId = urlParams.get('collection_id');
+
+            // Registrar evento
+            try {
+                const logRef = firebase.database().ref('subscriptionLogs').push();
+                await logRef.set({
+                    type: 'subscription_pending_page_view',
+                    userId: user.uid,
+                    paymentId: paymentId || 'unknown',
+                    collectionId: collectionId || 'unknown',
+                    timestamp: firebase.database.ServerValue.TIMESTAMP,
+                    userAgent: navigator.userAgent
+                });
+            } catch (error) {
+                console.error('Error al registrar evento:', error);
+            }
+
+            // Iniciar verificación automática cada 30 segundos
+            startAutoCheck(user.uid);
+        });
+
+        function startAutoCheck(userId) {
+            checkInterval = setInterval(async () => {
+                try {
+                    const snapshot = await firebase.database()
+                        .ref(`subscriptions/${userId}`)
+                        .once('value');
+                    
+                    const subscription = snapshot.val();
+                    
+                    if (subscription) {
+                        if (subscription.status === 'active') {
+                            clearInterval(checkInterval);
+                            window.location.href = 'subscription-success.html';
+                        } else if (subscription.status === 'failed' || subscription.status === 'cancelled') {
+                            clearInterval(checkInterval);
+                            window.location.href = 'subscription-failure.html';
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error al verificar estado:', error);
+                }
+            }, 30000); // Cada 30 segundos
+        }
+
+        // Botón de verificación manual
+        document.getElementById('checkStatusBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('checkStatusBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-small"></span> Verificando...';
+
+            try {
+                const user = firebase.auth().currentUser;
+                if (!user) return;
+
+                const snapshot = await firebase.database()
+                    .ref(`subscriptions/${user.uid}`)
+                    .once('value');
+                
+                const subscription = snapshot.val();
+                
+                if (subscription) {
+                    if (subscription.status === 'active') {
+                        window.location.href = 'subscription-success.html';
+                        return;
+                    } else if (subscription.status === 'failed' || subscription.status === 'cancelled') {
+                        window.location.href = 'subscription-failure.html';
+                        return;
+                    }
+                }
+
+                // Si sigue pendiente
+                alert('Tu pago aún está siendo procesado. Te notificaremos cuando se confirme.');
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al verificar el estado. Por favor intenta nuevamente.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<span class="btn-icon">🔄</span> Verificar Estado';
+            }
+        });
+
+        // Limpiar intervalo al salir
+        window.addEventListener('beforeunload', () => {
+            if (checkInterval) {
+                clearInterval(checkInterval);
+            }
+        });
+    </script>
+
+    <style>
+        .spinner-small {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #ffffff;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</body>
+</html>

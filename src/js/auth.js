@@ -15,6 +15,44 @@ function estaVerificado(usuario) {
   return usuario && usuario.verificado === true;
 }
 
+// Verificar si el usuario es Premium
+async function esPremium(userId) {
+  try {
+    if (!userId) return false;
+    
+    // Primero intentar desde la sesión local
+    const usuario = obtenerUsuarioActual();
+    if (usuario && usuario.id === userId && usuario.isPremium !== undefined) {
+      return usuario.isPremium === true;
+    }
+    
+    // Si no está en sesión, intentar desde Firebase con manejo de errores
+    try {
+      const premiumRef = firebase.database().ref(`premiumUsers/${userId}`);
+      const snapshot = await premiumRef.once('value');
+      const premiumData = snapshot.val();
+      
+      return premiumData && premiumData.isPremium === true;
+    } catch (firebaseError) {
+      // Si hay error de permisos, intentar desde el nodo de usuarios
+      if (firebaseError.code === 'PERMISSION_DENIED') {
+        const userRef = firebase.database().ref(`usuarios/${userId}/isPremium`);
+        const userSnapshot = await userRef.once('value');
+        return userSnapshot.val() === true;
+      }
+      return false;
+    }
+  } catch (error) {
+    // Error silencioso - no mostrar en consola para no alarmar
+    return false;
+  }
+}
+
+// Verificar si el usuario es Premium (versión síncrona desde cache)
+function esPremiumSync(usuario) {
+  return usuario && usuario.isPremium === true;
+}
+
 // Verificar si un usuario está bloqueado por el CEO
 function estaBloqueado(userId) {
   // Obtener lista de usuarios bloqueados del CEO
@@ -210,10 +248,54 @@ function inicializarNavbar() {
 /* Utilidad: renderizar nombre con badge de verificado o CEO */
 function renderNombreConBadge(nombre, usuario) {
   try {
-    const mostrarBadge = estaVerificado(usuario) || esCEO(usuario);
-    return `${nombre}${mostrarBadge ? ' <img src="verificado.png" alt="Verificado" class="verified-badge" />' : ''}`;
+    const isPremium = esPremiumSync(usuario);
+    const isVerificado = estaVerificado(usuario);
+    const isCEO = esCEO(usuario);
+    
+    // Si es Premium, aplicar color verde al nombre
+    const nombreHTML = isPremium 
+      ? `<span style="color: #00C853; font-weight: 600;">${nombre}</span>`
+      : nombre;
+    
+    // Construir badges
+    let badges = '';
+    
+    // Badge de verificado (si aplica)
+    if (isVerificado || isCEO) {
+      badges += ' <img src="../../assets/images/verificado.png" alt="Verificado" class="verified-badge" style="width: 18px; height: 18px; vertical-align: middle;" />';
+    }
+    
+    // Badge Premium (si aplica)
+    if (isPremium) {
+      badges += ' <span class="premium-badge" style="background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 600; margin-left: 6px; vertical-align: middle;">💎</span>';
+    }
+    
+    return nombreHTML + badges;
   } catch (e) {
+    console.error('Error en renderNombreConBadge:', e);
     return nombre;
+  }
+}
+
+/* Utilidad: obtener clase CSS para nombre según tipo de usuario */
+function getNombreClase(usuario) {
+  if (esPremiumSync(usuario)) {
+    return 'nombre-premium'; // Verde
+  }
+  if (esCEO(usuario)) {
+    return 'nombre-ceo'; // Puede ser dorado o especial
+  }
+  return 'nombre-normal';
+}
+
+/* Utilidad: aplicar estilo Premium a elemento de nombre */
+function aplicarEstiloPremium(elemento, usuario) {
+  if (!elemento) return;
+  
+  if (esPremiumSync(usuario)) {
+    elemento.style.color = '#00C853';
+    elemento.style.fontWeight = '600';
+    elemento.classList.add('premium-user');
   }
 }
 
@@ -227,15 +309,88 @@ async function getUsuarioPorIdCacheado(userId) {
     }
     const data = await obtenerUsuarioPorId(userId);
     if (data) {
-      const usuario = { id: userId, ...data };
+      // Verificar si es Premium (con manejo de errores silencioso)
+      let isPremium = false;
+      try {
+        isPremium = await esPremium(userId);
+      } catch (e) {
+        // Si falla, usar el valor del usuario si existe
+        isPremium = data.isPremium === true;
+      }
+      const usuario = { id: userId, ...data, isPremium };
       window._usuarioCache[userId] = usuario;
       return usuario;
     }
     return null;
   } catch (e) {
-    console.error('Error en getUsuarioPorIdCacheado:', e);
+    // Error silencioso
     return null;
   }
+}
+
+/* Cargar estado Premium del usuario actual */
+async function cargarEstadoPremium() {
+  try {
+    const usuario = obtenerUsuarioActual();
+    if (!usuario || !usuario.id) {
+      console.log('⚠️ No hay usuario actual para verificar Premium');
+      return;
+    }
+    
+    console.log('🔍 Verificando estado Premium para:', usuario.nombre, '(ID:', usuario.id, ')');
+    
+    const isPremium = await esPremium(usuario.id);
+    
+    console.log('📊 Resultado verificación Premium:', isPremium);
+    
+    if (isPremium) {
+      console.log('✅ Usuario tiene Premium activo - Actualizando sesión');
+      // Actualizar sesión con estado Premium
+      actualizarSesion({ isPremium: true });
+      
+      // Aplicar estilos Premium en la página actual
+      aplicarEstilosPremiumGlobal();
+      
+      // Recargar posts si estamos en home para actualizar badges
+      if (typeof window.cargarPosts === 'function') {
+        console.log('🔄 Recargando posts para mostrar badge Premium');
+        setTimeout(() => {
+          window.cargarPosts();
+        }, 500);
+      }
+    } else {
+      console.log('⚠️ Usuario NO tiene Premium');
+      // Asegurar que isPremium esté en false
+      actualizarSesion({ isPremium: false });
+    }
+  } catch (error) {
+    console.error('❌ Error al cargar estado Premium:', error);
+  }
+}
+
+/* Aplicar estilos Premium globalmente */
+function aplicarEstilosPremiumGlobal() {
+  // Agregar clase al body
+  document.body.classList.add('usuario-premium');
+  
+  // Aplicar estilos a elementos de nombre del usuario
+  const nombreElements = document.querySelectorAll('.user-name, .nombre-usuario, .profile-name');
+  nombreElements.forEach(el => {
+    el.style.color = '#00C853';
+    el.style.fontWeight = '600';
+  });
+  
+  // Agregar badge Premium si no existe
+  const profileContainers = document.querySelectorAll('.profile-header, .user-info');
+  profileContainers.forEach(container => {
+    if (!container.querySelector('.premium-badge')) {
+      const badge = document.createElement('span');
+      badge.className = 'premium-badge';
+      badge.innerHTML = '💎 Premium';
+      badge.style.cssText = 'background: linear-gradient(135deg, #00C853 0%, #00E676 100%); color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.85rem; font-weight: 600; margin-left: 10px;';
+      container.appendChild(badge);
+    }
+  });
 }
 
 // Exportar funciones para uso global
@@ -254,11 +409,30 @@ window.auth = {
   inicializarNavbar,
   esCEO,
   estaVerificado,
+  esPremium,
+  esPremiumSync,
   estaBloqueado,
   bloquearUsuario,
   desbloquearUsuario,
   verificarUsuario,
   obtenerTodosLosUsuarios,
   renderNombreConBadge,
-  getUsuarioPorIdCacheado
+  getNombreClase,
+  aplicarEstiloPremium,
+  getUsuarioPorIdCacheado,
+  cargarEstadoPremium,
+  aplicarEstilosPremiumGlobal
 };
+
+// Cargar estado Premium al iniciar
+if (typeof firebase !== 'undefined' && firebase.auth) {
+  try {
+    firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        cargarEstadoPremium();
+      }
+    });
+  } catch (error) {
+    console.log('Firebase Auth no disponible en este contexto');
+  }
+}

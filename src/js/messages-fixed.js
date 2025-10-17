@@ -720,4 +720,139 @@ function generarAvatarPlaceholder(nombre, size = 40) {
   
   return `data:image/svg+xml,${encodeURIComponent(`
     <svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
-      <rect width="${size}" height="${size
+      <rect width="${size}" height="${size}" fill="${color}"/>
+      <text x="50%" y="50%" text-anchor="middle" dy=".35em" fill="white" font-family="Arial" font-size="${size * 0.4}" font-weight="bold">${iniciales}</text>
+    </svg>
+  `)}`;
+}
+
+function avatarGenerico(size = 40) {
+  return `data:image/svg+xml,${encodeURIComponent(`
+    <svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
+      <rect width="${size}" height="${size}" fill="#e0e0e0"/>
+      <text x="50%" y="50%" text-anchor="middle" dy=".35em" fill="#999" font-family="Arial" font-size="${size * 0.5}">👤</text>
+    </svg>
+  `)}`;
+}
+
+// ========== MARCAR MENSAJES COMO LEÍDOS ==========
+async function marcarMensajesComoLeidos(userId) {
+  try {
+    const response = await fetch('https://laburitoya-6e55d-default-rtdb.firebaseio.com/mensajes.json');
+    const data = await response.json();
+    
+    if (!data) return;
+    
+    const actualizaciones = [];
+    
+    for (const key in data) {
+      const item = data[key];
+      const esEstructuraAnidada = item && typeof item === 'object' && !item.mensaje && !item.de && !item.remitente;
+      
+      if (esEstructuraAnidada) {
+        for (const mensajeId in item) {
+          const mensaje = item[mensajeId];
+          if (!mensaje || typeof mensaje !== 'object') continue;
+          
+          const remitente = mensaje.remitente || mensaje.de;
+          const destinatario = mensaje.destinatario || mensaje.para;
+          
+          if (remitente === userId && destinatario === usuarioActual.id && !mensaje.leido) {
+            actualizaciones.push(
+              fetch(`https://laburitoya-6e55d-default-rtdb.firebaseio.com/mensajes/${key}/${mensajeId}.json`, {
+                method: 'PATCH',
+                body: JSON.stringify({ leido: true })
+              })
+            );
+          }
+        }
+      } else {
+        const mensaje = item;
+        if (!mensaje || typeof mensaje !== 'object') continue;
+        
+        const remitente = mensaje.remitente || mensaje.de;
+        const destinatario = mensaje.destinatario || mensaje.para;
+        
+        if (remitente === userId && destinatario === usuarioActual.id && !mensaje.leido) {
+          actualizaciones.push(
+            fetch(`https://laburitoya-6e55d-default-rtdb.firebaseio.com/mensajes/${key}.json`, {
+              method: 'PATCH',
+              body: JSON.stringify({ leido: true })
+            })
+          );
+        }
+      }
+    }
+    
+    if (actualizaciones.length > 0) {
+      await Promise.all(actualizaciones);
+      console.log('✅ [MESSAGES] Mensajes marcados como leídos:', actualizaciones.length);
+    }
+  } catch (error) {
+    console.error('❌ [MESSAGES] Error al marcar como leídos:', error);
+  }
+}
+
+// ========== MARCAR NOTIFICACIONES DE MENSAJES COMO LEÍDAS ==========
+async function marcarNotificacionesMensajesComoLeidas(userId) {
+  try {
+    const response = await fetch('https://laburitoya-6e55d-default-rtdb.firebaseio.com/notificaciones.json');
+    const data = await response.json();
+    
+    if (!data) return;
+    
+    const actualizaciones = [];
+    
+    for (const notifId in data) {
+      const notif = data[notifId];
+      if (notif.tipo === 'mensaje' && notif.de === userId && notif.para === usuarioActual.id && !notif.leida) {
+        actualizaciones.push(
+          fetch(`https://laburitoya-6e55d-default-rtdb.firebaseio.com/notificaciones/${notifId}.json`, {
+            method: 'PATCH',
+            body: JSON.stringify({ leida: true })
+          })
+        );
+      }
+    }
+    
+    if (actualizaciones.length > 0) {
+      await Promise.all(actualizaciones);
+      console.log('✅ [MESSAGES] Notificaciones marcadas como leídas:', actualizaciones.length);
+    }
+  } catch (error) {
+    console.error('❌ [MESSAGES] Error al marcar notificaciones:', error);
+  }
+}
+
+// ========== CALCULAR TIEMPO ==========
+function calcularTiempo(fecha) {
+  const ahora = new Date();
+  const fechaMensaje = new Date(fecha);
+  const diferencia = ahora - fechaMensaje;
+  
+  const segundos = Math.floor(diferencia / 1000);
+  const minutos = Math.floor(segundos / 60);
+  const horas = Math.floor(minutos / 60);
+  const dias = Math.floor(horas / 24);
+  
+  if (dias > 0) return `${dias}d`;
+  if (horas > 0) return `${horas}h`;
+  if (minutos > 0) return `${minutos}m`;
+  return 'Ahora';
+}
+
+// ========== MOSTRAR ERROR ==========
+function mostrarError(titulo, mensaje, redirigir = null) {
+  const body = document.body;
+  body.innerHTML = `
+    <div style="display: flex; align-items: center; justify-content: center; height: 100vh; background: #f5f5f5;">
+      <div style="text-align: center; padding: 40px; background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); max-width: 400px;">
+        <h2 style="color: #d32f2f; margin-bottom: 16px;">❌ ${titulo}</h2>
+        <p style="color: #666; margin-bottom: 24px;">${mensaje}</p>
+        ${redirigir ? `<button onclick="window.location.href='${redirigir}'" style="padding: 12px 24px; background: #1976d2; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px;">Ir a ${redirigir === 'login.html' ? 'Login' : 'Inicio'}</button>` : ''}
+      </div>
+    </div>
+  `;
+}
+
+console.log('✅ [MESSAGES] Script completamente cargado');

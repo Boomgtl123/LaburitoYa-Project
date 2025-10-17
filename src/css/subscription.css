@@ -1,0 +1,993 @@
+/* ========================================
+   SUBSCRIPTION PAGE - MINIMALISTA & RESPONSIVE
+   LaburitoYa - Diseño profesional
+   SOLO para subscription.html
+   ======================================== */
+
+/* ========== VARIABLES CSS ========== */
+:root {
+  /* Colores principales */
+  --linkedin-blue: #0a66c2;
+  --linkedin-blue-hover: #004182;
+  --linkedin-blue-light: #e7f3ff;
+  --background-gray: #f8f9fa;
+  --white: #ffffff;
+  --text-primary: #1a1a1a;
+  --text-secondary: #6c757d;
+  --border-color: #e9ecef;
+  
+  /* Sombras minimalistas */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  
+  /* Premium */
+  --premium-gold: #ffc107;
+  --premium-gradient: linear-gradient(135deg, #0a66c2 0%, #0077b5 100%);
+  --success-color: #28a745;
+  --error-color: #dc3545;
+  
+  /* Espaciados responsive */
+  --spacing-xs: clamp(0.5rem, 2vw, 0.75rem);
+  --spacing-sm: clamp(0.75rem, 3vw, 1rem);
+  --spacing-md: clamp(1rem, 4vw, 1.5rem);
+  --spacing-lg: clamp(1.5rem, 5vw, 2.5rem);
+  --spacing-xl: clamp(2rem, 6vw, 3.5rem);
+  
+  /* Tipografía responsive */
+  --font-xs: clamp(0.75rem, 2vw, 0.875rem);
+  --font-sm: clamp(0.875rem, 2.5vw, 0.9375rem);
+  --font-base: clamp(0.9375rem, 3vw, 1rem);
+  --font-lg: clamp(1rem, 3.5vw, 1.125rem);
+  --font-xl: clamp(1.125rem, 4vw, 1.375rem);
+  --font-2xl: clamp(1.5rem, 5vw, 2rem);
+  --font-3xl: clamp(2rem, 6vw, 3rem);
+  
+  /* Otros */
+  --touch-target: 48px;
+  --border-radius: 12px;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ========== ESTILOS ESPECÍFICOS SOLO PARA SUBSCRIPTION.HTML ========== */
+
+/* Container específico */
+.subscription-header ~ * .container,
+.hero-section .container,
+.plans-section .container,
+.benefits-section .container,
+.faq-section .container,
+.subscription-footer .container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-md);
+  width: 100%;
+}
+
+/* ========== HEADER MINIMALISTA ========== */
+.subscription-header {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-sm);
+  padding: var(--spacing-sm) 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.subscription-header .header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-md);
+}
+
+.subscription-header .back-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: var(--font-sm);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  transition: var(--transition);
+  min-height: var(--touch-target);
+}
+
+.subscription-header .back-button:hover {
+  background: var(--background-gray);
+  color: var(--linkedin-blue);
+  transform: translateX(-2px);
+}
+
+.subscription-header .back-button span {
+  font-size: 1.25rem;
+}
+
+.subscription-header .logo {
+  height: clamp(28px, 5vw, 36px);
+  width: auto;
+}
+
+/* ========== HERO SECTION MINIMALISTA ========== */
+.hero-section {
+  background: var(--premium-gradient);
+  color: var(--white);
+  padding: var(--spacing-xl) 0;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 30% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.hero-content {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-md);
+  position: relative;
+  z-index: 1;
+}
+
+.hero-title {
+  font-size: var(--font-3xl);
+  font-weight: 700;
+  margin-bottom: var(--spacing-md);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.premium-text {
+  color: var(--premium-gold);
+  display: inline-block;
+  position: relative;
+}
+
+.premium-text::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--premium-gold);
+  border-radius: 2px;
+}
+
+.hero-subtitle {
+  font-size: var(--font-lg);
+  opacity: 0.95;
+  max-width: 600px;
+  margin: 0 auto;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+/* ========== CURRENT STATUS SECTION ========== */
+.current-status-section {
+  padding: var(--spacing-lg) 0;
+  background: var(--background-gray);
+}
+
+.status-card {
+  background: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  transition: var(--transition);
+}
+
+.status-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.status-header {
+  background: var(--linkedin-blue);
+  color: var(--white);
+  padding: var(--spacing-md);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.status-icon {
+  font-size: 1.5rem;
+}
+
+.status-header h3 {
+  font-size: var(--font-xl);
+  font-weight: 600;
+}
+
+.status-body {
+  padding: var(--spacing-lg);
+}
+
+.status-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.info-label {
+  font-size: var(--font-sm);
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.info-value {
+  font-size: var(--font-lg);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.status-active {
+  color: var(--success-color);
+}
+
+.btn-cancel {
+  background: var(--error-color);
+  color: var(--white);
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 24px;
+  font-size: var(--font-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  min-height: var(--touch-target);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-cancel:hover {
+  background: #c62828;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* ========== PLANS SECTION MINIMALISTA ========== */
+.plans-section {
+  padding: var(--spacing-xl) 0;
+  background: var(--white);
+}
+
+.section-title {
+  text-align: center;
+  font-size: var(--font-2xl);
+  font-weight: 700;
+  margin-bottom: var(--spacing-xl);
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.plans-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  gap: var(--spacing-lg);
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.plan-card {
+  background: var(--white);
+  border: 2px solid var(--border-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  transition: var(--transition);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.plan-card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-4px);
+}
+
+.plan-premium {
+  border-color: var(--linkedin-blue);
+  box-shadow: var(--shadow-md);
+}
+
+.plan-badge {
+  position: absolute;
+  top: 1rem;
+  right: -2rem;
+  background: var(--premium-gold);
+  color: #000;
+  padding: 0.25rem 2.5rem;
+  font-weight: 700;
+  font-size: var(--font-xs);
+  transform: rotate(45deg);
+  box-shadow: var(--shadow-sm);
+  z-index: 10;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.plan-header {
+  padding: var(--spacing-lg);
+  text-align: center;
+}
+
+.plan-free .plan-header {
+  background: linear-gradient(135deg, #757575 0%, #616161 100%);
+  color: var(--white);
+}
+
+.plan-premium .plan-header {
+  background: var(--premium-gradient);
+  color: var(--white);
+}
+
+.plan-name {
+  font-size: var(--font-xl);
+  font-weight: 700;
+  margin-bottom: var(--spacing-sm);
+  letter-spacing: -0.01em;
+}
+
+.plan-price {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.price-amount {
+  font-size: clamp(2.5rem, 8vw, 3.5rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.price-period {
+  font-size: var(--font-sm);
+  opacity: 0.9;
+  font-weight: 500;
+}
+
+.plan-body {
+  padding: var(--spacing-lg);
+  flex-grow: 1;
+}
+
+.plan-features {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  font-size: var(--font-sm);
+  line-height: 1.5;
+}
+
+.feature-icon {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #e8f5e9;
+  color: var(--success-color);
+  font-weight: 700;
+  font-size: 0.75rem;
+}
+
+.premium-icon {
+  background: var(--linkedin-blue);
+  color: var(--white);
+}
+
+.feature-disabled {
+  opacity: 0.4;
+}
+
+.feature-disabled .feature-icon {
+  background: #ffebee;
+  color: var(--error-color);
+}
+
+.plan-footer {
+  padding: var(--spacing-lg);
+  text-align: center;
+  border-top: 1px solid var(--border-color);
+}
+
+.btn-plan {
+  width: 100%;
+  padding: 1rem 1.5rem;
+  border: none;
+  border-radius: 24px;
+  font-size: var(--font-base);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: var(--touch-target);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-plan-free {
+  background: var(--border-color);
+  color: var(--text-secondary);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.btn-plan-premium {
+  background: var(--linkedin-blue);
+  color: var(--white);
+}
+
+.btn-plan-premium:hover {
+  background: var(--linkedin-blue-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-icon {
+  font-size: 1.2rem;
+}
+
+.plan-note {
+  margin-top: var(--spacing-sm);
+  font-size: var(--font-xs);
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+/* ========== BENEFITS SECTION MINIMALISTA ========== */
+.benefits-section {
+  padding: var(--spacing-xl) 0;
+  background: var(--background-gray);
+}
+
+.benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: var(--spacing-lg);
+  margin-top: var(--spacing-lg);
+}
+
+.benefit-card {
+  text-align: center;
+  padding: var(--spacing-lg);
+  border-radius: var(--border-radius);
+  background: var(--white);
+  border: 1px solid var(--border-color);
+  transition: var(--transition);
+}
+
+.benefit-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-4px);
+  border-color: var(--linkedin-blue);
+}
+
+.benefit-icon {
+  font-size: clamp(2.5rem, 6vw, 3.5rem);
+  margin-bottom: var(--spacing-sm);
+  display: block;
+}
+
+.benefit-title {
+  font-size: var(--font-lg);
+  font-weight: 600;
+  margin-bottom: var(--spacing-xs);
+  color: var(--text-primary);
+}
+
+.benefit-description {
+  color: var(--text-secondary);
+  font-size: var(--font-sm);
+  line-height: 1.6;
+}
+
+/* ========== FAQ SECTION MINIMALISTA ========== */
+.faq-section {
+  padding: var(--spacing-xl) 0;
+  background: var(--white);
+}
+
+.faq-list {
+  max-width: 800px;
+  margin: var(--spacing-lg) auto 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.faq-item {
+  background: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  transition: var(--transition);
+}
+
+.faq-item.active {
+  border-color: var(--linkedin-blue);
+  box-shadow: var(--shadow-sm);
+}
+
+.faq-question {
+  padding: var(--spacing-md);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-sm);
+  transition: var(--transition);
+  min-height: var(--touch-target);
+}
+
+.faq-question:hover {
+  background: var(--background-gray);
+}
+
+.faq-question h3 {
+  font-size: var(--font-base);
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+
+.faq-toggle {
+  font-size: 1.5rem;
+  font-weight: 300;
+  color: var(--linkedin-blue);
+  transition: var(--transition);
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.faq-item.active .faq-toggle {
+  transform: rotate(45deg);
+}
+
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+.faq-item.active .faq-answer {
+  max-height: 500px;
+}
+
+.faq-answer p {
+  padding: 0 var(--spacing-md) var(--spacing-md);
+  color: var(--text-secondary);
+  font-size: var(--font-sm);
+  line-height: 1.6;
+}
+
+/* ========== FOOTER MINIMALISTA ========== */
+.subscription-footer {
+  background: var(--text-primary);
+  color: var(--white);
+  padding: var(--spacing-lg) 0;
+  text-align: center;
+}
+
+.subscription-footer p {
+  font-size: var(--font-sm);
+  opacity: 0.9;
+}
+
+.footer-links {
+  margin-top: var(--spacing-sm);
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.footer-links a {
+  color: var(--white);
+  text-decoration: none;
+  font-size: var(--font-sm);
+  transition: var(--transition);
+  opacity: 0.9;
+}
+
+.footer-links a:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+/* ========== LOADING OVERLAY ========== */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(4px);
+}
+
+.loading-spinner {
+  text-align: center;
+  color: var(--white);
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid rgba(255, 255, 255, 0.2);
+  border-top-color: var(--white);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto var(--spacing-sm);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-spinner p {
+  font-size: var(--font-base);
+  font-weight: 500;
+}
+
+/* ========== MODAL MINIMALISTA ========== */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: var(--spacing-md);
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  background: var(--white);
+  border-radius: var(--border-radius);
+  max-width: 500px;
+  width: 100%;
+  box-shadow: var(--shadow-lg);
+  animation: modalSlideIn 0.3s ease;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-header {
+  padding: var(--spacing-md);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h3 {
+  font-size: var(--font-lg);
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: var(--transition);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.modal-close:hover {
+  background: var(--background-gray);
+  color: var(--text-primary);
+}
+
+.modal-body {
+  padding: var(--spacing-lg);
+}
+
+.modal-body p {
+  line-height: 1.6;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.modal-warning {
+  color: var(--error-color);
+  font-weight: 600;
+  margin-top: var(--spacing-sm);
+}
+
+.modal-footer {
+  padding: var(--spacing-md);
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  gap: var(--spacing-sm);
+  justify-content: flex-end;
+}
+
+.btn-secondary {
+  background: var(--background-gray);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  padding: 0.75rem 1.5rem;
+  border-radius: 24px;
+  font-size: var(--font-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  min-height: var(--touch-target);
+}
+
+.btn-secondary:hover {
+  background: #e0e0e0;
+  border-color: #d0d0d0;
+}
+
+.btn-danger {
+  background: var(--error-color);
+  color: var(--white);
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 24px;
+  font-size: var(--font-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  min-height: var(--touch-target);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-danger:hover {
+  background: #c62828;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* ========== RESULT PAGES ========== */
+.result-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-lg);
+  background: var(--background-gray);
+}
+
+.result-container {
+  max-width: 600px;
+  width: 100%;
+  background: var(--white);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-lg);
+  padding: var(--spacing-xl);
+  text-align: center;
+}
+
+.result-icon {
+  margin: 0 auto var(--spacing-lg);
+  font-size: clamp(3rem, 10vw, 4rem);
+}
+
+.result-title {
+  font-size: var(--font-2xl);
+  font-weight: 700;
+  margin-bottom: var(--spacing-md);
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.result-message {
+  font-size: var(--font-base);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-lg);
+  line-height: 1.6;
+}
+
+.result-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  justify-content: center;
+  margin: var(--spacing-lg) 0;
+  flex-wrap: wrap;
+}
+
+.btn-primary {
+  background: var(--linkedin-blue);
+  color: var(--white);
+  border: none;
+  padding: 0.875rem 1.75rem;
+  border-radius: 24px;
+  font-size: var(--font-base);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--touch-target);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:hover {
+  background: var(--linkedin-blue-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* ========== RESPONSIVE OPTIMIZATIONS ========== */
+
+/* Tablets */
+@media (max-width: 768px) {
+  .plans-grid {
+    grid-template-columns: 1fr;
+    max-width: 500px;
+  }
+  
+  .benefits-grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  }
+  
+  .modal-footer {
+    flex-direction: column;
+  }
+  
+  .btn-secondary,
+  .btn-danger {
+    width: 100%;
+  }
+}
+
+/* Móviles */
+@media (max-width: 480px) {
+  :root {
+    --spacing-lg: clamp(1.25rem, 4vw, 2rem);
+    --spacing-xl: clamp(1.5rem, 5vw, 2.5rem);
+  }
+  
+  .hero-section {
+    padding: var(--spacing-lg) 0;
+  }
+  
+  .plan-header {
+    padding: var(--spacing-md);
+  }
+  
+  .plan-body,
+  .plan-footer {
+    padding: var(--spacing-md);
+  }
+  
+  .price-amount {
+    font-size: clamp(2rem, 10vw, 2.5rem);
+  }
+  
+  .benefits-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .result-container {
+    padding: var(--spacing-lg);
+  }
+  
+  .result-actions {
+    flex-direction: column;
+  }
+  
+  .btn-primary {
+    width: 100%;
+  }
+  
+  .status-info {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Móviles pequeños */
+@media (max-width: 360px) {
+  .plan-badge {
+    font-size: 0.625rem;
+    padding: 0.2rem 2rem;
+  }
+  
+  .feature-item {
+    font-size: 0.8125rem;
+  }
+  
+  .benefit-icon {
+    font-size: 2rem;
+  }
+}
+
+/* Asegurar tamaño mínimo de fuente en iOS */
+@media (max-width: 480px) {
+  input,
+  select,
+  button,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* ========== ACCESIBILIDAD ========== */
+*:focus-visible {
+  outline: 2px solid var(--linkedin-blue);
+  outline-offset: 2px;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Reducir movimiento para usuarios que lo prefieran */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
