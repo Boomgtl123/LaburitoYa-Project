@@ -761,6 +761,11 @@ async function cancelSubscriptionAdmin(userId) {
         hideLoading();
         showSuccess('Suscripción cancelada exitosamente');
 
+        // Limpiar caché del usuario
+        if (window.auth && typeof window.auth.limpiarCacheUsuario === 'function') {
+            window.auth.limpiarCacheUsuario(userId);
+        }
+
         // Recargar datos
         await loadSubscribers();
         await loadMetrics();
@@ -874,6 +879,11 @@ async function confirmAssignPremium() {
         hideLoading();
         closeAssignPremiumModal();
         showSuccess(`Premium asignado exitosamente a ${user.nombre || user.correo} por ${months} ${months === 1 ? 'mes' : 'meses'}`);
+
+        // Limpiar caché del usuario
+        if (window.auth && typeof window.auth.limpiarCacheUsuario === 'function') {
+            window.auth.limpiarCacheUsuario(userId);
+        }
 
         // Recargar datos
         await loadSubscribers();

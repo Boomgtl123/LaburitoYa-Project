@@ -20,19 +20,21 @@ async function esPremium(userId) {
   try {
     if (!userId) return false;
     
-    // Primero intentar desde la sesión local
-    const usuario = obtenerUsuarioActual();
-    if (usuario && usuario.id === userId && usuario.isPremium !== undefined) {
-      return usuario.isPremium === true;
-    }
-    
-    // Si no está en sesión, intentar desde Firebase con manejo de errores
+    // SIEMPRE verificar desde Firebase para tener datos actualizados
     try {
       const premiumRef = firebase.database().ref(`premiumUsers/${userId}`);
       const snapshot = await premiumRef.once('value');
       const premiumData = snapshot.val();
       
-      return premiumData && premiumData.isPremium === true;
+      const isPremium = premiumData && premiumData.isPremium === true;
+      
+      // Si es el usuario actual, actualizar sesión
+      const usuario = obtenerUsuarioActual();
+      if (usuario && usuario.id === userId) {
+        actualizarSesion({ isPremium });
+      }
+      
+      return isPremium;
     } catch (firebaseError) {
       // Si hay error de permisos, intentar desde el nodo de usuarios
       if (firebaseError.code === 'PERMISSION_DENIED') {
@@ -40,6 +42,13 @@ async function esPremium(userId) {
         const userSnapshot = await userRef.once('value');
         return userSnapshot.val() === true;
       }
+      
+      // Como último recurso, usar sesión local solo si es el usuario actual
+      const usuario = obtenerUsuarioActual();
+      if (usuario && usuario.id === userId && usuario.isPremium !== undefined) {
+        return usuario.isPremium === true;
+      }
+      
       return false;
     }
   } catch (error) {
@@ -300,10 +309,16 @@ function aplicarEstiloPremium(elemento, usuario) {
 }
 
 /* Cache simple de usuarios por ID */
-async function getUsuarioPorIdCacheado(userId) {
+async function getUsuarioPorIdCacheado(userId, forzarRecarga = false) {
   try {
     if (!userId) return null;
     window._usuarioCache = window._usuarioCache || {};
+    
+    // Si se fuerza la recarga, eliminar del caché
+    if (forzarRecarga && window._usuarioCache[userId]) {
+      delete window._usuarioCache[userId];
+    }
+    
     if (window._usuarioCache[userId]) {
       return window._usuarioCache[userId];
     }
@@ -326,6 +341,20 @@ async function getUsuarioPorIdCacheado(userId) {
     // Error silencioso
     return null;
   }
+}
+
+/* Limpiar caché de un usuario específico */
+function limpiarCacheUsuario(userId) {
+  if (window._usuarioCache && window._usuarioCache[userId]) {
+    delete window._usuarioCache[userId];
+    console.log('🗑️ Caché limpiado para usuario:', userId);
+  }
+}
+
+/* Limpiar todo el caché de usuarios */
+function limpiarTodoCacheUsuarios() {
+  window._usuarioCache = {};
+  console.log('🗑️ Todo el caché de usuarios ha sido limpiado');
 }
 
 /* Cargar estado Premium del usuario actual */
@@ -420,6 +449,8 @@ window.auth = {
   getNombreClase,
   aplicarEstiloPremium,
   getUsuarioPorIdCacheado,
+  limpiarCacheUsuario,
+  limpiarTodoCacheUsuarios,
   cargarEstadoPremium,
   aplicarEstilosPremiumGlobal
 };
