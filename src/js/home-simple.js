@@ -226,7 +226,7 @@ function configurarEventListeners() {
       e.preventDefault();
       if (confirm('¿Estás seguro que deseas cerrar sesión?')) {
         localStorage.removeItem('usuarioActual');
-        window.location.href = 'index.html';
+        window.location.href = '../../index.html';
       }
     });
     console.log('✅ Listener de cerrar sesión configurado');

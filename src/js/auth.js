@@ -95,7 +95,7 @@ function obtenerUsuarioActual() {
 // Cerrar sesión
 function cerrarSesion() {
   localStorage.removeItem('usuarioActual');
-  window.location.href = 'index.html';
+  window.location.href = '../../index.html';
 }
 
 // Verificar si hay sesión activa

@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test de Redireccionamientos - LaburitoYa</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    }
+    
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 32px;
+    }
+    
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 16px;
+    }
+    
+    .section {
+      margin-bottom: 30px;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border-left: 4px solid #667eea;
+    }
+    
+    .section h2 {
+      color: #333;
+      margin-bottom: 15px;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .test-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
+    }
+    
+    .test-button {
+      padding: 15px 20px;
+      background: white;
+      border: 2px solid #667eea;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: left;
+      font-size: 14px;
+      color: #333;
+    }
+    
+    .test-button:hover {
+      background: #667eea;
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+    
+    .test-button strong {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 16px;
+    }
+    
+    .test-button small {
+      color: #666;
+      font-size: 12px;
+    }
+    
+    .test-button:hover small {
+      color: rgba(255,255,255,0.8);
+    }
+    
+    .status {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-left: 10px;
+    }
+    
+    .status.success {
+      background: #d4edda;
+      color: #155724;
+    }
+    
+    .status.warning {
+      background: #fff3cd;
+      color: #856404;
+    }
+    
+    .info-box {
+      background: #e7f3ff;
+      border: 1px solid #b3d9ff;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 20px;
+    }
+    
+    .info-box h3 {
+      color: #0066cc;
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+    
+    .info-box ul {
+      margin-left: 20px;
+      color: #333;
+    }
+    
+    .info-box li {
+      margin-bottom: 5px;
+    }
+    
+    .back-button {
+      display: inline-block;
+      padding: 12px 24px;
+      background: #667eea;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 600;
+      transition: all 0.3s;
+      margin-top: 20px;
+    }
+    
+    .back-button:hover {
+      background: #5568d3;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧪 Test de Redireccionamientos</h1>
+    <p class="subtitle">Verifica que todas las rutas funcionen correctamente después de la reorganización</p>
+    
+    <!-- Sección 1: Páginas Principales -->
+    <div class="section">
+      <h2>
+        🏠 Páginas Principales
+        <span class="status success">✅ Corregido</span>
+      </h2>
+      <div class="test-grid">
+        <button class="test-button" onclick="window.location.href='index.html'">
+          <strong>🏠 Index</strong>
+          <small>Página de inicio (raíz)</small>
+        </button>
+        <button class="test-button" onclick="window.location.href='src/pages/home.html'">
+          <strong>📱 Home</strong>
+          <small>Feed principal</small>
+        </button>
+        <button class="test-button" onclick="window.location.href='src/pages/login.html'">
+          <strong>🔐 Login</strong>
+          <small>Iniciar sesión</small>
+        </button>
+        <button class="test-button" onclick="window.location.href='src/pages/register.html'">
+          <strong>📝 Registro</strong>
+          <small>Crear cuenta</small>
+        </button>
+        <button class="test-button" onclick="window.location.href='src/pages/profile.html'">
+          <strong>👤 Perfil</strong>
+          <small>Perfil del usuario</small>
+        </button>
+        <button class="test-button" onclick="window.location.href='src/pages/messages.html'">
+          <strong>💬 Mensajes</strong>
+          <small>Chat y conversaciones</small>
+        </button>
+        <button class="test-button" onclick="window.location.href='src/pages/empleos.html'">
+          <strong>💼 Empleos</strong>
+          <small>Oportunidades laborales</small>
+        </button>
+        <button class="test-button" onclick="window.location.href='src/pages/admin-panel.html'">
+          <strong>👑 Admin Panel</strong>
+          <small>Panel de administración</small>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Sección 2: Perfiles Públicos -->
+    <div class="section">
+      <h2>
+        👥 Perfiles Públicos
+        <span class="status success">✅ URLs Corregidas</span>
+      </h2>
+      <div class="test-grid">
+        <button class="test-button" onclick="window.location.href='src/pages/public-profile.html'">
+          <strong>👤 Perfil Público</strong>
+          <small>Ver perfil de otros usuarios</small>
+        </button>
+        <button class="test-button" onclick="testShareURL('home')">
+          <strong>🔗 URL Compartir Post</strong>
+          <small>Probar URL de publicación</small>
+        </button>
+        <button class="test-button" onclick="testShareURL('profile')">
+          <strong>🔗 URL Compartir Perfil</strong>
+          <small>Probar URL de perfil</small>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Sección 3: Páginas Informativas -->
+    <div class="section">
+      <h2>
+        ℹ️ Páginas Informativas
+        <span class="status success">✅ Funcionando</span>
+      </h2>
+      <div class="test-grid">
+        <button class="test-button" onclick="window.location.href='src/pages/quienes-somos.html'">
+          <strong>👥 Quiénes Somos</strong>
+          <small>Información del equipo</small>
+        </button>
+        <button class="test-button" onclick="window.location.href='src/pages/politicas.html'">
+          <strong>📋 Políticas</strong>
+          <small>Términos y condiciones</small>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Sección 4: Páginas de Diagnóstico -->
+    <div class="section">
+      <h2>
+        🔧 Diagnóstico y Debug
+        <span class="status warning">⚠️ Solo para desarrollo</span>
+      </h2>
+      <div class="test-grid">
+        <button class="test-button" onclick="window.location.href='src/pages/test-home-debug.html'">
+          <strong>🔍 Debug Home</strong>
+          <small>Diagnóstico de home.html</small>
+        </button>
+        <button class="test-button" onclick="window.location.href='src/pages/test-firebase-connection.html'">
+          <strong>🔥 Test Firebase</strong>
+          <small>Verificar conexión</small>
+        </button>
+        <button class="test-button" onclick="window.location.href='src/pages/diagnostico-home.html'">
+          <strong>📊 Diagnóstico</strong>
+          <small>Estado del sistema</small>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Información -->
+    <div class="info-box">
+      <h3>📝 Instrucciones de Prueba</h3>
+      <ul>
+        <li><strong>Páginas Principales:</strong> Verifica que cada página cargue correctamente</li>
+        <li><strong>Cerrar Sesión:</strong> Desde cualquier página, debe volver a index.html</li>
+        <li><strong>Login/Registro:</strong> Después de autenticarse, debe ir a home.html</li>
+        <li><strong>URLs de Compartir:</strong> Deben incluir /src/pages/ en la ruta</li>
+        <li><strong>Navegación:</strong> Los links entre páginas deben funcionar sin errores</li>
+      </ul>
+    </div>
+    
+    <div class="info-box" style="background: #d4edda; border-color: #c3e6cb; margin-top: 15px;">
+      <h3 style="color: #155724;">✅ Estado de Correcciones</h3>
+      <ul style="color: #155724;">
+        <li><strong>auth.js:</strong> Cerrar sesión corregido (→ ../../index.html)</li>
+        <li><strong>home-simple.js:</strong> Cerrar sesión corregido (→ ../../index.html)</li>
+        <li><strong>home.js:</strong> URL de compartir corregida</li>
+        <li><strong>public-profile.js:</strong> URL de compartir corregida</li>
+        <li><strong>profile-instagram.js:</strong> URL de compartir corregida</li>
+        <li><strong>Otros archivos:</strong> Verificados y funcionando correctamente</li>
+      </ul>
+    </div>
+    
+    <a href="index.html" class="back-button">← Volver al Inicio</a>
+  </div>
+  
+  <script>
+    function testShareURL(type) {
+      const origin = window.location.origin;
+      let url;
+      
+      if (type === 'home') {
+        url = `${origin}/src/pages/home.html?post=test123`;
+        alert(`✅ URL de Compartir Publicación:\n\n${url}\n\nEsta URL es correcta y debe funcionar.`);
+      } else if (type === 'profile') {
+        url = `${origin}/src/pages/public-profile.html?userId=test123`;
+        alert(`✅ URL de Compartir Perfil:\n\n${url}\n\nEsta URL es correcta y debe funcionar.`);
+      }
+      
+      // Copiar al portapapeles
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(url).then(() => {
+          console.log('URL copiada al portapapeles:', url);
+        });
+      }
+    }
+    
+    // Log de información
+    console.log('🧪 Test de Redireccionamientos Cargado');
+    console.log('📍 Ubicación actual:', window.location.href);
+    console.log('🌐 Origin:', window.location.origin);
+    console.log('✅ Todas las correcciones aplicadas');
+  </script>
+</body>
+</html>

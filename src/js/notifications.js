@@ -76,7 +76,7 @@ function actualizarBadgeNotificaciones(cantidad) {
   }
   
   // Badge general de notificaciones (si existe)
-  const notifBadge = document.getElementById('notificationsBadge');
+  const notifBadge = document.getElementById('notificationsBadgeIcon');
   if (notifBadge) {
     if (cantidad > 0) {
       notifBadge.textContent = cantidad > 99 ? '99+' : cantidad;

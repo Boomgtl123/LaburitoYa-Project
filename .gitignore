@@ -9,6 +9,8 @@
 
 # Configuración con datos reales
 config.js
+config/config.js
+/config/config.js
 
 # Archivos de sistema
 .DS_Store

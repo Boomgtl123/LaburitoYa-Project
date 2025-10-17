@@ -611,7 +611,7 @@ async function cambiarFoto(e) {
 // ========== COMPARTIR PERFIL ==========
 function compartirPerfil() {
   const username = usuarioActual.username || generarUsername(usuarioActual.nombre);
-  const url = `${window.location.origin}/public-profile.html?userId=${usuarioActual.id}`;
+  const url = `${window.location.origin}/src/pages/public-profile.html?userId=${usuarioActual.id}`;
   
   if (navigator.share) {
     navigator.share({

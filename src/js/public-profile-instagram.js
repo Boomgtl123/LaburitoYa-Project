@@ -414,7 +414,7 @@ function enviarMensaje() {
 // ========== COMPARTIR PERFIL ==========
 function compartirPerfil() {
   const username = usuarioPerfil.username || generarUsername(usuarioPerfil.nombre);
-  const url = `${window.location.origin}/public-profile-new.html?userId=${userId}`;
+  const url = `${window.location.origin}/src/pages/public-profile.html?userId=${userId}`;
   
   if (navigator.share) {
     navigator.share({

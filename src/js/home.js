@@ -846,7 +846,7 @@ async function eliminarPost(postId) {
 
 // ========== COMPARTIR POST ==========
 function compartirPost(postId) {
-  const url = `${window.location.origin}/home.html?post=${postId}`;
+  const url = `${window.location.origin}/src/pages/home.html?post=${postId}`;
   
   if (navigator.share) {
     navigator.share({
